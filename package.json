@@ -1,0 +1,47 @@
+{
+  "name": "intensivebackendopenbootcamp",
+  "version": "1.0.0",
+  "description": "Intensive course of Open Bootcamp with Node and Express in TypeScript - Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victorcanash/IntensiveBackendOpenBootcamp.git"
+  },
+  "author": "Victor Canas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/victorcanash/IntensiveBackendOpenBootcamp/issues"
+  },
+  "homepage": "https://github.com/victorcanash/IntensiveBackendOpenBootcamp#readme",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.23",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "concurrently": "^7.1.0",
+    "eslint": "^8.12.0",
+    "eslint-config-standart": "^0.2.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "jest": "^27.5.1",
+    "nodemon": "^2.0.15",
+    "serve": "^13.0.2",
+    "supertest": "^6.2.2",
+    "ts-jest": "^27.1.4",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-node-externals": "^3.0.0",
+    "webpack-shell-plugin": "^0.5.0"
+  }
+}
