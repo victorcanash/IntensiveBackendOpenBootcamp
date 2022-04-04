@@ -4,7 +4,11 @@
   "description": "Intensive course of Open Bootcamp with Node and Express in TypeScript - Backend",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+    "test": "jest",
+    "serve:coverage": "npm run test && cd coverage/lcov-report && npx serve"
   },
   "repository": {
     "type": "git",
