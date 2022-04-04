@@ -4,7 +4,7 @@
   "description": "Intensive course of Open Bootcamp with Node and Express in TypeScript - Backend",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
