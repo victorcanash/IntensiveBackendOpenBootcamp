@@ -16,6 +16,13 @@
     "type": "git",
     "url": "git+https://github.com/victorcanash/IntensiveBackendOpenBootcamp.git"
   },
+  "keywords": [
+    "node",
+    "express",
+    "typescript",
+    "swagger",
+    "mongoose"
+  ],
   "author": "Victor Canas",
   "license": "MIT",
   "bugs": {
@@ -27,6 +34,7 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "helmet": "^5.0.2",
+    "mongoose": "^6.2.10",
     "swagger-jsdoc": "^6.2.0",
     "swagger-ui-express": "^4.3.0",
     "tsoa": "^3.14.1"
