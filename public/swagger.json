@@ -1,0 +1,121 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"BasicResponse": {
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"description": "Basic JSON response for Controllers"
+			},
+			"DateResponse": {
+				"properties": {
+					"date": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"date",
+					"message"
+				],
+				"type": "object",
+				"description": "Basic JSON response with the current date for Controllers"
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "intensivebackendopenbootcamp",
+		"version": "1.0.0",
+		"description": "Intensive course of Open Bootcamp with Node and Express in TypeScript - Backend",
+		"license": {
+			"name": "MIT"
+		},
+		"contact": {
+			"name": "Victor Canas"
+		}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/api/hello": {
+			"get": {
+				"operationId": "GetMessage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BasicResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"HelloController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "name",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/goodbye": {
+			"get": {
+				"operationId": "GetDateMessage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DateResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"GoodbyeController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "name",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
