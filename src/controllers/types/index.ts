@@ -6,6 +6,14 @@ export type BasicResponse = {
 }
 
 /**
+ * Basic JSON response with the current date for Controllers
+ */
+export type DateResponse = {
+    message: string,
+    date: string
+}
+
+/**
  * Error JSON response for Controllers
  */
 export type ErrorResponse = {

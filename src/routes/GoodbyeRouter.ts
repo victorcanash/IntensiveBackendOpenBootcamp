@@ -1,24 +1,24 @@
 import express, { Request, Response } from 'express';
-import { HelloController } from '../controllers/HelloController';
+import { GoodbyeController } from '../controllers/GoodbyeController';
 import { LogInfo } from '../utils/logger';
 
 
-const helloRouter = express.Router();
+const goodbyeRouter = express.Router();
 
-// http://localhost:8000/api/hello?name=Martin/
-helloRouter.route('/')
+// http://localhost:8000/api/goodbye?name=Martin/
+goodbyeRouter.route('/')
     // GET:
     .get(async (req: Request, res: Response) => {
         // Obtain a QUery Param
         const name: any = req?.query?.name;
         LogInfo(`Query Param: ${name}`);
         // Controller Instance to execute method
-        const controller: HelloController = new HelloController();
+        const controller: GoodbyeController = new GoodbyeController();
         // Obtain Response
-        const response = await controller.getMessage(name);
+        const response = await controller.getDateMessage(name);
         // Send to the client the response
         return res.send(response);
     });
 
 // Export Hello Router
-export default helloRouter;
+export default goodbyeRouter;
