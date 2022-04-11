@@ -12,6 +12,9 @@ import helmet from 'helmet';
 // Root Router
 import rootRouter from '../routes';
 
+// MongoDB
+import mongoose from 'mongoose';
+
 
 // * Create EXPRESS SERVER
 const server: Express = express();
@@ -38,7 +41,8 @@ server.use(
 // * Static server
 server.use(express.static('public'));
 
-// TODO: Mongoose Connection
+// * Mongoose Connection
+mongoose.connect('mongodb://localhost:27017/intensive_ob_db');
 
 // * Security Config
 server.use(helmet());
