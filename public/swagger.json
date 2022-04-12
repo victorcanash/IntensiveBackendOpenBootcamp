@@ -238,6 +238,26 @@
 					}
 				]
 			}
+		},
+		"/api/auth/logout": {
+			"post": {
+				"operationId": "LogoutUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"AuthController"
+				],
+				"security": [],
+				"parameters": []
+			}
 		}
 	},
 	"servers": [
