@@ -14,6 +14,5 @@ export const kataEntity = () => {
         }
     );
 
-    return mongoose.model('Kata', kataSchema);
-
+    return mongoose.models.Katas || mongoose.model('Katas', kataSchema);
 };
