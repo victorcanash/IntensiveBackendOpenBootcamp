@@ -1,5 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import dotenv from 'dotenv';
+
+
+// Config dotenv to read environment variables
+dotenv.config();
+
+const secret = process.env.SECRETKEY || 'MYSECRETKEY';
 
 /**
  * 
@@ -22,7 +29,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     }
 
     // Verify the token obtained
-    jwt.verify(token, '', (err: any, decoded: any) => {
+    jwt.verify(token, secret, (err: any, decoded: any) => {
 
         if (err) {
             return res.status(500).send({
