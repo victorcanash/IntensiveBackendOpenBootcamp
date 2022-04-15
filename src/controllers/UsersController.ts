@@ -1,9 +1,9 @@
-import { Delete, Get, Post, Put, Query, Route, Tags } from 'tsoa';
+import { Delete, Get, /* Post, */ Put, Query, Route, Tags } from 'tsoa';
 import { IUsersController } from './interfaces';
 import { LogSuccess, /* LogError */ LogWarning } from '../utils/logger';
 
 // ORM - Users Collection
-import { getAllUsers, getUserByID, deleteUserByID, createUser, updateUserByID } from '../domain/orm/Users.orm';
+import { getAllUsers, getUserByID, deleteUserByID, updateUserByID, getKatasFromUser } from '../domain/orm/Users.orm';
 
 
 @Route('/api/users')
@@ -16,8 +16,7 @@ export class UsersController implements IUsersController {
      * @returns All user o user found by iD
      */
     @Get('/')
-    public async getUsers(@Query()id?: string): Promise<any> {
-        
+    public async getUsers(@Query()page: number, @Query()limit: number, @Query()id?: string): Promise<any> {
         let response: any = '';
         
         if (id) {
@@ -25,7 +24,7 @@ export class UsersController implements IUsersController {
             response = await getUserByID(id);
         } else {
             LogSuccess('[/api/users] Get All Users Request');
-            response = await getAllUsers();   
+            response = await getAllUsers(page, limit);   
         }
         
         return response;
@@ -37,8 +36,7 @@ export class UsersController implements IUsersController {
      * @returns message informing if deletion was correct
      */
     @Delete('/')
-    public async deleteUser(@Query()id?: string): Promise<any> {
-        
+    public async deleteUser(@Query()id?: string): Promise<any> { 
         let response: any = '';
         
         if (id) {
@@ -57,27 +55,6 @@ export class UsersController implements IUsersController {
         
         return response;
     }
-    
-    /**
-     * Endpoint to create a new User in the Collection "Users" of DB 
-     * @param {any} user User object to create
-     * @returns message informing if creation was correct
-     */
-    @Post('/')
-    public async createUser(@Query()user: any): Promise<any> {
-       
-        let response: any = '';
-
-        await createUser(user).then(() => {
-            LogSuccess(`[/api/users] Create User: ${user} `);
-            response = {
-                message: `User created successfully: ${user.name}`
-            };
-        });
-
-        return response;
-
-    }
 
     /**
      *  Endpoint to update a User in the Collection "Users" of DB 
@@ -86,12 +63,11 @@ export class UsersController implements IUsersController {
      * @returns 
      */
     @Put('/')
-    public async updateUser(@Query()id: string, @Query()user: any): Promise<any> {
-        
+    public async updateUser(@Query()id: string, @Query()user: any): Promise<any> { 
         let response: any = '';
         
         if (id) {
-            LogSuccess(`[/api/users] Update User By ID: ${id} `);
+            LogSuccess(`[/api/users] Update User By ID: ${id}`);
             await updateUserByID(id, user).then(() => {
                 response = {
                     message: `User with id ${id} updated successfully`
@@ -105,5 +81,22 @@ export class UsersController implements IUsersController {
         }
         
         return response;
+    }
+
+    @Get('/katas')
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()id: string): Promise<any> {
+        let response: any = '';
+
+        if (id) {
+            LogSuccess(`[/api/users/katas] Get Katas from User By ID: ${id} `);
+            response = await getKatasFromUser(page, limit, id);
+        } else {
+            LogSuccess('[/api/users/katas] Get All Katas without id');
+            response = {
+                message: 'ID from user is needed'
+            };
+        }
+        
+        return response; 
     }
 }

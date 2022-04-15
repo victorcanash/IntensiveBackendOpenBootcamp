@@ -9,6 +9,7 @@ import helloRouter from './HelloRouter';
 import goodbyeRouter from './GoodbyeRouter';
 import usersRouter from './UsersRouter';
 import authRouter from './AuthRouter';
+import katasRouter from './KatasRouter';
 
 import { LogInfo } from '../utils/logger';
 
@@ -34,5 +35,6 @@ server.use('/hello', helloRouter); // http://localhost:8000/api/hello --> HelloR
 server.use('/goodbye', goodbyeRouter); // http://localhost:8000/api/goodbye --> GoodbyeRouter
 server.use('/users', usersRouter); ; // http://localhost:8000/api/users --> UsersRouter
 server.use('/auth', authRouter); // http://localhost:8000/api/auth --> AuthRouter
+server.use('/katas', katasRouter); // http://localhost:8000/api/katas --> KatasRouter
 
 export default server;

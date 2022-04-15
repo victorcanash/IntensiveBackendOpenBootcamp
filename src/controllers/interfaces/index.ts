@@ -1,4 +1,5 @@
 import { IUser } from '../../domain/interfaces/IUser.interface';
+import { IKata } from '../../domain/interfaces/IKata.interface';
 import { BasicResponse, DateResponse } from '../types';
 
 
@@ -11,19 +12,30 @@ export interface IGoodbyeController {
 }
 
 export interface IUsersController {
-    // Read all users from database || get User By ID
-    getUsers(id?: string): Promise<any>
+    // Get all users from database with pagination || Get User By ID
+    getUsers(page: number, limit: number, id?: string): Promise<any>
     // Delete User By ID
     deleteUser(id?: string): Promise<any>
-    // Create new User
-    createUser(user: any): Promise<any>
     // Update user
     updateUser(id: string, user: any): Promise<any>
+    // Get Katas of User with pagination
+    getKatas(page: number, limit: number, id?: string): Promise<any>
 }
 
 export interface IAuthController {
-    // register users
+    // Register users
     registerUser(user: IUser): Promise<any>
-    // login user
+    // Login user
     loginUser(auth: any): Promise<any>
+}
+
+export interface IKatasController {
+    // Get all katas from database with pagination || Get kata By ID
+    getKatas(page: number, limit: number, id?: string): Promise<any>
+    // Create New Kata
+    createKata(kata: IKata): Promise<any>
+    // Delete Kata By ID
+    deleteKata(id?: string): Promise<any>
+    // Update Kata
+    updateKata(id: string, kata: IKata): Promise<any>
 }
