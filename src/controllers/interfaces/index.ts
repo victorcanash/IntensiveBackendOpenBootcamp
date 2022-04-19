@@ -31,7 +31,7 @@ export interface IAuthController {
 
 export interface IKatasController {
     // Get all katas from database with pagination || Get kata By ID
-    getKatas(page: number, limit: number, mostRecent: boolean, id?: string, level?: KataLevel): Promise<any>
+    getKatas(page: number, limit: number, order: {}, id?: string, level?: KataLevel): Promise<any>
     // Create New Kata
     createKata(kata: IKata): Promise<any>
     // Delete Kata By ID

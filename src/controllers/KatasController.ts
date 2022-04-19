@@ -16,7 +16,7 @@ export class KatasController implements IKatasController {
      * @returns All katas o kata found by ID
      */
     @Get('/')
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()mostRecent: boolean, @Query()id?: string, @Query()level?: KataLevel): Promise<any> { 
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: {}, @Query()id?: string, @Query()level?: KataLevel): Promise<any> { 
         let response: any = '';
         
         if (id) {
@@ -24,7 +24,7 @@ export class KatasController implements IKatasController {
             response = await getKataByID(id);
         } else {
             LogSuccess('[/api/katas] Get All Katas Request');
-            response = await getAllKatas(page, limit, mostRecent, level);
+            response = await getAllKatas(page, limit, order, level);
         }
         
         return response;
