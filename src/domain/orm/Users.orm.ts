@@ -3,7 +3,7 @@ import { userEntity } from '../entities/User.entity';
 import { kataEntity } from '../entities/Kata.entity';
 import { IUser } from '../interfaces/IUser.interface';
 import { IAuth } from '../interfaces/IAuth.interface';
-import { IKata } from '../interfaces/IKata.interface';
+import { IKata, KataLevel } from '../interfaces/IKata.interface';
 // import { UserResponse } from '../types/UsersResponse.type';
 
 // Environment variables
@@ -26,7 +26,7 @@ const secret = process.env.SECRETKEY || 'MYSECRETKEY';
 /**
  * Method to obtain all Users from Collection "Users" in Mongo Server
  */
- export const getAllUsers = async (page: number, limit: number): Promise<any[] | undefined> => {
+ export const getAllUsers = async (page: number, limit: number, order: {}): Promise<any[] | undefined> => {
     try {
         const userModel = userEntity();
 
@@ -34,6 +34,7 @@ const secret = process.env.SECRETKEY || 'MYSECRETKEY';
 
         // Search all users (using pagination)
         await userModel.find({ isDeleted: false })
+            .sort(order)
             .select('name email age katas created_at updated_at')
             .limit(limit)
             .skip((page - 1) * limit)
@@ -165,16 +166,11 @@ export const logoutUser = async (): Promise<any | undefined> => {
 /**
  * Method to obtain all Katas Collection from logged User in Mongo Server
  */
- export const getKatasFromUser = async (page: number, limit: number, id: string): Promise<any[] | undefined> => {
+ export const getKatasFromUser = async (page: number, limit: number, id: string, order: {}, level?: KataLevel): Promise<any[] | undefined> => {
     try {
         const userModel = userEntity();
-        const katasModel = kataEntity();
-
-        let katasFound: IKata[] = [];
-
-        const response: any = {
-            katas: []
-        };
+        const kataModel = kataEntity();
+        const response: any = {};
 
         await userModel.findById(id).then(async (user: IUser) => {
             response.user = user.email;
@@ -186,15 +182,29 @@ export const logoutUser = async (): Promise<any | undefined> => {
                 objectIds.push(objectID);
             });
 
-            await katasModel.find({ '_id': { '$in': objectIds } }).then((katas: IKata[]) => {
-                katasFound = katas;
+            // Filter by level
+            const levelFilter: string = (level === undefined ? '' : level);
+            const levelReg: RegExp = new RegExp(levelFilter);
+
+            // Search Katas (using pagination)
+            await kataModel.find({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
+                .sort(order)
+                .limit(limit)
+                .skip((page - 1) * limit)
+                .exec().then((katas: IKata[]) => {
+                    response.katas = katas;
+                });
+
+            // Count total documents in collection "Katas"
+            await kataModel.countDocuments({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
+                .then((total: number) => {
+                    response.totalPages = Math.ceil(total / limit);
+                    response.currentPage = page;
             });
 
         }).catch((error) => {
             LogError(`[ORM ERROR]: Obtaining User: ${error}`);
         });
-
-        response.katas = katasFound;
 
         return response;
 

@@ -2,10 +2,10 @@ import express, { Request, Response } from 'express';
 // Body Parser (Read JSON from Body in Requests)
 import bodyParser from 'body-parser';
 
+import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { UsersController } from '../controllers/UsersController';
 // import { LogInfo } from '../utils/logger';
-// JWT Verifier MiddleWare
-import { verifyToken } from '../middlewares/verifyToken.middleware';
+import { KataLevel } from '../domain/interfaces/IKata.interface';
 
 
 // Middleware to read JSON in Body
@@ -18,15 +18,17 @@ const usersRouter = express.Router();
 usersRouter.route('/')
     // GET:
     .get(verifyToken, async (req: Request, res: Response) => {
-        // Obtain Query Params (ID)
-        const id: any = req?.query?.id;
+        // Obtain Query Params
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
+        const id: any = req?.query?.id;
+        const orderQuery: any = req?.query?.order || '{}';
+        const order: {} = JSON.parse(orderQuery);
 
         // Controller Instance to excute method
         const controller: UsersController = new UsersController();
         // Obtain Reponse
-        const response: any = await controller.getUsers(page, limit, id);
+        const response: any = await controller.getUsers(page, limit, order, id);
         // Send to the client the response
         return res.status(200).send(response);
     })
@@ -76,15 +78,27 @@ usersRouter.route('/')
 // http://localhost:8000/api/users/katas
 usersRouter.route('/katas')
     .get(verifyToken, async (req: Request, res: Response) => {
-        // Obtain Query Params (ID)
-        const id: any = req?.query?.id;
+        // Obtain Query Params
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
+        const id: any = req?.query?.id;
+        let level: any = req?.query?.level;
+        if (level) {
+            if (level.toUpperCase().includes('BASIC')) {
+                level = KataLevel.BASIC;
+            } else if (level.toUpperCase().includes('MEDIUM')) {
+                level = KataLevel.MEDIUM;
+            } else if (level.toUpperCase().includes('HIGH')) {
+                level = KataLevel.HIGH;
+            }
+        }
+        const orderQuery: any = req?.query?.order || '{}';
+        const order: {} = JSON.parse(orderQuery);
 
         // Controller Instance to excute method
         const controller: UsersController = new UsersController();
         // Obtain Reponse
-        const response: any = await controller.getKatas(page, limit, id);
+        const response: any = await controller.getKatas(page, limit, id, order, level);
         // Send to the client the response
         return res.status(200).send(response);
 });

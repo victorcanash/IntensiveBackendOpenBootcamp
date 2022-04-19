@@ -1,9 +1,9 @@
 import { Delete, Get, /* Post, */ Put, Query, Route, Tags } from 'tsoa';
-import { IUsersController } from './interfaces';
-import { LogSuccess, /* LogError */ LogWarning } from '../utils/logger';
 
-// ORM - Users Collection
+import { LogSuccess, /* LogError */ LogWarning } from '../utils/logger';
+import { IUsersController } from './interfaces';
 import { getAllUsers, getUserByID, deleteUserByID, updateUserByID, getKatasFromUser } from '../domain/orm/Users.orm';
+import { KataLevel } from '../domain/interfaces/IKata.interface';
 
 
 @Route('/api/users')
@@ -16,7 +16,7 @@ export class UsersController implements IUsersController {
      * @returns All user o user found by iD
      */
     @Get('/')
-    public async getUsers(@Query()page: number, @Query()limit: number, @Query()id?: string): Promise<any> {
+    public async getUsers(@Query()page: number, @Query()limit: number, @Query()order: {}, @Query()id?: string): Promise<any> {
         let response: any = '';
         
         if (id) {
@@ -24,7 +24,7 @@ export class UsersController implements IUsersController {
             response = await getUserByID(id);
         } else {
             LogSuccess('[/api/users] Get All Users Request');
-            response = await getAllUsers(page, limit);   
+            response = await getAllUsers(page, limit, order);   
         }
         
         return response;
@@ -84,12 +84,12 @@ export class UsersController implements IUsersController {
     }
 
     @Get('/katas')
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()id: string): Promise<any> {
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()id: string, order: {}, level?: KataLevel): Promise<any> {
         let response: any = '';
 
         if (id) {
             LogSuccess(`[/api/users/katas] Get Katas from User By ID: ${id} `);
-            response = await getKatasFromUser(page, limit, id);
+            response = await getKatasFromUser(page, limit, id, order, level);
         } else {
             LogSuccess('[/api/users/katas] Get All Katas without id');
             response = {

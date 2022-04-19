@@ -13,13 +13,13 @@ export interface IGoodbyeController {
 
 export interface IUsersController {
     // Get all users from database with pagination || Get User By ID
-    getUsers(page: number, limit: number, id?: string): Promise<any>
+    getUsers(page: number, limit: number, order: {}, id?: string): Promise<any>
     // Delete User By ID
     deleteUser(id?: string): Promise<any>
     // Update user
     updateUser(id: string, user: any): Promise<any>
     // Get Katas of User with pagination
-    getKatas(page: number, limit: number, id?: string): Promise<any>
+    getKatas(page: number, limit: number, id: string, order: {}, level?: KataLevel): Promise<any>
 }
 
 export interface IAuthController {

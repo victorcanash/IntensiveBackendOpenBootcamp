@@ -1,7 +1,7 @@
 import { Delete, Get, Post, Put, Query, Route, Tags } from 'tsoa';
 
-import { IKatasController } from './interfaces';
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
+import { IKatasController } from './interfaces';
 import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata } from '../domain/orm/Katas.orm';
 import { IKata, KataLevel } from '../domain/interfaces/IKata.interface';
 

@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express';
 // Body Parser to read BODY from requests
 import bodyParser from 'body-parser';
-// JWT Verifier MiddleWare
-import { verifyToken } from '../middlewares/verifyToken.middleware';
 
+import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
 // import { LogInfo } from '../utils/logger';
 import { KataLevel, IKata } from '../domain/interfaces/IKata.interface';
