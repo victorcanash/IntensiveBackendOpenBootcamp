@@ -2,9 +2,10 @@ import express, { Request, Response } from 'express';
 // Body Parser (Read JSON from Body in Requests)
 import bodyParser from 'body-parser';
 
+// import { LogInfo } from '../utils/logger';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { UsersController } from '../controllers/UsersController';
-// import { LogInfo } from '../utils/logger';
+import { IUpdateUser } from '../domain/interfaces/IUser.interface';
 import { KataLevel } from '../domain/interfaces/IKata.interface';
 
 
@@ -50,21 +51,19 @@ usersRouter.route('/')
 
         // Read from body
         const name: any = req?.body?.name;
-        const email: any = req?.body?.email;
         const age: any = req?.body?.age;
 
-        if (name && email && age) {
+        if (name && age) {
             // Controller Instance to excute method
             const controller: UsersController = new UsersController();
 
-            const user = {
+            const user: IUpdateUser = {
                 name: name,
-                email: email,
-                age: age
+                age: age,
             };
 
             // Obtain Response
-            const response: any = await controller.updateUser(id, user);
+            const response: any = await controller.updateUser(user, id);
 
             // Send to the client the response
             return res.status(200).send(response);
@@ -98,7 +97,7 @@ usersRouter.route('/katas')
         // Controller Instance to excute method
         const controller: UsersController = new UsersController();
         // Obtain Reponse
-        const response: any = await controller.getKatas(page, limit, id, order, level);
+        const response: any = await controller.getKatas(page, limit, order, id, level);
         // Send to the client the response
         return res.status(200).send(response);
 });

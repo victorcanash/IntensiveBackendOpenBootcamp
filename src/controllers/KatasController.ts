@@ -1,4 +1,4 @@
-import { Delete, Get, Post, Put, Query, Route, Tags } from 'tsoa';
+import { Delete, Get, Post, Put, Query, Route, Tags, Body } from 'tsoa';
 
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { IKatasController } from './interfaces';
@@ -16,7 +16,7 @@ export class KatasController implements IKatasController {
      * @returns All katas o kata found by ID
      */
     @Get('/')
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: {}, @Query()id?: string, @Query()level?: KataLevel): Promise<any> { 
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string, @Query()level?: KataLevel): Promise<any> { 
         let response: any = '';
         
         if (id) {
@@ -36,23 +36,17 @@ export class KatasController implements IKatasController {
      * @returns message informing if creating was correct
      */
     @Post('/')
-    public async createKata(kata: IKata): Promise<any> {
+    public async createKata(@Body()kata: IKata): Promise<any> {
         let response: any = '';
 
-        if (kata) {
-            LogSuccess(`[/api/katas] Create New Kata: ${kata.name} `);
-            await createKata(kata).then((r) => {
-                LogSuccess(`[/api/katas] Created Kata: ${kata.name} `);
-                response = {
-                    message: `Kata created successfully: ${kata.name}`
-                };
-            });
-        } else {
-            LogWarning('[/api/katas] Register needs Kata Entity');
+        LogSuccess(`[/api/katas] Create New Kata: ${kata.name} `);
+        await createKata(kata).then((r) => {
+            LogSuccess(`[/api/katas] Created Kata: ${kata.name} `);
             response = {
-                message: 'Kata not Registered: Please, provide a Kata Entity to create one'
+                message: `Kata created successfully: ${kata.name}`
             };
-        }
+        });
+
         return response;
     }
 
@@ -89,12 +83,12 @@ export class KatasController implements IKatasController {
      * @returns message informing if updating was correct
      */
     @Put('/')
-    public async updateKata(@Query()id: string, kata: IKata): Promise<any> { 
+    public async updateKata(@Body()kata: IKata, @Query()id?: string): Promise<any> { 
         let response: any = '';
         
         if (id) {
             LogSuccess(`[/api/katas] Update Kata By ID: ${id} `);
-            await updateKataByID(id, kata).then((r) => {
+            await updateKataByID(kata, id).then((r) => {
                 response = {
                     message: `Kata with id ${id} updated successfully`
                 };

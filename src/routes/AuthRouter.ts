@@ -4,12 +4,10 @@ import bcrypt from 'bcrypt';
 // Body Parser (Read JSON from Body in Requests)
 import bodyParser from 'body-parser';
 
-
+import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { AuthController } from '../controllers/AuthController';
 import { IUser } from '../domain/interfaces/IUser.interface';
 import { IAuth } from '../domain/interfaces/IAuth.interface';
-// JWT Verifier MiddleWare
-import { verifyToken } from '../middlewares/verifyToken.middleware';
 
 
 // Middleware to read JSON in Body
@@ -78,7 +76,7 @@ authRouter.route('/login')
         }
 });
 
-// Route Protected by VERIFY TOKEN Middleware
+// Route to get logged user
 authRouter.route('/me')
     .get(verifyToken, async (req: Request, res: Response) => {
 

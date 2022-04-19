@@ -1,8 +1,9 @@
-import { Delete, Get, /* Post, */ Put, Query, Route, Tags } from 'tsoa';
+import { Delete, Get, /* Post, */ Put, Query, Route, Tags, Body } from 'tsoa';
 
 import { LogSuccess, /* LogError */ LogWarning } from '../utils/logger';
 import { IUsersController } from './interfaces';
 import { getAllUsers, getUserByID, deleteUserByID, updateUserByID, getKatasFromUser } from '../domain/orm/Users.orm';
+import { IUpdateUser } from '../domain/interfaces/IUser.interface';
 import { KataLevel } from '../domain/interfaces/IKata.interface';
 
 
@@ -16,7 +17,7 @@ export class UsersController implements IUsersController {
      * @returns All user o user found by iD
      */
     @Get('/')
-    public async getUsers(@Query()page: number, @Query()limit: number, @Query()order: {}, @Query()id?: string): Promise<any> {
+    public async getUsers(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string): Promise<any> {
         let response: any = '';
         
         if (id) {
@@ -59,16 +60,16 @@ export class UsersController implements IUsersController {
     /**
      *  Endpoint to update a User in the Collection "Users" of DB 
      * @param id Id of user to update
-     * @param user IUser obj to set the new values
+     * @param user IUpdateUser interface to set the new values
      * @returns 
      */
     @Put('/')
-    public async updateUser(@Query()id: string, @Query()user: any): Promise<any> { 
+    public async updateUser(@Body()user: IUpdateUser, @Query()id?: string): Promise<any> { 
         let response: any = '';
         
         if (id) {
             LogSuccess(`[/api/users] Update User By ID: ${id}`);
-            await updateUserByID(id, user).then(() => {
+            await updateUserByID(user, id).then(() => {
                 response = {
                     message: `User with id ${id} updated successfully`
                 };
@@ -84,12 +85,12 @@ export class UsersController implements IUsersController {
     }
 
     @Get('/katas')
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()id: string, order: {}, level?: KataLevel): Promise<any> {
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string, @Query()level?: KataLevel): Promise<any> {
         let response: any = '';
 
         if (id) {
             LogSuccess(`[/api/users/katas] Get Katas from User By ID: ${id} `);
-            response = await getKatasFromUser(page, limit, id, order, level);
+            response = await getKatasFromUser(page, limit, order, id, level);
         } else {
             LogSuccess('[/api/users/katas] Get All Katas without id');
             response = {

@@ -93,7 +93,7 @@ katasRouter.route('/')
             };
 
             // Obtain Response
-            const response: any = await controller.updateKata(id, kata);
+            const response: any = await controller.updateKata(kata, id);
 
             // Send to the client the response
             return res.status(200).send(response);

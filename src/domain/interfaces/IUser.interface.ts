@@ -5,3 +5,8 @@ export interface IUser {
     age: number,
     katas: string[]
 }
+
+export interface IUpdateUser {
+    name: string,
+    age: number
+}

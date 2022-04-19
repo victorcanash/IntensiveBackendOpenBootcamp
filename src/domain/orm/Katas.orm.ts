@@ -1,9 +1,9 @@
+// Environment variables
+import dotenv from 'dotenv';
+
 import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { kataEntity } from '../entities/Kata.entity';
 import { IKata, KataLevel } from '../interfaces/IKata.interface';
-
-// Environment variables
-import dotenv from 'dotenv';
 
 
 // Configuration of environment variables
@@ -86,7 +86,7 @@ export const createKata = async (kata: IKata): Promise<any | undefined> => {
 };
 
 // - Update Kata By ID
-export const updateKataByID = async (id: string, kata: IKata): Promise<any | undefined> => {
+export const updateKataByID = async (kata: IKata, id: string): Promise<any | undefined> => {
     try {
         const kataModel = kataEntity();
 

@@ -33,6 +33,124 @@
 				],
 				"type": "object",
 				"description": "Basic JSON response with the current date for Controllers"
+			},
+			"IUpdateUser": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"age": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"age"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"KataLevel": {
+				"enum": [
+					"Basic",
+					"Medium",
+					"High"
+				],
+				"type": "string"
+			},
+			"IUser": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"age": {
+						"type": "number",
+						"format": "double"
+					},
+					"katas": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"password",
+					"age",
+					"katas"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IAuth": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IKata": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"level": {
+						"$ref": "#/components/schemas/KataLevel"
+					},
+					"intents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stars": {
+						"type": "number",
+						"format": "double"
+					},
+					"creator": {
+						"type": "string"
+					},
+					"solution": {
+						"type": "string"
+					},
+					"participants": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"level",
+					"intents",
+					"stars",
+					"creator",
+					"solution",
+					"participants"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -132,6 +250,32 @@
 				"security": [],
 				"parameters": [
 					{
+						"in": "query",
+						"name": "page",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "order",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
 						"description": "Id of user to retreive (optional)",
 						"in": "query",
 						"name": "id",
@@ -171,35 +315,6 @@
 					}
 				]
 			},
-			"post": {
-				"operationId": "CreateUser",
-				"responses": {
-					"200": {
-						"description": "message informing if creation was correct",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"description": "Endpoint to create a new User in the Collection \"Users\" of DB",
-				"tags": [
-					"UsersController"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "User object to create",
-						"in": "query",
-						"name": "user",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
 			"put": {
 				"operationId": "UpdateUser",
 				"responses": {
@@ -222,15 +337,171 @@
 						"description": "Id of user to update",
 						"in": "query",
 						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "IUpdateUser interface to set the new values",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUpdateUser"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/users/katas": {
+			"get": {
+				"operationId": "GetKatas",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"UsersController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "order",
 						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					},
 					{
-						"description": "IUser obj to set the new values",
 						"in": "query",
-						"name": "user",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "level",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/KataLevel"
+						}
+					}
+				]
+			}
+		},
+		"/api/auth/register": {
+			"post": {
+				"operationId": "RegisterUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"AuthController"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUser"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/login": {
+			"post": {
+				"operationId": "LoginUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"AuthController"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IAuth"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/auth/me": {
+			"get": {
+				"operationId": "UserData",
+				"responses": {
+					"200": {
+						"description": "All user o user found by iD",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Endpoint to retreive the User in the Collection \"Users\" of DB\nMiddleware: Validate JWT\nIn headers you must add the x-access-token with a valid JWT",
+				"tags": [
+					"AuthController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Id of user to retreive (optional)",
+						"in": "query",
+						"name": "id",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -257,6 +528,170 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/api/katas": {
+			"get": {
+				"operationId": "GetKatas",
+				"responses": {
+					"200": {
+						"description": "All katas o kata found by ID",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Endpoint to retreive the katas in the Collection \"Katas\" of DB",
+				"tags": [
+					"KatasController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "order",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Id of Kata to retreive (optional)",
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "level",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/KataLevel"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateKata",
+				"responses": {
+					"200": {
+						"description": "message informing if creating was correct",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Endpoint to create a Kata in the Collection \"Katas\" of DB",
+				"tags": [
+					"KatasController"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "Kata interface to create",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IKata"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteKata",
+				"responses": {
+					"200": {
+						"description": "message informing if deletion was correct",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Endpoint to delete the Katas in the Collection \"Katas\" of DB",
+				"tags": [
+					"KatasController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Id of Kata to delete (optional)",
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateKata",
+				"responses": {
+					"200": {
+						"description": "message informing if updating was correct",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Endpoint to update a Kata in the Collection \"Katas\" of DB",
+				"tags": [
+					"KatasController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Id of Kata to update",
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "Kata interface to update",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IKata"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

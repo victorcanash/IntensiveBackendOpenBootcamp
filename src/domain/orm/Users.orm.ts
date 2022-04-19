@@ -1,11 +1,3 @@
-import { /* LogSuccess, */ LogError } from '../../utils/logger';
-import { userEntity } from '../entities/User.entity';
-import { kataEntity } from '../entities/Kata.entity';
-import { IUser } from '../interfaces/IUser.interface';
-import { IAuth } from '../interfaces/IAuth.interface';
-import { IKata, KataLevel } from '../interfaces/IKata.interface';
-// import { UserResponse } from '../types/UsersResponse.type';
-
 // Environment variables
 import dotenv from 'dotenv';
 // BCRYPT for passwords
@@ -13,6 +5,14 @@ import bcrypt from 'bcrypt';
 // JWT
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+
+import { /* LogSuccess, */ LogError } from '../../utils/logger';
+import { userEntity } from '../entities/User.entity';
+import { kataEntity } from '../entities/Kata.entity';
+import { IUpdateUser, IUser } from '../interfaces/IUser.interface';
+import { IAuth } from '../interfaces/IAuth.interface';
+import { IKata, KataLevel } from '../interfaces/IKata.interface';
+// import { UserResponse } from '../types/UsersResponse.type';
 
 
 // Configuration of environment variables
@@ -88,7 +88,7 @@ export const deleteUserByID = async (id: string): Promise<any | undefined> => {
 /**
  * Method to update a User from Collection "Users" passing its id and IUser object with the values to set in Mongo Server
  */
-export const updateUserByID = async (id: string, user: any): Promise<any | undefined> => {
+export const updateUserByID = async (user: IUpdateUser, id: string): Promise<any | undefined> => {
     try { 
         const userModel = userEntity();
 
@@ -166,7 +166,7 @@ export const logoutUser = async (): Promise<any | undefined> => {
 /**
  * Method to obtain all Katas Collection from logged User in Mongo Server
  */
- export const getKatasFromUser = async (page: number, limit: number, id: string, order: {}, level?: KataLevel): Promise<any[] | undefined> => {
+ export const getKatasFromUser = async (page: number, limit: number, order: {}, id: string, level?: KataLevel): Promise<any[] | undefined> => {
     try {
         const userModel = userEntity();
         const kataModel = kataEntity();
