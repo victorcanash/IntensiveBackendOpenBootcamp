@@ -15,6 +15,12 @@ export const kataEntity = () => {
             creator: { type: String, required: true },
             solution: { type: String, required: true },
             participants: { type: [], required: true }
+        },
+        { 
+            timestamps: { 
+                createdAt: 'created_at',
+                updatedAt: 'updated_at'
+            } 
         }
     );
 

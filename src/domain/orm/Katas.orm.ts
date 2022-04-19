@@ -14,17 +14,21 @@ dotenv.config();
 /**
  * Method to obtain all Katas from Collection "Katas" in Mongo Server
  */
-export const getAllKatas = async (page: number, limit: number, level?: KataLevel): Promise<any[] | undefined> => {
+export const getAllKatas = async (page: number, limit: number, mostRecent: boolean, level?: KataLevel): Promise<any[] | undefined> => {
     try {
         const kataModel = kataEntity();
         const response: any = {};
 
         // Filter by level
-        const levelFilter: string = level === undefined ? '' : level;
+        const levelFilter: string = (level === undefined ? '' : level);
         const levelReg: RegExp = new RegExp(levelFilter);
 
+        // Order by most recent / oldest
+        const createdAt: number = (mostRecent ? -1 : 1);
+
         // Search all Katas (using pagination)
-        await kataModel.find({ 'level': { $regex: levelReg } })
+        await kataModel.find({ level: { $regex: levelReg } })
+            .sort({ created_at: createdAt })
             .limit(limit)
             .skip((page - 1) * limit)
             .exec().then((katas: IKata[]) => {

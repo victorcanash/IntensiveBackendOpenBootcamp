@@ -12,6 +12,12 @@ export const userEntity = () => {
             password: { type: String, required: true },
             age: { type: Number, required: true },
             katas: { type: [], required: true }
+        },
+        { 
+            timestamps: { 
+                createdAt: 'created_at',
+                updatedAt: 'updated_at'
+            } 
         }
     );
 

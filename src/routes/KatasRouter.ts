@@ -22,6 +22,7 @@ katasRouter.route('/')
         // Obtain Query Params
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
+        const mostRecent: any = req?.query?.mostRecent || 0;
         const id: any = req?.query?.id;
         let level: any = req?.query?.level;
         if (level) {
@@ -37,7 +38,7 @@ katasRouter.route('/')
         // Controller Instance to excute method
         const controller: KatasController = new KatasController();
         // Obtain Reponse
-        const response: any = await controller.getKatas(page, limit, id, level);
+        const response: any = await controller.getKatas(page, limit, !!parseInt(mostRecent), id, level);
         // Send to the client the response
         return res.status(200).send(response);
     })

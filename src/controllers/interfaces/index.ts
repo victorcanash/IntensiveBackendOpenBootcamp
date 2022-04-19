@@ -1,5 +1,5 @@
 import { IUser } from '../../domain/interfaces/IUser.interface';
-import { IKata } from '../../domain/interfaces/IKata.interface';
+import { IKata, KataLevel } from '../../domain/interfaces/IKata.interface';
 import { BasicResponse, DateResponse } from '../types';
 
 
@@ -31,7 +31,7 @@ export interface IAuthController {
 
 export interface IKatasController {
     // Get all katas from database with pagination || Get kata By ID
-    getKatas(page: number, limit: number, id?: string): Promise<any>
+    getKatas(page: number, limit: number, mostRecent: boolean, id?: string, level?: KataLevel): Promise<any>
     // Create New Kata
     createKata(kata: IKata): Promise<any>
     // Delete Kata By ID
