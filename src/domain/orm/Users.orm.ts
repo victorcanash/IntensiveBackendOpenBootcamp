@@ -34,7 +34,7 @@ const secret = process.env.SECRETKEY || 'MYSECRETKEY';
 
         // Search all users (using pagination)
         await userModel.find({ isDeleted: false })
-            .select('name email age katas')
+            .select('name email age katas created_at updated_at')
             .limit(limit)
             .skip((page - 1) * limit)
             .exec().then((users: IUser[]) => {
@@ -62,7 +62,7 @@ export const getUserByID = async (id: string) : Promise<any | undefined> => {
         const userModel = userEntity();
 
         // Search User By ID
-        return await userModel.findById(id).select('name email age katas');
+        return await userModel.findById(id).select('name email age katas created_at updated_at');
 
     } catch (error) {
         LogError(`[ORM ERROR]: Getting User By ID: ${error}`);
