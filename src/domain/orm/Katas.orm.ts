@@ -1,6 +1,6 @@
 import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { kataEntity } from '../entities/Kata.entity';
-import { IKata } from '../interfaces/IKata.interface';
+import { IKata, KataLevel } from '../interfaces/IKata.interface';
 
 // Environment variables
 import dotenv from 'dotenv';
@@ -14,14 +14,17 @@ dotenv.config();
 /**
  * Method to obtain all Katas from Collection "Katas" in Mongo Server
  */
-export const getAllKatas = async (page: number, limit: number): Promise<any[] | undefined> => {
+export const getAllKatas = async (page: number, limit: number, level?: KataLevel): Promise<any[] | undefined> => {
     try {
         const kataModel = kataEntity();
-
         const response: any = {};
 
+        // Filter by level
+        const levelFilter: string = level === undefined ? '' : level;
+        const levelReg: RegExp = new RegExp(levelFilter);
+
         // Search all Katas (using pagination)
-        await kataModel.find({ isDeleted: false })
+        await kataModel.find({ 'level': { $regex: levelReg } })
             .limit(limit)
             .skip((page - 1) * limit)
             .exec().then((katas: IKata[]) => {

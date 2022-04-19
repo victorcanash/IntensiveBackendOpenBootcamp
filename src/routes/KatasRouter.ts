@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 
 import { KatasController } from '../controllers/KatasController';
-import { LogInfo } from '../utils/logger';
+// import { LogInfo } from '../utils/logger';
 import { KataLevel, IKata } from '../domain/interfaces/IKata.interface';
 
 
@@ -19,18 +19,25 @@ const katasRouter = express.Router();
 katasRouter.route('/')
     // GET:
     .get(verifyToken, async (req: Request, res: Response) => {
-        // Obtain a Query Param (ID)
-        const id: any = req?.query?.id;
-
-        // Pagination
+        // Obtain Query Params
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
+        const id: any = req?.query?.id;
+        let level: any = req?.query?.level;
+        if (level) {
+            if (level.toUpperCase().includes('BASIC')) {
+                level = KataLevel.BASIC;
+            } else if (level.toUpperCase().includes('MEDIUM')) {
+                level = KataLevel.MEDIUM;
+            } else if (level.toUpperCase().includes('HIGH')) {
+                level = KataLevel.HIGH;
+            }
+        }
 
-        LogInfo(`Query Param: ${id}`);
         // Controller Instance to excute method
         const controller: KatasController = new KatasController();
         // Obtain Reponse
-        const response: any = await controller.getKatas(page, limit, id);
+        const response: any = await controller.getKatas(page, limit, id, level);
         // Send to the client the response
         return res.status(200).send(response);
     })
@@ -38,7 +45,6 @@ katasRouter.route('/')
     .delete(verifyToken, async (req: Request, res: Response) => {
         // Obtain a Query Param (ID)
         const id: any = req?.query?.id;
-        LogInfo(`Query Param: ${id}`);
         // Controller Instance to excute method
         const controller: KatasController = new KatasController();
         // Obtain Reponse
@@ -54,7 +60,16 @@ katasRouter.route('/')
         // Read from body
         const name: string = req?.body?.name;
         const description: string = req?.body?.description || '';
-        const level: KataLevel = req?.body?.level || KataLevel.BASIC;
+        let level: any = req?.body?.level || KataLevel.BASIC;
+        if (level) {
+            if (level.toUpperCase().includes('BASIC')) {
+                level = KataLevel.BASIC;
+            } else if (level.toUpperCase().includes('MEDIUM')) {
+                level = KataLevel.MEDIUM;
+            } else if (level.toUpperCase().includes('HIGH')) {
+                level = KataLevel.HIGH;
+            }
+        }
         const intents: number = req?.body?.intents || 0;
         const stars: number = req?.body?.starts || 0;
         const creator: string = req?.body?.creator;
@@ -91,7 +106,16 @@ katasRouter.route('/')
         // Read from body
         const name: string = req?.body?.name;
         const description: string = req?.body?.description || 'Default description';
-        const level: KataLevel = req?.body?.level || KataLevel.BASIC;
+        let level: any = req?.body?.level || KataLevel.BASIC;
+        if (level) {
+            if (level.toUpperCase().includes('BASIC')) {
+                level = KataLevel.BASIC;
+            } else if (level.toUpperCase().includes('MEDIUM')) {
+                level = KataLevel.MEDIUM;
+            } else if (level.toUpperCase().includes('HIGH')) {
+                level = KataLevel.HIGH;
+            }
+        }
         const intents: number = req?.body?.intents || 0;
         const stars: number = req?.body?.stars || 0;
         const creator: string = req?.body?.creator;

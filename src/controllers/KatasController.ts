@@ -3,7 +3,7 @@ import { Delete, Get, Post, Put, Query, Route, Tags } from 'tsoa';
 import { IKatasController } from './interfaces';
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata } from '../domain/orm/Katas.orm';
-import { IKata } from '../domain/interfaces/IKata.interface';
+import { IKata, KataLevel } from '../domain/interfaces/IKata.interface';
 
 
 @Route('/api/katas')
@@ -16,7 +16,7 @@ export class KatasController implements IKatasController {
      * @returns All katas o kata found by ID
      */
     @Get('/')
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()id?: string): Promise<any> { 
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()id?: string, @Query()level?: KataLevel): Promise<any> { 
         let response: any = '';
         
         if (id) {
@@ -24,7 +24,7 @@ export class KatasController implements IKatasController {
             response = await getKataByID(id);
         } else {
             LogSuccess('[/api/katas] Get All Katas Request');
-            response = await getAllKatas(page, limit);
+            response = await getAllKatas(page, limit, level);
         }
         
         return response;

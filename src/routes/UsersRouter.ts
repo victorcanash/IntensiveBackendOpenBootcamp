@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 
 import { UsersController } from '../controllers/UsersController';
-import { LogInfo } from '../utils/logger';
+// import { LogInfo } from '../utils/logger';
 // JWT Verifier MiddleWare
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 
@@ -18,14 +18,11 @@ const usersRouter = express.Router();
 usersRouter.route('/')
     // GET:
     .get(verifyToken, async (req: Request, res: Response) => {
-        // Obtain a Query Param (ID)
+        // Obtain Query Params (ID)
         const id: any = req?.query?.id;
-
-        // Pagination
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
 
-        LogInfo(`Query Param: ${id}`);
         // Controller Instance to excute method
         const controller: UsersController = new UsersController();
         // Obtain Reponse
@@ -37,7 +34,6 @@ usersRouter.route('/')
     .delete(verifyToken, async (req: Request, res: Response) => {
         // Obtain a Query Param (ID)
         const id: any = req?.query?.id;
-        LogInfo(`Query Param: ${id}`);
         // Controller Instance to excute method
         const controller: UsersController = new UsersController();
         // Obtain Reponse
@@ -80,10 +76,8 @@ usersRouter.route('/')
 // http://localhost:8000/api/users/katas
 usersRouter.route('/katas')
     .get(verifyToken, async (req: Request, res: Response) => {
-        // Obtain a Query Param (ID)
+        // Obtain Query Params (ID)
         const id: any = req?.query?.id;
-
-        // Pagination
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
 
