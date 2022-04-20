@@ -65,7 +65,7 @@ export const deleteKataByID = async (id: string): Promise<any | undefined> => {
         const kataModel = kataEntity();
 
         // Delete Kata BY ID
-        return await kataModel.deleteOne({ _id: id });
+        return await kataModel.findByIdAndDelete({ _id: id });
 
     } catch (error) {
         LogError(`[ORM ERROR]: Deleting Kata By ID: ${error}`);
@@ -95,5 +95,18 @@ export const updateKataByID = async (kata: IKata, id: string): Promise<any | und
 
     } catch (error) {
         LogError(`[ORM ERROR]: Updating Kata ${id}: ${error}`);
+    }
+};
+
+// - kataFromUser
+export const isKataFromUser = async (id: string, userId: string) : Promise<any | undefined> => {
+    try {
+        const kataModel = kataEntity();
+
+        // Search Kata By ID
+        return await kataModel.findOne({ _id: id, creator: userId });
+
+    } catch (error) {
+        LogError(`[ORM ERROR]: Is Kata ${id} From User {$userId}: ${error}`);
     }
 };

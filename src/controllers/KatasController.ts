@@ -2,7 +2,7 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body } from 'tsoa';
 
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { IKatasController } from './interfaces';
-import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata } from '../domain/orm/Katas.orm';
+import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata, isKataFromUser } from '../domain/orm/Katas.orm';
 import { IKata, KataLevel } from '../domain/interfaces/IKata.interface';
 
 
@@ -56,20 +56,39 @@ export class KatasController implements IKatasController {
      * @returns message informing if deletion was correct
      */
     @Delete('/')
-    public async deleteKata(@Query()id?: string): Promise<any> {
+    public async deleteKata(@Query()id?: string, @Query()userId?: string): Promise<any> {
         let response: any = '';
         
-        if (id) {
-            LogSuccess(`[/api/katas] Delete Kata By ID: ${id} `);
-            await deleteKataByID(id).then((r) => {
-                response = {
-                    message: `Kata with id ${id} deleted successfully`
-                };
-            });
-        } else {
+        if (id && userId) {
+            // Check if Kata is from logged user
+            await isKataFromUser(id, userId)
+                .then(async (kataFromUser) => {
+                    if (!kataFromUser) {
+                        LogWarning(`[/api/katas] Delete Kata Request, kata with id ${id} is not from user with id ${userId}`);
+                        response = {
+                            message: `Kata with id ${id} is not from user with id ${userId}`
+                        };
+                    } else {
+                        // Delete kata
+                        await deleteKataByID(id)
+                            .then((r) => {
+                                LogSuccess(`[/api/katas] Delete Kata By ID: ${id} `);
+                                response = {
+                                    message: `Kata with id ${id} deleted successfully`
+                                };
+                            });
+                    }
+                });
+        } else if (!id) {
             LogWarning('[/api/katas] Delete Kata Request WITHOUT ID');
             response = {
                 message: 'Please, provide an ID to remove from database'
+            };
+
+        } else if (!userId) {
+            LogWarning('[/api/katas] Delete Kata Request WITHOUT userID');
+            response = {
+                message: 'Please, provide an userID to remove from database'
             };
         }
         

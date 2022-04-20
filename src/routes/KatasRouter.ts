@@ -46,10 +46,13 @@ katasRouter.route('/')
     .delete(verifyToken, async (req: Request, res: Response) => {
         // Obtain a Query Param (ID)
         const id: any = req?.query?.id;
+        // Get logged user id from verifyToken middleware
+        const userId: any = res.locals.loggedUser?._id;
+
         // Controller Instance to excute method
         const controller: KatasController = new KatasController();
         // Obtain Reponse
-        const response: any = await controller.deleteKata(id);
+        const response: any = await controller.deleteKata(id, userId);
         // Send to the client the response
         return res.status(200).send(response);
     })
@@ -117,11 +120,12 @@ katasRouter.route('/')
                 level = KataLevel.HIGH;
             }
         }
-        const intents: number = req?.body?.intents || 0;
+        const intents: number = req?.body?.intents || 1;
         const stars: number = req?.body?.stars || 0;
-        const creator: string = req?.body?.creator;
         const solution: string = req?.body?.solution || 'Default Solution';
         const participants: string[] = req?.body?.participants || [];
+        // Read from verifyToken middleware
+        const creator: string = res.locals.loggedUser?._id;
 
         if (name && description && level && intents >= 0 && stars >= 0 && creator && solution && participants.length >= 0) {
             // Controller Instance to excute method

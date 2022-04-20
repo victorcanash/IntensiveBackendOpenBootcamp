@@ -40,7 +40,7 @@ export interface IKatasController {
     // Create New Kata
     createKata(kata: IKata): Promise<any>
     // Delete Kata By ID
-    deleteKata(id?: string): Promise<any>
+    deleteKata(id?: string, userId?: string): Promise<any>
     // Update Kata
     updateKata(kata: IKata, id?: string): Promise<any>
 }
