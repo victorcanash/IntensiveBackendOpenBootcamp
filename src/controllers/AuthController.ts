@@ -1,10 +1,11 @@
 import { /* Delete, */ Get, Post, /* Put, */ Query, Route, Tags, Body } from 'tsoa';
 
-import { IAuthController } from './interfaces';
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
+import { IAuthController } from './interfaces';
+import { registerUser, loginUser /* ,logoutUser */ } from '../domain/orm/Auth.orm';
+import { getUserByID } from '../domain/orm/Users.orm';
 import { IUser } from '../domain/interfaces/IUser.interface';
 import { IAuth } from '../domain/interfaces/IAuth.interface';
-import { registerUser, loginUser, /* logoutUser, */ getUserByID } from '../domain/orm/Users.orm';
 import { AuthResponse, ErrorResponse } from './types';
 
 
