@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
 // import { LogInfo } from '../utils/logger';
-import { KataLevel, IKata, IUpdateKata } from '../domain/interfaces/IKata.interface';
+import { KataLevel, IKata, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 
 
 const jsonParser = bodyParser.json();
@@ -37,8 +37,10 @@ katasRouter.route('/')
 
         // Controller Instance to excute method
         const controller: KatasController = new KatasController();
+
         // Obtain Reponse
         const response: any = await controller.getKatas(page, limit, order, id, level);
+
         // Send to the client the response
         return res.status(200).send(response);
     })
@@ -46,13 +48,16 @@ katasRouter.route('/')
     .delete(verifyToken, async (req: Request, res: Response) => {
         // Obtain a Query Param (ID)
         const id: any = req?.query?.id;
+
         // Get logged user id from verifyToken middleware
         const userId: any = res.locals.loggedUser?._id;
 
         // Controller Instance to excute method
         const controller: KatasController = new KatasController();
+
         // Obtain Reponse
         const response: any = await controller.deleteKata(id, userId);
+
         // Send to the client the response
         return res.status(200).send(response);
     })
@@ -74,18 +79,24 @@ katasRouter.route('/')
                 level = KataLevel.HIGH;
             }
         }
-        const intents: number = req?.body?.intents || 0;
+        let intents: number = req?.body?.intents || 1;
         const solution: string = req?.body?.solution || '';
 
         // Get logged user id from verifyToken middleware
         const userId: any = res?.locals?.loggedUser._id;
 
         if (name && description && level && 
-            intents >= 0 && solution) {
+            intents && solution) {
+            // Fix numbers
+            if (intents < 1) {
+                intents = 1;
+            }
+            intents = Math.round(intents);
+
             // Controller Instance to excute method
             const controller: KatasController = new KatasController();
 
-            const kata: IUpdateKata = {
+            const kata: IKataUpdate = {
                 name: name,
                 description: description,
                 level: level,
@@ -107,7 +118,7 @@ katasRouter.route('/')
     .post(jsonParser, verifyToken, async (req: Request, res: Response) => {
         // Read from body
         const name: string = req?.body?.name;
-        const description: string = req?.body?.description || 'Default description';
+        const description: string = req?.body?.description || '';
         let level: any = req?.body?.level || KataLevel.BASIC;
         if (level) {
             if (level.toUpperCase().includes('BASIC')) {
@@ -118,15 +129,22 @@ katasRouter.route('/')
                 level = KataLevel.HIGH;
             }
         }
-        const intents: number = req?.body?.intents || 1;
-        const solution: string = req?.body?.solution || 'Default Solution';
+        let intents: number = req?.body?.intents || 1;
+        const solution: string = req?.body?.solution || '';
         const participants: string[] = req?.body?.participants || [];
+        
         // Read from verifyToken middleware
-        const userId: string = res.locals.loggedUser?._id;
+        const userId: any = res.locals.loggedUser?._id;
 
         if (name && description && level && 
-            intents >= 0 && userId && solution && 
+            intents && userId && solution && 
             participants.length >= 0) {
+            // Fix numbers
+            if (intents < 1) {
+                intents = 1;
+            }
+            intents = Math.round(intents);
+
             // Controller Instance to excute method
             const controller: KatasController = new KatasController();
 
@@ -154,7 +172,49 @@ katasRouter.route('/')
                 message: '[ERROR] Creating Kata. You need to send all attrs of Kata to update it'
             });
         }
-});
+    });
+
+// http://localhost:8000/api/katas
+katasRouter.route('/stars')
+    // PUT:
+    .put(jsonParser, verifyToken, async (req: Request, res: Response) => {
+        // Obtain a Query Param (ID)
+        const id: any = req?.query?.id;
+        
+        // Read from body
+        let stars: number = req?.body?.stars;
+
+        // Read from verifyToken middleware
+        const userId: any = res.locals.loggedUser?._id?.valueOf();
+
+        if (id && userId && stars) {
+            // Controller Instance to excute method
+            const controller: KatasController = new KatasController();
+
+            // Fix numbers
+            if (stars < 0) {
+                stars = 0;
+            } else if (stars > 5) {
+                stars = 5;
+            }
+            stars = Math.round(stars);
+
+            const kataStars: IKataStars = {
+                user: userId,
+                stars: stars
+            };
+
+            // Obtain Response
+            const response: any = await controller.updateKataStars(kataStars, id);
+
+            // Send to the client the response
+            return res.status(200).send(response);
+        } else {
+            return res.status(400).send({
+                message: '[ERROR] Updating Kata Stars. You need to send all attributes of Kata Stars to update it'
+            });
+        }
+    });
 
 // Export Users Router
 export default katasRouter;

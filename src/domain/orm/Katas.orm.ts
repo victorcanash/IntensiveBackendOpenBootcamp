@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { kataEntity } from '../entities/Kata.entity';
-import { IKata, IKataUpdate, KataLevel } from '../interfaces/IKata.interface';
+import { IKata, IKataStars, IKataUpdate, KataLevel } from '../interfaces/IKata.interface';
 
 
 // Configuration of environment variables
@@ -98,7 +98,40 @@ export const updateKataByID = async (kata: IKataUpdate, id: string): Promise<any
     }
 };
 
-// - kataFromUser
+// - Update Kata Stars By ID
+export const updateKataStarsByID = async (kataStars: IKataStars, id: string): Promise<any | undefined> => {
+    try {
+        const kataModel = kataEntity();
+
+        // Get kata to set new values
+        const kata = await kataModel.findById(id);
+
+        // Set stars of user and recalculate average
+        const stars: number[] = [];
+        let existsUser: boolean = false;
+        kata.stars.users.forEach((item: IKataStars) => {
+            if (item.user === kataStars.user) {
+                item.stars = kataStars.stars;
+                existsUser = true;
+            }
+            stars.push(item.stars);
+        });
+        if (!existsUser) {
+            kata.stars.users.push(kataStars);
+            stars.push(kataStars.stars);
+        }
+        const newAverage = stars.reduce((a: any, b: any) => a + b, 0) / stars.length;
+        kata.stars.average = newAverage;
+
+        // Update Kata Stars
+        return await kataModel.findByIdAndUpdate(id, kata);
+
+    } catch (error) {
+        LogError(`[ORM ERROR]: Updating Kata Stars ${id}: ${error}`);
+    }
+};
+
+// - Get Kata by ID and by user ID
 export const getKataFromUser = async (id: string, userId: string) : Promise<any | undefined> => {
     try {
         const kataModel = kataEntity();

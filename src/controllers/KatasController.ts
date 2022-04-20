@@ -2,8 +2,8 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body } from 'tsoa';
 
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { IKatasController } from './interfaces';
-import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata, getKataFromUser } from '../domain/orm/Katas.orm';
-import { IKata, IKataUpdate, KataLevel } from '../domain/interfaces/IKata.interface';
+import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, deleteKataByID, createKata, getKataFromUser } from '../domain/orm/Katas.orm';
+import { IKata, IKataStars, IKataUpdate, KataLevel } from '../domain/interfaces/IKata.interface';
 
 
 @Route('/api/katas')
@@ -98,8 +98,9 @@ export class KatasController implements IKatasController {
 
     /**
      * Endpoint to update a Kata in the Collection "Katas" of DB 
+     * @param {IKataUpdate} kata Kata interface to update
      * @param {string} id Id of Kata to update
-     * @param {IKata} kata Kata interface to update
+     * @param {string} userId Id of logged user to update
      * @returns message informing if updating was correct
      */
     @Put('/')
@@ -130,16 +131,46 @@ export class KatasController implements IKatasController {
         } else if (!id) {
             LogWarning('[/api/katas] Update Kata Request WITHOUT ID');
             response = {
-                message: 'Please, provide an ID to update an existing user'
+                message: 'Please, provide an ID to update an existing kata'
             };
 
         } else if (!userId) {
             LogWarning('[/api/katas] Update Kata Request WITHOUT userID');
             response = {
-                message: 'Please, provide an userID to update an existing user'
+                message: 'Please, provide an userID to update an existing kata'
             };
         }
         
+        return response;
+    }
+
+    /**
+     * Endpoint to update stars of a Kata in the Collection "Katas" of DB 
+     * @param {IKataStars} kataStars Kata stars interface to update
+     * @param {string} id Id of Kata to update stars
+     * @returns message informing if updating was correct
+     */
+     @Put('/stars')
+    public async updateKataStars(@Body()kataStars: IKataStars, @Query()id?: string): Promise<any> {
+        let response: any = '';
+        
+        if (id) {
+            // Update kata
+            await updateKataStarsByID(kataStars, id)
+                .then((r) => {
+                    LogSuccess(`[/api/katas/stars] Update Kata Stars By ID: ${id} `);
+                    response = {
+                        message: `Kata Stars with id ${id} updated successfully`
+                    };
+                });
+
+        } else {
+            LogWarning('[/api/katas/stars] Update Kata Stars Request WITHOUT ID');
+            response = {
+                message: 'Please, provide an ID to update stars of an existing kata'
+            };
+        }
+
         return response;
     }
 }
