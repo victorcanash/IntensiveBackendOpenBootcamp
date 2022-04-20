@@ -29,7 +29,7 @@ export interface IAuthController {
     // Login user
     loginUser(auth: IAuth): Promise<any>
     // Get logged user
-    userData(id: string): Promise<any>
+    getLoggedUser(id: string): Promise<any>
     // Logout user
     logoutUser(): Promise<any>
 }

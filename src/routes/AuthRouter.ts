@@ -79,16 +79,15 @@ authRouter.route('/login')
 // Route to get logged user
 authRouter.route('/me')
     .get(verifyToken, async (req: Request, res: Response) => {
-
-        // Obtain the ID of user to check it's data
-        const id: any = req?.query?.id;
+        // Get logged user id from verifyToken middleware
+        const id: any = res.locals.loggedUser?._id;
 
         if (id) {
             // Controller: Auth Controller
             const controller: AuthController = new AuthController();
 
             // Obtain response from Controller
-            const response: any = await controller.userData(id);
+            const response: any = await controller.getLoggedUser(id);
 
             // If user is authorised:
             return res.status(200).send(response);

@@ -61,15 +61,15 @@ export class AuthController implements IAuthController {
      * Endpoint to retreive the User in the Collection "Users" of DB
      * Middleware: Validate JWT
      * In headers you must add the x-access-token with a valid JWT
-     * @param {string} id Id of user to retreive (optional)
+     * @param {string} id ID of user to retrieve (optional)
      * @returns All user o user found by iD
      */
     @Get('/me')
-    public async userData(@Query()id: string): Promise<any> {
+    public async getLoggedUser(@Query()id: string): Promise<any> {
         let response: any = '';
              
         if (id) {
-            LogSuccess(`[/api/users] Get User Data By ID: ${id} `);
+            LogSuccess(`[/api/auth/me] Get Logged User by ID: ${id}`);
             response = await getUserByID(id);
         }
         

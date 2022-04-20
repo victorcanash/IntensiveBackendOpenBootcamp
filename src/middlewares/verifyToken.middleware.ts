@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 
+import { getUserByEmail } from '../domain/orm/Users.orm';
+
 
 // Config dotenv to read environment variables
 dotenv.config();
@@ -29,8 +31,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     }
 
     // Verify the token obtained
-    jwt.verify(token, secret, (err: any, decoded: any) => {
-
+    jwt.verify(token, secret, async (err: any, decoded: any) => {
         if (err) {
             return res.status(500).send({
                 authenticationError: 'JWT verification failed',
@@ -39,6 +40,8 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
         }
 
         // Pass something to next request (id of user || other info)
+        const loggedUser = await getUserByEmail(decoded.email);
+        res.locals.loggedUser = loggedUser;
 
         // Execute Next Function -> Protected Routes will be executed
         next();

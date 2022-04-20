@@ -58,6 +58,21 @@ export const getUserByID = async (id: string) : Promise<any | undefined> => {
 };
 
 /**
+ * Method to obtain a User from Collection "Users" passing its email in Mongo Server
+ */
+ export const getUserByEmail = async (email: string) : Promise<any | undefined> => {
+    try {
+        const userModel = userEntity();
+
+        // Search User By Email
+        return await userModel.findOne({ email: email }).select('name email age katas created_at updated_at');
+
+    } catch (error) {
+        LogError(`[ORM ERROR]: Getting User By Email: ${error}`);
+    }
+};
+
+/**
  * Method to delete a User from Collection "Users" passing its id in Mongo Server
  */
 export const deleteUserByID = async (id: string): Promise<any | undefined> => {
