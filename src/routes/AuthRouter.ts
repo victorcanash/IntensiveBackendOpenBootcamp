@@ -47,7 +47,7 @@ authRouter.route('/register')
                 message: '[ERROR User Data missing]: No user can be registered'
             });
         }
-});
+    });
 
 authRouter.route('/login')
     .post(jsonParser, async (req:Request, res: Response) => {
@@ -74,7 +74,7 @@ authRouter.route('/login')
             });
 
         }
-});
+    });
 
 // Route to get logged user
 authRouter.route('/me')
@@ -96,7 +96,7 @@ authRouter.route('/me')
                 message: 'You are not authorised to perform this action'
             });
         }
-});
+    });
 
 
 export default authRouter;

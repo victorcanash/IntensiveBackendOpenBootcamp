@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { kataEntity } from '../entities/Kata.entity';
-import { IKata, IUpdateKata, KataLevel } from '../interfaces/IKata.interface';
+import { IKata, IKataUpdate, KataLevel } from '../interfaces/IKata.interface';
 
 
 // Configuration of environment variables
@@ -86,7 +86,7 @@ export const createKata = async (kata: IKata): Promise<any | undefined> => {
 };
 
 // - Update Kata By ID
-export const updateKataByID = async (kata: IUpdateKata, id: string): Promise<any | undefined> => {
+export const updateKataByID = async (kata: IKataUpdate, id: string): Promise<any | undefined> => {
     try {
         const kataModel = kataEntity();
 

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { userEntity } from '../entities/User.entity';
 import { kataEntity } from '../entities/Kata.entity';
-import { IUpdateUser, IUser } from '../interfaces/IUser.interface';
+import { IUserUpdate, IUser } from '../interfaces/IUser.interface';
 import { IKata, KataLevel } from '../interfaces/IKata.interface';
 // import { UserResponse } from '../types/UsersResponse.type';
 
@@ -90,7 +90,7 @@ export const deleteUserByID = async (id: string): Promise<any | undefined> => {
 /**
  * Method to update a User from Collection "Users" passing its id and IUser object with the values to set in Mongo Server
  */
-export const updateUserByID = async (user: IUpdateUser, id: string): Promise<any | undefined> => {
+export const updateUserByID = async (user: IUserUpdate, id: string): Promise<any | undefined> => {
     try { 
         const userModel = userEntity();
 

@@ -5,7 +5,7 @@ export enum KataLevel {
     HIGH = 'High'
 }
 
-export interface IUserStarsKata {
+export interface IKataStars {
     user: string, 
     stars: number
 }
@@ -17,14 +17,14 @@ export interface IKata {
     intents: number,
     stars: {
         average: number,
-        users: IUserStarsKata[]
+        users: IKataStars[]
     },
     creator: string, // Id of user
     solution: string,
     participants: string[]
 }
 
-export interface IUpdateKata {
+export interface IKataUpdate {
     name: string,
     description: string,
     level: KataLevel,

@@ -6,7 +6,7 @@ export interface IUser {
     katas: string[]
 }
 
-export interface IUpdateUser {
+export interface IUserUpdate {
     name: string,
     age: number
 }

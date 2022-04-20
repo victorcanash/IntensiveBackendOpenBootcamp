@@ -3,7 +3,7 @@ import { Delete, Get, /* Post, */ Put, Query, Route, Tags, Body } from 'tsoa';
 import { LogSuccess, /* LogError */ LogWarning } from '../utils/logger';
 import { IUsersController } from './interfaces';
 import { getAllUsers, getUserByID, deleteUserByID, updateUserByID, getKatasFromUser } from '../domain/orm/Users.orm';
-import { IUpdateUser } from '../domain/interfaces/IUser.interface';
+import { IUserUpdate } from '../domain/interfaces/IUser.interface';
 import { KataLevel } from '../domain/interfaces/IKata.interface';
 
 
@@ -64,7 +64,7 @@ export class UsersController implements IUsersController {
      * @returns 
      */
     @Put('/')
-    public async updateUser(@Body()user: IUpdateUser, @Query()id?: string): Promise<any> { 
+    public async updateUser(@Body()user: IUserUpdate, @Query()id?: string): Promise<any> { 
         let response: any = '';
         
         if (id) {

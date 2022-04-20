@@ -3,7 +3,7 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body } from 'tsoa';
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { IKatasController } from './interfaces';
 import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata, getKataFromUser } from '../domain/orm/Katas.orm';
-import { IKata, IUpdateKata, KataLevel } from '../domain/interfaces/IKata.interface';
+import { IKata, IKataUpdate, KataLevel } from '../domain/interfaces/IKata.interface';
 
 
 @Route('/api/katas')
@@ -103,7 +103,7 @@ export class KatasController implements IKatasController {
      * @returns message informing if updating was correct
      */
     @Put('/')
-    public async updateKata(@Body()kata: IUpdateKata, @Query()id?: string, @Query()userId?: string): Promise<any> { 
+    public async updateKata(@Body()kata: IKataUpdate, @Query()id?: string, @Query()userId?: string): Promise<any> { 
         let response: any = '';
         
         if (id && userId) {

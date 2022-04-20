@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 // import { LogInfo } from '../utils/logger';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { UsersController } from '../controllers/UsersController';
-import { IUpdateUser } from '../domain/interfaces/IUser.interface';
+import { IUserUpdate } from '../domain/interfaces/IUser.interface';
 import { KataLevel } from '../domain/interfaces/IKata.interface';
 
 
@@ -57,7 +57,7 @@ usersRouter.route('/')
             // Controller Instance to excute method
             const controller: UsersController = new UsersController();
 
-            const user: IUpdateUser = {
+            const user: IUserUpdate = {
                 name: name,
                 age: age,
             };
@@ -100,7 +100,7 @@ usersRouter.route('/katas')
         const response: any = await controller.getKatas(page, limit, order, id, level);
         // Send to the client the response
         return res.status(200).send(response);
-});
+    });
 
 // Export Hello Router
 export default usersRouter;
