@@ -2,8 +2,8 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body } from 'tsoa';
 
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { IKatasController } from './interfaces';
-import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata, isKataFromUser } from '../domain/orm/Katas.orm';
-import { IKata, KataLevel } from '../domain/interfaces/IKata.interface';
+import { getAllKatas, getKataByID, updateKataByID, deleteKataByID, createKata, getKataFromUser } from '../domain/orm/Katas.orm';
+import { IKata, IUpdateKata, KataLevel } from '../domain/interfaces/IKata.interface';
 
 
 @Route('/api/katas')
@@ -61,7 +61,7 @@ export class KatasController implements IKatasController {
         
         if (id && userId) {
             // Check if Kata is from logged user
-            await isKataFromUser(id, userId)
+            await getKataFromUser(id, userId)
                 .then(async (kataFromUser) => {
                     if (!kataFromUser) {
                         LogWarning(`[/api/katas] Delete Kata Request, kata with id ${id} is not from user with id ${userId}`);
@@ -79,6 +79,7 @@ export class KatasController implements IKatasController {
                             });
                     }
                 });
+
         } else if (!id) {
             LogWarning('[/api/katas] Delete Kata Request WITHOUT ID');
             response = {
@@ -102,20 +103,40 @@ export class KatasController implements IKatasController {
      * @returns message informing if updating was correct
      */
     @Put('/')
-    public async updateKata(@Body()kata: IKata, @Query()id?: string): Promise<any> { 
+    public async updateKata(@Body()kata: IUpdateKata, @Query()id?: string, @Query()userId?: string): Promise<any> { 
         let response: any = '';
         
-        if (id) {
-            LogSuccess(`[/api/katas] Update Kata By ID: ${id} `);
-            await updateKataByID(kata, id).then((r) => {
-                response = {
-                    message: `Kata with id ${id} updated successfully`
-                };
-            });
-        } else {
+        if (id && userId) {
+            // Check if Kata is from logged user
+            await getKataFromUser(id, userId)
+                .then(async (kataFromUser) => {
+                    if (!kataFromUser) {
+                        LogWarning(`[/api/katas] Update Kata Request, kata with id ${id} is not from user with id ${userId}`);
+                        response = {
+                            message: `Kata with id ${id} is not from user with id ${userId}`
+                        };
+                    } else {
+                        // Update kata
+                        await updateKataByID(kata, id)
+                            .then((r) => {
+                                LogSuccess(`[/api/katas] Update Kata By ID: ${id} `);
+                                response = {
+                                    message: `Kata with id ${id} updated successfully`
+                                };
+                            });
+                    }
+                });
+
+        } else if (!id) {
             LogWarning('[/api/katas] Update Kata Request WITHOUT ID');
             response = {
                 message: 'Please, provide an ID to update an existing user'
+            };
+
+        } else if (!userId) {
+            LogWarning('[/api/katas] Update Kata Request WITHOUT userID');
+            response = {
+                message: 'Please, provide an userID to update an existing user'
             };
         }
         

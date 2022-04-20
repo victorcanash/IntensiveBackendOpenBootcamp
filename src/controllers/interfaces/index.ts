@@ -1,6 +1,6 @@
 import { IUpdateUser, IUser } from '../../domain/interfaces/IUser.interface';
 import { IAuth } from '@/domain/interfaces/IAuth.interface';
-import { IKata, KataLevel } from '../../domain/interfaces/IKata.interface';
+import { IKata, IUpdateKata, KataLevel } from '../../domain/interfaces/IKata.interface';
 import { BasicResponse, DateResponse } from '../types';
 
 
@@ -42,5 +42,5 @@ export interface IKatasController {
     // Delete Kata By ID
     deleteKata(id?: string, userId?: string): Promise<any>
     // Update Kata
-    updateKata(kata: IKata, id?: string): Promise<any>
+    updateKata(kata: IUpdateKata, id?: string, userId?: string): Promise<any>
 }

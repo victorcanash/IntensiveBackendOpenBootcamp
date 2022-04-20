@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
 // import { LogInfo } from '../utils/logger';
-import { KataLevel, IKata } from '../domain/interfaces/IKata.interface';
+import { KataLevel, IKata, IUpdateKata } from '../domain/interfaces/IKata.interface';
 
 
 const jsonParser = bodyParser.json();
@@ -75,28 +75,26 @@ katasRouter.route('/')
             }
         }
         const intents: number = req?.body?.intents || 0;
-        const stars: number = req?.body?.starts || 0;
-        const creator: string = req?.body?.creator;
         const solution: string = req?.body?.solution || '';
-        const participants: string[] = req?.body?.participants || [];
 
-        if (name && description && level && intents >= 0 && stars >= 0 && creator && solution && participants.length >= 0) {
+        // Get logged user id from verifyToken middleware
+        const userId: any = res?.locals?.loggedUser._id;
+
+        if (name && description && level && 
+            intents >= 0 && solution) {
             // Controller Instance to excute method
             const controller: KatasController = new KatasController();
 
-            const kata: IKata = {
+            const kata: IUpdateKata = {
                 name: name,
                 description: description,
                 level: level,
                 intents: intents,
-                stars: stars,
-                creator: creator,
                 solution: solution,
-                participants: participants
             };
 
             // Obtain Response
-            const response: any = await controller.updateKata(kata, id);
+            const response: any = await controller.updateKata(kata, id, userId);
 
             // Send to the client the response
             return res.status(200).send(response);
@@ -121,13 +119,14 @@ katasRouter.route('/')
             }
         }
         const intents: number = req?.body?.intents || 1;
-        const stars: number = req?.body?.stars || 0;
         const solution: string = req?.body?.solution || 'Default Solution';
         const participants: string[] = req?.body?.participants || [];
         // Read from verifyToken middleware
-        const creator: string = res.locals.loggedUser?._id;
+        const userId: string = res.locals.loggedUser?._id;
 
-        if (name && description && level && intents >= 0 && stars >= 0 && creator && solution && participants.length >= 0) {
+        if (name && description && level && 
+            intents >= 0 && userId && solution && 
+            participants.length >= 0) {
             // Controller Instance to excute method
             const controller: KatasController = new KatasController();
 
@@ -136,8 +135,11 @@ katasRouter.route('/')
                 description: description,
                 level: level,
                 intents: intents,
-                stars: stars,
-                creator: creator,
+                stars: {
+                    average: 0,
+                    users: []
+                },
+                creator: userId,
                 solution: solution,
                 participants: participants
             };

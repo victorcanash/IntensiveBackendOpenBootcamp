@@ -11,10 +11,18 @@ export const kataEntity = () => {
             description: { type: String, required: true },
             level: { type: String, required: true },
             intents: { type: Number, required: true },
-            stars: { type: Number, required: true },
+            stars: {
+                average: { type: Number, required: true },
+                users: [
+                    {
+                        user: { type: String, required: true },
+                        stars: { type: Number, required: true }
+                    }
+                ]
+            },
             creator: { type: String, required: true },
             solution: { type: String, required: true },
-            participants: { type: [], required: true }
+            participants: { type: [String], required: true }
         },
         { 
             timestamps: { 
