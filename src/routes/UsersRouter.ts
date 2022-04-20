@@ -50,10 +50,16 @@ usersRouter.route('/')
         const id: any = req?.query?.id;
 
         // Read from body
-        const name: any = req?.body?.name;
-        const age: any = req?.body?.age;
+        const name: string = req?.body?.name;
+        let age: number = req?.body?.age;
 
         if (name && age) {
+            // Fix numbers
+            if (age < 1) {
+                age = 1;
+            }
+            age = Math.round(age);
+
             // Controller Instance to excute method
             const controller: UsersController = new UsersController();
 

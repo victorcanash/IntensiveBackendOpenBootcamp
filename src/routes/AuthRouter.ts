@@ -18,10 +18,19 @@ const authRouter = express.Router();
 
 authRouter.route('/register')
     .post(jsonParser, async (req:Request, res: Response) => {
-        const { name, email, password, age } = req?.body;
+        const name: string = req?.body?.name;
+        const email: string = req?.body?.email;
+        const password: string = req?.body?.password;
+        let age: number = req?.body?.age;
         let hashedPassword: string = '';
 
         if (name && password && email && age) {
+            // Fix numbers
+            if (age < 1) {
+                age = 1;
+            }
+            age = Math.round(age);
+
             // Obtain the password in request and cypher
             hashedPassword = bcrypt.hashSync(password, 8);
 
@@ -51,7 +60,8 @@ authRouter.route('/register')
 
 authRouter.route('/login')
     .post(jsonParser, async (req:Request, res: Response) => {
-        const { email, password } = req?.body;
+        const email: string = req?.body?.email;
+        const password: string = req?.body?.password;
 
         if (email && password) {
             // Controller Instance to excute method
