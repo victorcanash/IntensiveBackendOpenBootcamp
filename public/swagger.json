@@ -59,7 +59,7 @@
 				],
 				"type": "string"
 			},
-			"IUser": {
+			"IAuthRegister": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -73,25 +73,18 @@
 					"age": {
 						"type": "number",
 						"format": "double"
-					},
-					"katas": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
 					}
 				},
 				"required": [
 					"name",
 					"email",
 					"password",
-					"age",
-					"katas"
+					"age"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IAuth": {
+			"IAuthLogin": {
 				"properties": {
 					"email": {
 						"type": "string"
@@ -103,83 +96,6 @@
 				"required": [
 					"email",
 					"password"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"IKataStars": {
-				"properties": {
-					"user": {
-						"type": "string"
-					},
-					"stars": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"user",
-					"stars"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"IKata": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"level": {
-						"$ref": "#/components/schemas/KataLevel"
-					},
-					"intents": {
-						"type": "number",
-						"format": "double"
-					},
-					"stars": {
-						"properties": {
-							"users": {
-								"items": {
-									"$ref": "#/components/schemas/IKataStars"
-								},
-								"type": "array"
-							},
-							"average": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"users",
-							"average"
-						],
-						"type": "object"
-					},
-					"creator": {
-						"type": "string"
-					},
-					"solution": {
-						"type": "string"
-					},
-					"participants": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"name",
-					"description",
-					"level",
-					"intents",
-					"stars",
-					"creator",
-					"solution",
-					"participants"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -209,6 +125,23 @@
 					"level",
 					"intents",
 					"solution"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IKataStars": {
+				"properties": {
+					"user": {
+						"type": "string"
+					},
+					"stars": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"user",
+					"stars"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -503,7 +436,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IUser"
+								"$ref": "#/components/schemas/IAuthRegister"
 							}
 						}
 					}
@@ -533,7 +466,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IAuth"
+								"$ref": "#/components/schemas/IAuthLogin"
 							}
 						}
 					}
@@ -672,14 +605,23 @@
 					"KatasController"
 				],
 				"security": [],
-				"parameters": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"description": "Kata interface to create",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IKata"
+								"$ref": "#/components/schemas/IKataUpdate"
 							}
 						}
 					}

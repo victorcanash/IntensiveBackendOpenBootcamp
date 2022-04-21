@@ -2,6 +2,7 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body } from 'tsoa';
 
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { IKatasController } from './interfaces';
+import { getUserByID, updateUserByID } from '../domain/orm/Users.orm';
 import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataParticipantsByID, deleteKataByID, createKata, getKataFromUser } from '../domain/orm/Katas.orm';
 import { IKata, IKataUpdate, IKataStars, KataLevel } from '../domain/interfaces/IKata.interface';
 
@@ -36,7 +37,7 @@ export class KatasController implements IKatasController {
      * @returns message informing if creating was correct
      */
     @Post('/')
-    public async createKata(@Body()kata: IKataUpdate, userId: string): Promise<any> {
+    public async createKata(@Body()kata: IKataUpdate, @Query()userId: string): Promise<any> {
         let response: any = '';
 
         const newKata: IKata = {
@@ -53,12 +54,16 @@ export class KatasController implements IKatasController {
             participants: []
         };
 
-        LogSuccess(`[/api/katas] Create New Kata: ${kata.name} `);
-        await createKata(newKata).then((r) => {
-            LogSuccess(`[/api/katas] Created Kata: ${kata.name} `);
-            response = {
-                message: `Kata created successfully: ${kata.name}`
-            };
+        await getUserByID(userId).then(async (user) => {
+            await createKata(newKata).then(async (createdKata) => {
+                user.katas.push(createdKata._id);
+                await updateUserByID(user, userId).then(() => {
+                    LogSuccess(`[/api/katas] Created Kata: ${kata.name} `);
+                    response = {
+                        message: `Kata created successfully: ${kata.name}`
+                    };
+                });
+            });
         });
 
         return response;
