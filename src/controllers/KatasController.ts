@@ -2,7 +2,7 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body } from 'tsoa';
 
 import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
 import { IKatasController } from './interfaces';
-import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, deleteKataByID, createKata, getKataFromUser } from '../domain/orm/Katas.orm';
+import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataParticipantsByID, deleteKataByID, createKata, getKataFromUser } from '../domain/orm/Katas.orm';
 import { IKata, IKataStars, IKataUpdate, KataLevel } from '../domain/interfaces/IKata.interface';
 
 
@@ -120,7 +120,7 @@ export class KatasController implements IKatasController {
                         // Update kata
                         await updateKataByID(kata, id)
                             .then((r) => {
-                                LogSuccess(`[/api/katas] Update Kata By ID: ${id} `);
+                                LogSuccess(`[/api/katas] Update Kata By ID: ${id}`);
                                 response = {
                                     message: `Kata with id ${id} updated successfully`
                                 };
@@ -158,7 +158,7 @@ export class KatasController implements IKatasController {
             // Update kata
             await updateKataStarsByID(kataStars, id)
                 .then((r) => {
-                    LogSuccess(`[/api/katas/stars] Update Kata Stars By ID: ${id} `);
+                    LogSuccess(`[/api/katas/stars] Update Kata Stars By ID: ${id}`);
                     response = {
                         message: `Kata Stars with id ${id} updated successfully`
                     };
@@ -171,6 +171,50 @@ export class KatasController implements IKatasController {
             };
         }
 
+        return response;
+    }
+
+    /**
+     * Endpoint to send a Kata solution in the Collection "Katas" of DB 
+     * @param {string} solution Kata solution of user to check if it is correct
+     * @param {string} id Id of Kata to check
+     * @param {string} userId Id of logged user to update participants list
+     * @returns message informing if checking was correct
+     */
+    @Put('/resolve')
+    public async sendKataSolution(@Body()solution: string, @Query()id?: string, @Query()userId?: string): Promise<any> { 
+        let response: any = '';
+        
+        if (id && userId) {
+            // Update kata participants
+            await updateKataParticipantsByID(id, userId)
+                .then((kata) => {
+                    LogSuccess(`[/api/katas/solution] Check Kata Solution: ${solution} By ID: ${id}`);
+                    // Check kata solution
+                    response = {
+                        solution: kata.solution,
+                        message: '',
+                    };
+                    if (kata.solution === solution) {
+                        response.message = `Kata Solution with id ${id} checked successfully, CORRECT solution`;
+                    } else {
+                        response.message = `Kata Solution with id ${id} checked successfully, WRONG solution`;
+                    }
+                });
+
+        } else if (!id) {
+            LogWarning('[/api/katas/resolve] Check Kata Solution Request WITHOUT ID');
+            response = {
+                message: 'Please, provide an ID to check a kata solution'
+            };
+
+        } else if (!userId) {
+            LogWarning('[/api/katas] Check Kata Solution Request WITHOUT userID');
+            response = {
+                message: 'Please, provide an userID to check a kata solution'
+            };
+        }
+        
         return response;
     }
 }

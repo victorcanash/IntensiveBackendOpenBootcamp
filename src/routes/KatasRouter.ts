@@ -131,14 +131,12 @@ katasRouter.route('/')
         }
         let intents: number = req?.body?.intents || 1;
         const solution: string = req?.body?.solution || '';
-        const participants: string[] = req?.body?.participants || [];
         
         // Read from verifyToken middleware
         const userId: any = res.locals.loggedUser?._id;
 
         if (name && description && level && 
-            intents && userId && solution && 
-            participants.length >= 0) {
+            intents && userId && solution) {
             // Fix numbers
             if (intents < 1) {
                 intents = 1;
@@ -159,7 +157,7 @@ katasRouter.route('/')
                 },
                 creator: userId,
                 solution: solution,
-                participants: participants
+                participants: []
             };
 
             // Obtain Response
@@ -174,7 +172,7 @@ katasRouter.route('/')
         }
     });
 
-// http://localhost:8000/api/katas
+// http://localhost:8000/api/katas/stars
 katasRouter.route('/stars')
     // PUT:
     .put(jsonParser, verifyToken, async (req: Request, res: Response) => {
@@ -212,6 +210,35 @@ katasRouter.route('/stars')
         } else {
             return res.status(400).send({
                 message: '[ERROR] Updating Kata Stars. You need to send all attributes of Kata Stars to update it'
+            });
+        }
+    });
+
+// http://localhost:8000/api/katas/resolve
+katasRouter.route('/resolve')
+    // PUT:
+    .put(jsonParser, verifyToken, async (req: Request, res: Response) => {
+        // Obtain a Query Param (ID)
+        const id: any = req?.query?.id;
+        
+        // Read from body
+        const solution: string = req?.body?.solution;
+
+        // Read from verifyToken middleware
+        const userId: any = res.locals.loggedUser?._id?.valueOf();
+
+        if (id && userId && solution) {
+            // Controller Instance to excute method
+            const controller: KatasController = new KatasController();
+
+            // Obtain Response
+            const response: any = await controller.sendKataSolution(solution, id, userId);
+
+            // Send to the client the response
+            return res.status(200).send(response);
+        } else {
+            return res.status(400).send({
+                message: '[ERROR] Sending Kata Solution. You need to send all attributes to send it'
             });
         }
     });

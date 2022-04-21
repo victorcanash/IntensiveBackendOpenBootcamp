@@ -34,7 +34,7 @@
 				"type": "object",
 				"description": "Basic JSON response with the current date for Controllers"
 			},
-			"IUpdateUser": {
+			"IUserUpdate": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -107,6 +107,23 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IKataStars": {
+				"properties": {
+					"user": {
+						"type": "string"
+					},
+					"stars": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"user",
+					"stars"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IKata": {
 				"properties": {
 					"name": {
@@ -123,8 +140,23 @@
 						"format": "double"
 					},
 					"stars": {
-						"type": "number",
-						"format": "double"
+						"properties": {
+							"users": {
+								"items": {
+									"$ref": "#/components/schemas/IKataStars"
+								},
+								"type": "array"
+							},
+							"average": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"users",
+							"average"
+						],
+						"type": "object"
 					},
 					"creator": {
 						"type": "string"
@@ -148,6 +180,35 @@
 					"creator",
 					"solution",
 					"participants"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IKataUpdate": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"level": {
+						"$ref": "#/components/schemas/KataLevel"
+					},
+					"intents": {
+						"type": "number",
+						"format": "double"
+					},
+					"solution": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"level",
+					"intents",
+					"solution"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -349,7 +410,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IUpdateUser"
+								"$ref": "#/components/schemas/IUserUpdate"
 							}
 						}
 					}
@@ -687,6 +748,15 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"description": "Id of logged user to update",
+						"in": "query",
+						"name": "userId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"requestBody": {
@@ -695,7 +765,100 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IKata"
+								"$ref": "#/components/schemas/IKataUpdate"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/katas/stars": {
+			"put": {
+				"operationId": "UpdateKataStars",
+				"responses": {
+					"200": {
+						"description": "message informing if updating was correct",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Endpoint to update stars of a Kata in the Collection \"Katas\" of DB",
+				"tags": [
+					"KatasController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Id of Kata to update stars",
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "Kata stars interface to update",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IKataStars"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/katas/resolve": {
+			"put": {
+				"operationId": "SendKataSolution",
+				"responses": {
+					"200": {
+						"description": "message informing if checking was correct",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Endpoint to send a Kata solution in the Collection \"Katas\" of DB",
+				"tags": [
+					"KatasController"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Id of Kata to check",
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Id of logged user to update participants list",
+						"in": "query",
+						"name": "userId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "Kata solution of user to check if it is correct",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "string"
 							}
 						}
 					}

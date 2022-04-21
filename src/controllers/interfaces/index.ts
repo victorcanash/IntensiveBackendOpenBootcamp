@@ -43,6 +43,8 @@ export interface IKatasController {
     deleteKata(id?: string, userId?: string): Promise<any>
     // Update Kata
     updateKata(kata: IKataUpdate, id?: string, userId?: string): Promise<any>
-    // UpdateKataStars
+    // Update Kata Stars
     updateKataStars(kataStars: IKataStars, id?: string): Promise<any>
+    // Check Kata Solution
+    sendKataSolution(solution: string, id?: string, userId?: string): Promise<any>
 }

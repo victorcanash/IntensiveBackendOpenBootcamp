@@ -94,7 +94,7 @@ export const updateKataByID = async (kata: IKataUpdate, id: string): Promise<any
         return await kataModel.findByIdAndUpdate(id, kata);
 
     } catch (error) {
-        LogError(`[ORM ERROR]: Updating Kata ${id}: ${error}`);
+        LogError(`[ORM ERROR]: Updating Kata ${id} with error: ${error}`);
     }
 };
 
@@ -127,11 +127,37 @@ export const updateKataStarsByID = async (kataStars: IKataStars, id: string): Pr
         return await kataModel.findByIdAndUpdate(id, kata);
 
     } catch (error) {
-        LogError(`[ORM ERROR]: Updating Kata Stars ${id}: ${error}`);
+        LogError(`[ORM ERROR]: Updating Kata Stars ${id} with error: ${error}`);
     }
 };
 
-// - Get Kata by ID and by user ID
+// - Update Kata Participants by ID and user ID
+export const updateKataParticipantsByID = async (id: string, participant: string) : Promise<any | undefined> => {
+    try {
+        const kataModel = kataEntity();
+
+        // Get kata to set new participant
+        const kata = await kataModel.findById(id);
+
+        // Update participants
+        let existsParticipant: boolean = false;
+        for (let i = 0; i < kata.participants.length; i++) {
+            if (kata.participants[i] === participant) {
+                kata.participants[i] = participant;
+                existsParticipant = true;
+                break;
+            }
+        }
+        if (!existsParticipant) {
+            kata.participants.push(participant);
+        }
+        return await kataModel.findByIdAndUpdate(id, kata);
+    } catch (error) {
+        LogError(`[ORM ERROR]: Updating Kata Participants by ID ${id} of participant ${participant} with error: ${error}`);
+    }
+};
+
+// - Get Kata by ID and user ID
 export const getKataFromUser = async (id: string, userId: string) : Promise<any | undefined> => {
     try {
         const kataModel = kataEntity();
@@ -140,6 +166,6 @@ export const getKataFromUser = async (id: string, userId: string) : Promise<any 
         return await kataModel.findOne({ _id: id, creator: userId });
 
     } catch (error) {
-        LogError(`[ORM ERROR]: Is Kata ${id} From User {$userId}: ${error}`);
+        LogError(`[ORM ERROR]: Getting Kata ${id} From User ${userId} with error: ${error}`);
     }
 };
