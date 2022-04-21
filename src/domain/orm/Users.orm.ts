@@ -39,6 +39,7 @@ import { IKata, KataLevel } from '../interfaces/IKata.interface';
 
     } catch (error) {
         LogError(`[ORM ERROR]: Getting All Users: ${error}`);
+        throw new Error(`[ORM ERROR]: Getting All Users: ${error}`);
     }
 };
 
@@ -54,6 +55,7 @@ export const getUserByID = async (id: string) : Promise<any | undefined> => {
 
     } catch (error) {
         LogError(`[ORM ERROR]: Getting User By ID: ${error}`);
+        throw new Error(`[ORM ERROR]: Getting User By ID: ${error}`);
     }
 };
 
@@ -69,6 +71,7 @@ export const getUserByID = async (id: string) : Promise<any | undefined> => {
 
     } catch (error) {
         LogError(`[ORM ERROR]: Getting User By Email: ${error}`);
+        throw new Error(`[ORM ERROR]: Getting User By Email: ${error}`);
     }
 };
 
@@ -84,6 +87,7 @@ export const deleteUserByID = async (id: string): Promise<any | undefined> => {
 
     } catch (error) {
         LogError(`[ORM ERROR]: Deleting User By ID: ${error}`);
+        throw new Error(`[ORM ERROR]: Deleting User By ID: ${error}`);
     }
 };
 
@@ -99,6 +103,7 @@ export const updateUserByID = async (user: IUserUpdate, id: string): Promise<any
 
     } catch (error) {
         LogError(`[ORM ERROR]: Updating User ${id}: ${error}`);
+        throw new Error(`[ORM ERROR]: Updating User ${id}: ${error}`);
     }
 };
 
@@ -106,48 +111,44 @@ export const updateUserByID = async (user: IUserUpdate, id: string): Promise<any
  * Method to obtain all Katas Collection from logged User in Mongo Server
  */
  export const getKatasFromUser = async (page: number, limit: number, order: {}, id: string, level?: KataLevel): Promise<any[] | undefined> => {
-    try {
-        const userModel = userEntity();
-        const kataModel = kataEntity();
-        const response: any = {};
+    const userModel = userEntity();
+    const kataModel = kataEntity();
+    const response: any = {};
 
-        await userModel.findById(id).then(async (user: IUser) => {
-            response.user = user.email;
+    await userModel.findById(id).then(async (user: IUser) => {
+        response.user = user.email;
 
-            // Create types to search
-            const objectIds: mongoose.Types.ObjectId[] = [];
-            user.katas.forEach((kataID: string) => {
-                const objectID = new mongoose.Types.ObjectId(kataID);
-                objectIds.push(objectID);
-            });
-
-            // Filter by level
-            const levelFilter: string = (level === undefined ? '' : level);
-            const levelReg: RegExp = new RegExp(levelFilter);
-
-            // Search Katas (using pagination)
-            await kataModel.find({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
-                .sort(order)
-                .limit(limit)
-                .skip((page - 1) * limit)
-                .exec().then((katas: IKata[]) => {
-                    response.katas = katas;
-                });
-
-            // Count total documents in collection "Katas"
-            await kataModel.countDocuments({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
-                .then((total: number) => {
-                    response.totalPages = Math.ceil(total / limit);
-                    response.currentPage = page;
-            });
-
-        }).catch((error) => {
-            LogError(`[ORM ERROR]: Obtaining User: ${error}`);
+        // Create types to search
+        const objectIds: mongoose.Types.ObjectId[] = [];
+        user.katas.forEach((kataID: string) => {
+            const objectID = new mongoose.Types.ObjectId(kataID);
+            objectIds.push(objectID);
         });
 
-        return response;
+        // Filter by level
+        const levelFilter: string = (level === undefined ? '' : level);
+        const levelReg: RegExp = new RegExp(levelFilter);
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Getting All Users: ${error}`);
-    }
+        // Search Katas (using pagination)
+        await kataModel.find({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
+            .sort(order)
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .exec().then((katas: IKata[]) => {
+                response.katas = katas;
+            });
+
+        // Count total documents in collection "Katas"
+        await kataModel.countDocuments({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
+            .then((total: number) => {
+                response.totalPages = Math.ceil(total / limit);
+                response.currentPage = page;
+        });
+
+    }).catch((error) => {
+        LogError(`[ORM ERROR]: Obtaining User: ${error}`);
+        throw new Error(`[ORM ERROR]: Obtaining User: ${error}`);
+    });
+
+    return response;
 };

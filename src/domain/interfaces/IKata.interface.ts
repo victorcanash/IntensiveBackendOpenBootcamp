@@ -24,6 +24,15 @@ export interface IKata {
     participants: string[]
 }
 
+export interface IKataCreate {
+    name: string,
+    description: string,
+    level: KataLevel,
+    intents: number,
+    creator: string,
+    solution: string,
+}
+
 export interface IKataUpdate {
     name: string,
     description: string,

@@ -21,10 +21,10 @@ export class UsersController implements IUsersController {
         let response: any = '';
         
         if (id) {
-            LogSuccess(`[/api/users] Get User By ID: ${id}`);
+            LogSuccess(`[/api/users] Get user by ID: ${id}`);
             response = await getUserByID(id);
         } else {
-            LogSuccess('[/api/users] Get All Users Request');
+            LogSuccess('[/api/users] Get all users request');
             response = await getAllUsers(page, limit, order);   
         }
         
@@ -41,14 +41,14 @@ export class UsersController implements IUsersController {
         let response: any = '';
         
         if (id) {
-            LogSuccess(`[/api/users] Delete User By ID: ${id}`);
+            LogSuccess(`[/api/users] Delete user by ID: ${id}`);
             await deleteUserByID(id).then(() => {
                 response = {
                     message: `User with id ${id} deleted successfully`
                 };
             });
         } else {
-            LogWarning('[/api/users] Delete User Request WITHOUT ID');
+            LogWarning('[/api/users] Delete user request without ID');
             response = {
                 message: 'Please, provide an ID to remove from database'
             };
@@ -68,14 +68,14 @@ export class UsersController implements IUsersController {
         let response: any = '';
         
         if (id) {
-            LogSuccess(`[/api/users] Update User By ID: ${id}`);
+            LogSuccess(`[/api/users] Update user by ID: ${id}`);
             await updateUserByID(user, id).then(() => {
                 response = {
                     message: `User with id ${id} updated successfully`
                 };
             });
         } else {
-            LogWarning('[/api/users] Update User Request WITHOUT ID');
+            LogWarning('[/api/users] Update user request without ID');
             response = {
                 message: 'Please, provide an ID to update an existing user'
             };
@@ -89,10 +89,10 @@ export class UsersController implements IUsersController {
         let response: any = '';
 
         if (id) {
-            LogSuccess(`[/api/users/katas] Get Katas from User By ID: ${id} `);
+            LogSuccess(`[/api/users/katas] Get katas from user by ID: ${id} `);
             response = await getKatasFromUser(page, limit, order, id, level);
         } else {
-            LogSuccess('[/api/users/katas] Get All Katas without id');
+            LogSuccess('[/api/users/katas] Get all katas without ID');
             response = {
                 message: 'ID from user is needed'
             };

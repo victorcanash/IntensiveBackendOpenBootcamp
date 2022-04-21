@@ -1,12 +1,12 @@
 import { /* Delete, */ Get, Post, /* Put, */ Query, Route, Tags, Body } from 'tsoa';
 
-import { LogSuccess, /* LogError, */ LogWarning } from '../utils/logger';
+import { LogSuccess /* , LogError, LogWarning */ } from '../utils/logger';
 import { IAuthController } from './interfaces';
 import { registerUser, loginUser /* ,logoutUser */ } from '../domain/orm/Auth.orm';
 import { getUserByID } from '../domain/orm/Users.orm';
 import { IUser } from '../domain/interfaces/IUser.interface';
-import { IAuth } from '../domain/interfaces/IAuth.interface';
-import { AuthResponse, ErrorResponse } from './types';
+import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface';
+// import { AuthResponse, ErrorResponse } from './types';
 
 
 @Route('/api/auth')
@@ -14,45 +14,36 @@ import { AuthResponse, ErrorResponse } from './types';
 export class AuthController implements IAuthController {
     
     @Post('/register')
-    public async registerUser(@Body()user: IUser): Promise<any> {
+    public async registerUser(@Body()auth: IAuthRegister): Promise<any> {
         let response: any = '';
 
-        if (user) {
-            LogSuccess(`[/api/auth/register] Register New User: ${user.email}`);
-            await registerUser(user).then(() => {
-                LogSuccess(`[/api/auth/register] Created User: ${user.email}`);
-                response = {
-                    message: `User created successfully: ${user.name}`
-                };
-            });
-        } else {
-            LogWarning('[/api/auth/register] Register needs User Entity');
+        const user: IUser = {
+            name: auth.name,
+            email: auth.email,
+            password: auth.password,
+            age: auth.age,
+            katas: []
+        };
+        await registerUser(user).then(() => {
+            LogSuccess(`[/api/auth/register] Registered user: ${user.name}`);
             response = {
-                message: 'User not Registered: Please, provide a User Entity to create one'
+                message: `User registered successfully: ${user.name}`
             };
-        }
+        });
 
         return response;
     }
 
     @Post('/login')
-    public async loginUser(@Body()auth: IAuth): Promise<any> {
-        let response: AuthResponse | ErrorResponse | undefined;
+    public async loginUser(@Body()auth: IAuthLogin): Promise<any> {
+        let response: any = '';
 
-        if (auth) {
-            LogSuccess(`[/api/auth/login] Login User: ${auth.email}`);
-            const data = await loginUser(auth);
-            response = {
-                token: data.token,
-                message: `Welcome, ${data.user.name}`
-            };
-        } else {
-            LogWarning('[/api/auth/login] Login needs Auth Entity (email && password');
-            response = {
-                error: '[AUTH ERROR]: Email & Password are needed',
-                message: 'Please, provide an email && password to login'
-            };
-        }
+        LogSuccess(`[/api/auth/login] Login user: ${auth.email}`);
+        const data = await loginUser(auth);
+        response = {
+            token: data.token,
+            message: `Welcome, ${data.user.name}`
+        };
 
         return response;
     }
@@ -68,10 +59,8 @@ export class AuthController implements IAuthController {
     public async getLoggedUser(@Query()id: string): Promise<any> {
         let response: any = '';
              
-        if (id) {
-            LogSuccess(`[/api/auth/me] Get Logged User by ID: ${id}`);
-            response = await getUserByID(id);
-        }
+        LogSuccess(`[/api/auth/me] Get logged user by ID: ${id}`);
+        response = await getUserByID(id);
         
         return response;
     }

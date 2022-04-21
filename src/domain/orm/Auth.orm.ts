@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 
 import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { userEntity } from '../entities/User.entity';
-import { IAuth } from '../interfaces/IAuth.interface';
+import { IAuthLogin } from '../interfaces/IAuth.interface';
 import { IUser } from '../interfaces/IUser.interface';
 
 
@@ -28,14 +28,14 @@ const secret = process.env.SECRETKEY || 'MYSECRETKEY';
         return await userModel.create(user);
 
     } catch (error) {
-        LogError(`[ORM ERROR]: Creating User: ${error}`);
+        LogError(`[ORM ERROR]: Creating user: ${error}`);
     }
 };
 
 /**
  * Method to login a User from Collection "Users" passing its IAuth in Mongo Server
  */
-export const loginUser = async (auth: IAuth): Promise<any | undefined> => {
+export const loginUser = async (auth: IAuthLogin): Promise<any | undefined> => {
     try {
         const userModel = userEntity();
 
@@ -46,15 +46,15 @@ export const loginUser = async (auth: IAuth): Promise<any | undefined> => {
         await userModel.findOne({ email: auth.email }).then((user: IUser) => {
             userFound = user;
         }).catch((error) => {
-            console.error('[ERROR Authentication in ORM]: User Not Found');
-            throw new Error(`[ERROR Authentication in ORM]: User Not Found: ${error}`);
+            LogError('[ERROR Authentication in ORM]: User not found');
+            throw new Error(`[ERROR Authentication in ORM]: User not found: ${error}`);
         });
 
         // Check if password is valid (compare with bcrypt)
         const validPassword = bcrypt.compareSync(auth.password, userFound!.password);
 
         if (!validPassword) {
-            console.error('[ERROR Authentication in ORM]: Password not valid');
+            LogError('[ERROR Authentication in ORM]: Password not valid');
             throw new Error('[ERROR Authentication in ORM]: Password not valid');
         }
         
@@ -69,7 +69,8 @@ export const loginUser = async (auth: IAuth): Promise<any | undefined> => {
         };
 
     } catch (error) {
-        LogError(`[ORM ERROR]: Logging User: ${error}`);
+        LogError(`[ORM ERROR]: Logging user: ${error}`);
+        throw new Error(`[ORM ERROR]: Logging user: ${error}`);
     }
 };
 

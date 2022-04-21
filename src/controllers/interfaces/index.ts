@@ -1,6 +1,6 @@
-import { IUserUpdate, IUser } from '../../domain/interfaces/IUser.interface';
-import { IAuth } from '@/domain/interfaces/IAuth.interface';
-import { IKata, IKataStars, IKataUpdate, KataLevel } from '../../domain/interfaces/IKata.interface';
+import { IUserUpdate } from '../../domain/interfaces/IUser.interface';
+import { IAuthLogin, IAuthRegister } from '@/domain/interfaces/IAuth.interface';
+import { IKataStars, IKataUpdate, KataLevel } from '../../domain/interfaces/IKata.interface';
 import { BasicResponse, DateResponse } from '../types';
 
 
@@ -25,9 +25,9 @@ export interface IUsersController {
 
 export interface IAuthController {
     // Register users
-    registerUser(user: IUser): Promise<any>
+    registerUser(auth: IAuthRegister): Promise<any>
     // Login user
-    loginUser(auth: IAuth): Promise<any>
+    loginUser(auth: IAuthLogin): Promise<any>
     // Get logged user
     getLoggedUser(id: string): Promise<any>
     // Logout user
@@ -38,7 +38,7 @@ export interface IKatasController {
     // Get all katas from database with pagination || Get kata By ID
     getKatas(page: number, limit: number, order: any, id?: string, level?: KataLevel): Promise<any>
     // Create New Kata
-    createKata(kata: IKata): Promise<any>
+    createKata(kata: IKataUpdate, userId: string): Promise<any>
     // Delete Kata By ID
     deleteKata(id?: string, userId?: string): Promise<any>
     // Update Kata

@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
 // import { LogInfo } from '../utils/logger';
-import { KataLevel, IKata, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
+import { KataLevel, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 
 
 const jsonParser = bodyParser.json();
@@ -146,22 +146,16 @@ katasRouter.route('/')
             // Controller Instance to excute method
             const controller: KatasController = new KatasController();
 
-            const kata: IKata = {
+            const kata: IKataUpdate = {
                 name: name,
                 description: description,
                 level: level,
                 intents: intents,
-                stars: {
-                    average: 0,
-                    users: []
-                },
-                creator: userId,
-                solution: solution,
-                participants: []
+                solution: solution
             };
 
             // Obtain Response
-            const response: any = await controller.createKata(kata);
+            const response: any = await controller.createKata(kata, userId);
 
             // Send to the client the response
             return res.status(201).send(response);

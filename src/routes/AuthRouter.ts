@@ -6,8 +6,7 @@ import bodyParser from 'body-parser';
 
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { AuthController } from '../controllers/AuthController';
-import { IUser } from '../domain/interfaces/IUser.interface';
-import { IAuth } from '../domain/interfaces/IAuth.interface';
+import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface';
 
 
 // Middleware to read JSON in Body
@@ -34,26 +33,25 @@ authRouter.route('/register')
             // Obtain the password in request and cypher
             hashedPassword = bcrypt.hashSync(password, 8);
 
-            const newUser: IUser = {
+            const auth: IAuthRegister = {
                 name: name,
                 email: email,
                 password: hashedPassword,
-                age: age,
-                katas: []
+                age: age
             };
 
             // Controller Instance to excute method
             const controller: AuthController = new AuthController();
 
             // Obtain Response
-            const response: any = await controller.registerUser(newUser);
+            const response: any = await controller.registerUser(auth);
 
             // Send to the client the response
             return res.status(200).send(response);
         } else {
             // Send to the client the response
             return res.status(400).send({
-                message: '[ERROR User Data missing]: No user can be registered'
+                message: '[ERROR Auth Data missing]: No user can be registered'
             });
         }
     });
@@ -67,7 +65,7 @@ authRouter.route('/login')
             // Controller Instance to excute method
             const controller: AuthController = new AuthController();
 
-            const auth: IAuth = {
+            const auth: IAuthLogin = {
                 email: email,
                 password: password
             };
@@ -80,7 +78,7 @@ authRouter.route('/login')
         } else {
             // Send to the client the response
             return res.status(400).send({
-                message: '[ERROR User Data missing]: No user can be registered'
+                message: '[ERROR Auth Data missing]: No user can be logged'
             });
 
         }

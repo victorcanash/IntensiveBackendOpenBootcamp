@@ -75,7 +75,7 @@ usersRouter.route('/')
             return res.status(200).send(response);
         } else {
             return res.status(400).send({
-                message: '[ERROR] Updating User. You need to send all attributes of User to update it'
+                message: '[ERROR] Updating User. You need to send all attributes of user to update it'
             });
         }
     });
