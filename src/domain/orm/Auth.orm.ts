@@ -24,11 +24,19 @@ const secret = process.env.SECRETKEY || 'MYSECRETKEY';
     try {
         const userModel = userEntity();
 
-        // Create / Insert new User
-        return await userModel.create(user);
+        await userModel.create(user).then((user: IUser) => {
+            if (user) {
+                return user;
+            } else {
+                throw new Error('[ERROR Registering in ORM]: Something was wrong');
+            }
+        }).catch((error: Error) => {
+            LogError(error.message);
+            throw new Error(error.message);
+        });
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Creating user: ${error}`);
+    } catch (error: any) {
+        throw new Error(error?.message);
     }
 };
 
@@ -42,25 +50,25 @@ export const loginUser = async (auth: IAuthLogin): Promise<any | undefined> => {
         let userFound: IUser | undefined = undefined;
         let token: string | undefined = undefined;
 
-        // Check if user exists by unique email
         await userModel.findOne({ email: auth.email }).then((user: IUser) => {
             userFound = user;
-        }).catch((error) => {
-            LogError('[ERROR Authentication in ORM]: User not found');
-            throw new Error(`[ERROR Authentication in ORM]: User not found: ${error}`);
+            if (!userFound) {
+                throw new Error('[ERROR Logging in ORM]: Email not valid');
+            }
+        }).catch((error: Error) => {
+            LogError(error.message);
+            throw new Error(error.message);
         });
 
-        // Check if password is valid (compare with bcrypt)
         const validPassword = bcrypt.compareSync(auth.password, userFound!.password);
 
         if (!validPassword) {
-            LogError('[ERROR Authentication in ORM]: Password not valid');
-            throw new Error('[ERROR Authentication in ORM]: Password not valid');
+            LogError('[ERROR Logging in ORM]: Password not valid');
+            throw new Error('[ERROR Logging in ORM]: Password not valid');
         }
         
-        // Generate our JWT
         token = jwt.sign({ email: userFound!.email }, secret, {
-            expiresIn: '2h'
+            expiresIn: '24h'
         });
 
         return {
@@ -68,9 +76,8 @@ export const loginUser = async (auth: IAuthLogin): Promise<any | undefined> => {
             token: token
         };
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Logging user: ${error}`);
-        throw new Error(`[ORM ERROR]: Logging user: ${error}`);
+    } catch (error: any) {
+        throw new Error(error?.message);
     }
 };
 
