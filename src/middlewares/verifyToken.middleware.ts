@@ -1,8 +1,8 @@
-import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 
-import { getUserByEmail } from '../domain/orm/Users.orm';
+import server from '../server';
 
 
 // Config dotenv to read environment variables
@@ -24,6 +24,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
 
     // Verify if jwt is present
     if (!token) {
+        server.locals.loggedEmail = null;
         return res.status(403).send({
             authenticationError: 'Missing JWT in request',
             message: 'Not authorised to consume this endpoint'
@@ -33,15 +34,16 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     // Verify the token obtained
     jwt.verify(token, secret, async (err: any, decoded: any) => {
         if (err) {
+            server.locals.loggedEmail = null;
             return res.status(500).send({
                 authenticationError: 'JWT verification failed',
                 message: 'Failed to verify JWT token in request'
             });
         }
 
-        // Pass something to next request (id of user || other info)
-        const loggedUser = await getUserByEmail(decoded.email);
-        res.locals.loggedUser = loggedUser;
+        // Pass something to next request (object of user || other info)
+        // res.locals.loggedEmail = decoded.email;
+        server.locals.loggedEmail = decoded.email;
 
         // Execute Next Function -> Protected Routes will be executed
         next();
