@@ -13,6 +13,7 @@ export class GoodbyeController implements IGoodbyeController {
         LogSuccess('[/api/goodbye] Get Request');
 
         return {
+            status: 200,
             message: `Goodbye, ${name || 'World!'}`,
             date: new Date().toDateString()
         };

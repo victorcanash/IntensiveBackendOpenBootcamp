@@ -13,6 +13,7 @@ export class HelloController implements IHelloController {
         LogSuccess('[/api/hello] Get Request');
 
         return {
+            status: 200,
             message: `Hello, ${name || 'World!'}`
         };
     }
