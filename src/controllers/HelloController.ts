@@ -1,4 +1,6 @@
-import { Get, Query, Route, Tags } from 'tsoa';
+import { Get, Query, Route, Tags, Response } from 'tsoa';
+import { StatusCodes } from 'http-status-codes';
+
 import { BasicResponse } from './types';
 import { IHelloController } from './interfaces';
 import { LogSuccess } from '../utils/logger';
@@ -9,11 +11,12 @@ import { LogSuccess } from '../utils/logger';
 export class HelloController implements IHelloController {
     
     @Get('/')
+    @Response<BasicResponse>(StatusCodes.OK)
     public async getMessage(@Query()name?: string): Promise<BasicResponse> {
         LogSuccess('[/api/hello] Get Request');
 
         return {
-            status: 200,
+            code: StatusCodes.OK,
             message: `Hello, ${name || 'World!'}`
         };
     }
