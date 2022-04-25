@@ -10,10 +10,15 @@
 				"properties": {
 					"message": {
 						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
-					"message"
+					"message",
+					"code"
 				],
 				"type": "object",
 				"description": "Basic JSON response for Controllers"
@@ -25,11 +30,16 @@
 					},
 					"message": {
 						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
 					"date",
-					"message"
+					"message",
+					"code"
 				],
 				"type": "object",
 				"description": "Basic JSON response with the current date for Controllers"
@@ -59,6 +69,27 @@
 				],
 				"type": "string"
 			},
+			"ErrorResponse": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"error": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"message",
+					"error",
+					"code"
+				],
+				"type": "object",
+				"description": "Error JSON response for Controllers"
+			},
 			"IAuthRegister": {
 				"properties": {
 					"name": {
@@ -84,6 +115,27 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"AuthResponse": {
+				"properties": {
+					"token": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"token",
+					"message",
+					"code"
+				],
+				"type": "object",
+				"description": "Auth JSON response for Controllers"
+			},
 			"IAuthLogin": {
 				"properties": {
 					"email": {
@@ -99,6 +151,59 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"IUser": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"age": {
+						"type": "number",
+						"format": "double"
+					},
+					"katas": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"password",
+					"age",
+					"katas"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserResponse": {
+				"properties": {
+					"user": {
+						"$ref": "#/components/schemas/IUser"
+					},
+					"message": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"user",
+					"message",
+					"code"
+				],
+				"type": "object",
+				"description": "Auth JSON response for Controllers"
 			},
 			"IKataUpdate": {
 				"properties": {
@@ -147,7 +252,13 @@
 				"additionalProperties": false
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"jwt": {
+				"type": "apiKey",
+				"name": "x-access-token",
+				"in": "header"
+			}
+		}
 	},
 	"info": {
 		"title": "intensivebackendopenbootcamp",
@@ -417,11 +528,50 @@
 			"post": {
 				"operationId": "RegisterUser",
 				"responses": {
-					"200": {
-						"description": "Ok",
+					"201": {
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
@@ -447,11 +597,40 @@
 			"post": {
 				"operationId": "LoginUser",
 				"responses": {
-					"200": {
-						"description": "Ok",
+					"201": {
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/AuthResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
@@ -478,30 +657,52 @@
 				"operationId": "GetLoggedUser",
 				"responses": {
 					"200": {
-						"description": "All user o user found by iD",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/UserResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to retreive the User in the Collection \"Users\" of DB\nMiddleware: Validate JWT\nIn headers you must add the x-access-token with a valid JWT",
 				"tags": [
 					"AuthController"
 				],
-				"security": [],
-				"parameters": [
+				"security": [
 					{
-						"description": "ID of user to retrieve (optional)",
-						"in": "query",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
+						"jwt": []
 					}
-				]
+				],
+				"parameters": []
 			}
 		},
 		"/api/auth/logout": {
@@ -520,7 +721,11 @@
 				"tags": [
 					"AuthController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			}
 		},

@@ -5,10 +5,10 @@ import bcrypt from 'bcrypt';
 // JWT
 import jwt from 'jsonwebtoken';
 
-import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { userEntity } from '../entities/User.entity';
 import { IAuthLogin } from '../interfaces/IAuth.interface';
 import { IUser } from '../interfaces/IUser.interface';
+import { ModelNotFoundError, ErrorProviders, BadQueryError } from '../../errors';
 
 
 // Configuration of environment variables
@@ -20,65 +20,69 @@ const secret = process.env.SECRETKEY || 'MYSECRETKEY';
 /**
  * Method to register/create a User from Collection "Users" passing its IUser in Mongo Server
  */
- export const registerUser = async (user: IUser): Promise<any | undefined> => {
-    try {
-        const userModel = userEntity();
+ export const registerUser = async (user: IUser): Promise<IUser | undefined> => {
+    const userModel = userEntity();
 
-        await userModel.create(user).then((user: IUser) => {
-            if (user) {
-                return user;
-            } else {
-                throw new Error('[ERROR Registering in ORM]: Something was wrong');
-            }
-        }).catch((error: Error) => {
-            LogError(error.message);
-            throw new Error(error.message);
-        });
+    let createdUser: IUser | undefined = undefined; 
 
-    } catch (error: any) {
-        throw new Error(error?.message);
-    }
+    await userModel.findOne({ email: user.email }).then((userResult: IUser) => {
+        if (userResult) {
+            throw new BadQueryError(ErrorProviders.AUTH, 'Entered email already exists');
+        }
+    }).catch((error: BadQueryError) => {
+        error.logError();
+        throw error;
+    });
+    
+    await userModel.create(user).then((userResult: IUser) => {
+        createdUser = userResult;
+        if (!createdUser) {
+            throw new ModelNotFoundError(ErrorProviders.AUTH, 'No user can be registered');
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    return createdUser;
 };
 
 /**
  * Method to login a User from Collection "Users" passing its IAuth in Mongo Server
  */
-export const loginUser = async (auth: IAuthLogin): Promise<any | undefined> => {
-    try {
-        const userModel = userEntity();
+export const loginUser = async (auth: IAuthLogin): Promise<{user: IUser | undefined, token: string | undefined}> => {
+    const userModel = userEntity();
 
-        let userFound: IUser | undefined = undefined;
-        let token: string | undefined = undefined;
+    let userFound: IUser | undefined = undefined;
+    let token: string | undefined = undefined;
 
-        await userModel.findOne({ email: auth.email }).then((user: IUser) => {
-            userFound = user;
-            if (!userFound) {
-                throw new Error('[ERROR Logging in ORM]: Email not valid');
-            }
-        }).catch((error: Error) => {
-            LogError(error.message);
-            throw new Error(error.message);
-        });
-
-        const validPassword = bcrypt.compareSync(auth.password, userFound!.password);
-
-        if (!validPassword) {
-            LogError('[ERROR Logging in ORM]: Password not valid');
-            throw new Error('[ERROR Logging in ORM]: Password not valid');
+    await userModel.findOne({ email: auth.email }).then((userResult: IUser) => {
+        userFound = userResult;
+        if (!userFound) {
+            throw new ModelNotFoundError(ErrorProviders.AUTH, 'Invalid email to login');
         }
-        
-        token = jwt.sign({ email: userFound!.email }, secret, {
-            expiresIn: '24h'
-        });
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
 
-        return {
-            user: userFound,
-            token: token
-        };
+    const validPassword = bcrypt.compareSync(auth.password, userFound!.password);
 
-    } catch (error: any) {
-        throw new Error(error?.message);
+    if (!validPassword) {
+        const passwordError = new ModelNotFoundError(ErrorProviders.AUTH, 'Invalid password to login');
+        passwordError.logError();
+        throw passwordError;
     }
+    
+    token = jwt.sign({ email: userFound!.email }, secret, {
+        expiresIn: '24h'
+    });
+
+    const result = {
+        user: userFound,
+        token: token
+    };
+    return result;
 };
 
 /**

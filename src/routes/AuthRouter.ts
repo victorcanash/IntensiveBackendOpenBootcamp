@@ -6,6 +6,7 @@ import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { AuthController } from '../controllers/AuthController';
 import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface';
 import { fixNumberValue } from '../utils/valuesFixer';
+import { BadQueryError, ErrorProviders } from '../errors';
 
 
 const jsonParser = bodyParser.json();
@@ -33,13 +34,14 @@ authRouter.route('/register')
                 age: fixedAge
             };
 
-            const response: any = await controller.registerUser(auth);
+            const controllerRes = await controller.registerUser(auth);
 
-            return res.status(200).send(response);
+            return res.status(controllerRes.code).send(controllerRes);
+
         } else {
-            return res.status(400).send({
-                message: '[ERROR Auth Data missing]: No user can be registered'
-            });
+            const badQueryError = new BadQueryError(ErrorProviders.AUTH, 'No user can be registered');
+            badQueryError.logError();
+            return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
         }
     });
 
@@ -54,23 +56,22 @@ authRouter.route('/login')
                 password: password
             };
 
-            const response: any = await controller.loginUser(auth);
+            const controllerRes = await controller.loginUser(auth);
 
-            return res.status(200).send(response);
+            return res.status(controllerRes.code).send(controllerRes);
+
         } else {
-            return res.status(400).send({
-                message: '[ERROR Auth Data missing]: No user can be logged'
-            });
-
+            const badQueryError = new BadQueryError(ErrorProviders.AUTH, 'No user can be logged');
+            badQueryError.logError();
+            return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
         }
     });
 
-// Route to get logged user
 authRouter.route('/me')
     .get(verifyToken, async (req: Request, res: Response) => {
-        const response: any = await controller.getLoggedUser();
+        const controllerRes = await controller.getLoggedUser();
 
-        return res.status(200).send(response);
+        return res.status(controllerRes.code).send(controllerRes);
     });
 
 

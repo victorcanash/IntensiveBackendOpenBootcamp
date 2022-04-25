@@ -1,9 +1,11 @@
-import { /* Delete, */ Get, Post, /* Put, Query, */ Route, Tags, Body, Security } from 'tsoa';
+import { Get, Post, Route, Tags, Body, Security, Response, SuccessResponse } from 'tsoa';
+import { StatusCodes } from 'http-status-codes';
 
 import { IAuthController } from './interfaces';
-import { BasicResponse, ErrorResponse } from './types';
+import { ErrorResponse, BasicResponse, AuthResponse, UserResponse } from './types';
 import server from '../server';
-import { LogSuccess /* , LogError, LogWarning */ } from '../utils/logger';
+import { SomethingWrongError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
+import { LogSuccess } from '../utils/logger';
 import { registerUser, loginUser /* ,logoutUser */ } from '../domain/orm/Auth.orm';
 import { getUserByEmail } from '../domain/orm/Users.orm';
 import { IUser } from '../domain/interfaces/IUser.interface';
@@ -13,10 +15,15 @@ import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface'
 @Route('/api/auth')
 @Tags('AuthController')
 export class AuthController implements IAuthController {
-    
+    private readonly somethingWrongError = new SomethingWrongError(ErrorProviders.AUTH);
+
+
     @Post('/register')
-    public async registerUser(@Body()auth: IAuthRegister): Promise<BasicResponse | ErrorResponse | any> {
-        let response: BasicResponse | ErrorResponse | any = '';
+    @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async registerUser(@Body()auth: IAuthRegister): Promise<BasicResponse | ErrorResponse> {
         const user: IUser = {
             name: auth.name,
             email: auth.email,
@@ -24,62 +31,65 @@ export class AuthController implements IAuthController {
             age: auth.age,
             katas: []
         };
-        await registerUser(user).then(() => {
-            LogSuccess(`[/api/auth/register] Registered user: ${user.name}`);
-            
+        
+        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        await registerUser(user).then((createdUser: IUser | undefined) => {
             response = {
-                status: 200,
-                message: `User registered successfully: ${user.name}`
+                code: StatusCodes.CREATED,
+                message: `User registered successfully: ${createdUser?.email}`
             };
-        }).catch((error) => {
-            response = {
-                status: 400,
-                error: error,
-                message: error.message
-            };
+            LogSuccess(`[/api/auth/register] Registered user: ${createdUser?.email}`);
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
         });
 
         return response;
     }
 
+    @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     @Post('/login')
-    public async loginUser(@Body()auth: IAuthLogin): Promise<any> {
-        let response: any = '';
+    public async loginUser(@Body()auth: IAuthLogin): Promise<AuthResponse | ErrorResponse> {
+        let response: AuthResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        await loginUser(auth).then((res: any) => {
-            LogSuccess(`[/api/auth/login] Login user: ${auth.email}`);
+        await loginUser(auth).then((result: {user: IUser | undefined, token: string | undefined}) => {
             response = {
-                token: res.token,
-                message: `Welcome, ${res.user?.name}`
+                code: StatusCodes.CREATED,
+                message: `User logged in successfully: ${result.user?.email}`,
+                token: result.token || ''
             };
-        }).catch((error: Error) => {
-            response = {
-                message: error.message
-            };
+            LogSuccess(`[/api/auth/login] Logged in user: ${result.user?.email}`);
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
         });
         
         return response;
     }
 
-    /**
-     * Endpoint to retreive the User in the Collection "Users" of DB
-     * Middleware: Validate JWT
-     * In headers you must add the x-access-token with a valid JWT
-     * @param {string} id ID of user to retrieve (optional)
-     * @returns All user o user found by iD
-     */
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     @Security('jwt')
     @Get('/me')
-    public async getLoggedUser(): Promise<any> {
-        let response: any = '';
+    public async getLoggedUser(): Promise<UserResponse | ErrorResponse> {
+        let response: UserResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
         const email = server.locals.loggedEmail;
-        LogSuccess(`[/api/auth/me] Get logged user by email: ${email}`);
-        await getUserByEmail(email).then((user: IUser) => {
-            response = user;
-        }).catch((error) => {
+
+        await getUserByEmail(email).then((foundUser: IUser | undefined) => {
             response = {
-                message: error
+                code: StatusCodes.OK,
+                message: 'User found successfully',
+                user: foundUser || {} as IUser
             };
+            LogSuccess(`[/api/auth/me] Get logged user by email: ${foundUser?.email}`);
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
         });
         
         return response;
