@@ -8,7 +8,7 @@ export const userEntity = () => {
     const userSchema = new mongoose.Schema<IUser>(
         {
             name: { type: String, required: true },
-            email: { type: String, required: true },
+            email: { type: String, required: true, unique: true },
             password: { type: String, required: true },
             age: { type: Number, required: true },
             katas: { type: [String], required: true }
