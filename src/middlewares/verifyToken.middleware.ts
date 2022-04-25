@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 
 import server from '../server';
+import { MissingTokenError, BadTokenError } from '../errors';
 
 
 // Config dotenv to read environment variables
@@ -25,24 +26,25 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     // Verify if jwt is present
     if (!token) {
         server.locals.loggedEmail = null;
-        return res.status(403).send({
-            authenticationError: 'Missing JWT in request',
-            message: 'Not authorised to consume this endpoint'
-        });
+        
+        const missingTokenError = new MissingTokenError('Missing JWT token in request');
+        missingTokenError.logError();
+
+        return res.status(missingTokenError.statusCode).send(missingTokenError.getResponse());
     }
 
     // Verify the token obtained
     jwt.verify(token, secret, async (err: any, decoded: any) => {
         if (err) {
             server.locals.loggedEmail = null;
-            return res.status(500).send({
-                authenticationError: 'JWT verification failed',
-                message: 'Failed to verify JWT token in request'
-            });
+
+            const badTokenError = new BadTokenError('Failed to verify JWT token in request');
+            badTokenError.logError();
+
+            return res.status(badTokenError.statusCode).send(badTokenError.getResponse());
         }
 
         // Pass something to next request (object of user || other info)
-        // res.locals.loggedEmail = decoded.email;
         server.locals.loggedEmail = decoded.email;
 
         // Execute Next Function -> Protected Routes will be executed
