@@ -1,3 +1,6 @@
+import { IUser } from '../../domain/interfaces/IUser.interface';
+
+
 /**
  * Error JSON response for Controllers
  */
@@ -31,7 +34,7 @@ export type BasicResponse = {
  export type UserResponse = {
     code: number,
     message: string,
-    user: any,
+    user: IUser,
 }
 
 /**

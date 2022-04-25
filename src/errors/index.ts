@@ -21,7 +21,7 @@ export enum ErrorTypes {
 
 /* ERROR CLASSES */
 
-class BaseError extends Error {
+export class BaseError extends Error {
     public readonly provider: ErrorProviders;
     public readonly type: ErrorTypes;
     public readonly name: string;
@@ -36,7 +36,7 @@ class BaseError extends Error {
         this.provider = provider;
         this.type = type;
         this.statusCode = statusCode;
-        this.name = `${this.provider}/${this.type}`;
+        this.name = `${this.provider}: ${this.type}`;
 
         Error.captureStackTrace(this);
     }
