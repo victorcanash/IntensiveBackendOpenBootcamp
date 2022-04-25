@@ -1,26 +1,18 @@
 /**
- * Basic JSON response with the current date for Controllers
+ * Error JSON response for Controllers
  */
- export type DateResponse = {
-    status: number,
-    message: string,
-    date: string
+ export type ErrorResponse = {
+    code: number,
+    error: string,
+    message: string
 }
+
 
 /**
  * Basic JSON response for Controllers
  */
 export type BasicResponse = {
-    status: number,
-    message: string
-}
-
-/**
- * Error JSON response for Controllers
- */
-export type ErrorResponse = {
-    status: number,
-    error: string,
+    code: number,
     message: string
 }
 
@@ -28,7 +20,25 @@ export type ErrorResponse = {
  * Auth JSON response for Controllers
  */
  export type AuthResponse = {
-    status: number,
+    code: number,
     message: string,
     token: string,
+}
+
+/**
+ * Auth JSON response for Controllers
+ */
+ export type UserResponse = {
+    code: number,
+    message: string,
+    user: any,
+}
+
+/**
+ * Basic JSON response with the current date for Controllers
+ */
+ export type DateResponse = {
+    code: number,
+    message: string,
+    date: string
 }
