@@ -1,4 +1,5 @@
 import { IUser } from '../../domain/interfaces/IUser.interface';
+import { IKata } from '../../domain/interfaces/IKata.interface';
 
 
 /**
@@ -29,12 +30,35 @@ export type BasicResponse = {
 }
 
 /**
- * Auth JSON response for Controllers
+ * User JSON response for Controllers
  */
  export type UserResponse = {
     code: number,
     message: string,
     user: IUser,
+}
+
+/**
+ * Users JSON response for Controllers
+ */
+ export type UsersResponse = {
+    code: number,
+    message: string,
+    users: IUser[],
+    totalPages: number,
+    currentPage: number
+}
+
+/**
+ * Katas from User JSON response for Controllers
+ */
+ export type KatasFromUserResponse = {
+    code: number,
+    message: string,
+    user: IUser,
+    katas: IKata[],
+    totalPages: number,
+    currentPage: number
 }
 
 /**

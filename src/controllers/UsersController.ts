@@ -1,102 +1,133 @@
-import { Delete, Get, /* Post, */ Put, Query, Route, Tags, Body } from 'tsoa';
+import { Delete, Get, Put, Route, Query, Tags, Body, Security, Response, SuccessResponse } from 'tsoa';
+import { StatusCodes } from 'http-status-codes';
 
-import { LogSuccess, /* LogError */ LogWarning } from '../utils/logger';
 import { IUsersController } from './interfaces';
-import { getAllUsers, getUserByID, deleteUserByID, updateUserByID, getKatasFromUser } from '../domain/orm/Users.orm';
-import { IUserUpdate } from '../domain/interfaces/IUser.interface';
+import { ErrorResponse, BasicResponse, UserResponse, UsersResponse, KatasFromUserResponse } from './types';
+import server from '../server';
+import { SomethingWrongError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
+import { LogSuccess } from '../utils/logger';
+import { getAllUsers, getUserByID, deleteUserByEmail, updateUserByEmail, getKatasFromUser } from '../domain/orm/Users.orm';
+import { IUser, IUserUpdate } from '../domain/interfaces/IUser.interface';
 import { KataLevel } from '../domain/interfaces/IKata.interface';
+import { UsersResponse as UsersORMResponse, KatasFromUserResponse as KatasORMResponse } from '../domain/types';
 
 
 @Route('/api/users')
 @Tags('UsersController')
 export class UsersController implements IUsersController {
+    private readonly somethingWrongError = new SomethingWrongError(ErrorProviders.AUTH);
 
-    /**
-     * Endpoint to retreive the Users in the Collection "Users" of DB 
-     * @param {string} id Id of user to retreive (optional)
-     * @returns All user o user found by iD
-     */
+
     @Get('/')
-    public async getUsers(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string): Promise<any> {
-        let response: any = '';
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async getUsers(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string): Promise<UserResponse | UsersResponse | ErrorResponse> {
+        let response: UserResponse | UsersResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         if (id) {
-            LogSuccess(`[/api/users] Get user by ID: ${id}`);
-            response = await getUserByID(id);
+            await getUserByID(id).then((foundUser: IUser) => {
+                response = {
+                    code: StatusCodes.OK,
+                    message: 'User found successfully',
+                    user: foundUser
+                };
+                LogSuccess(`[/api/users] Get user by ID: ${id}`);
+
+            }).catch((error: BaseError) => {
+                response = error.getResponse();
+            });
+
         } else {
-            LogSuccess('[/api/users] Get all users request');
-            response = await getAllUsers(page, limit, order);   
+            await getAllUsers(page, limit, order).then((usersResponse: UsersORMResponse) => {
+                response = {
+                    code: StatusCodes.OK,
+                    message: 'Users found successfully',
+                    users: usersResponse.users,
+                    totalPages: usersResponse.totalPages,
+                    currentPage: usersResponse.currentPage
+                };
+                LogSuccess('[/api/users] Get all users');
+
+            }).catch((error: BaseError) => {
+                response = error.getResponse();
+            }); 
         }
         
         return response;
     }
 
-    /**
-     * Endpoint to delete the Users in the Collection "Users" of DB 
-     * @param {string} id Id of user to delete (optional)
-     * @returns message informing if deletion was correct
-     */
     @Delete('/')
-    public async deleteUser(@Query()id?: string): Promise<any> { 
-        let response: any = '';
-        
-        if (id) {
-            LogSuccess(`[/api/users] Delete user by ID: ${id}`);
-            await deleteUserByID(id).then(() => {
-                response = {
-                    message: `User with id ${id} deleted successfully`
-                };
-            });
-        } else {
-            LogWarning('[/api/users] Delete user request without ID');
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async deleteUser(): Promise<BasicResponse | ErrorResponse> { 
+        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        const email: any = server.locals.loggedEmail;
+
+        await deleteUserByEmail(email).then((deletedUser: IUser) => {
             response = {
-                message: 'Please, provide an ID to remove from database'
+                code: StatusCodes.OK,
+                message: `User with email: ${deletedUser.email} deleted successfully`
             };
-        }
+            LogSuccess(`[/api/users] Delete user by email: ${deletedUser.email}`);
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
         
         return response;
     }
 
-    /**
-     *  Endpoint to update a User in the Collection "Users" of DB 
-     * @param id Id of user to update
-     * @param user IUpdateUser interface to set the new values
-     * @returns 
-     */
     @Put('/')
-    public async updateUser(@Body()user: IUserUpdate, @Query()id?: string): Promise<any> { 
-        let response: any = '';
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async updateUser(@Body()user: IUserUpdate): Promise<BasicResponse | ErrorResponse> { 
+        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        const email: any = server.locals.loggedEmail;
         
-        if (id) {
-            LogSuccess(`[/api/users] Update user by ID: ${id}`);
-            await updateUserByID(user, id).then(() => {
-                response = {
-                    message: `User with id ${id} updated successfully`
-                };
-            });
-        } else {
-            LogWarning('[/api/users] Update user request without ID');
+        await updateUserByEmail(user, email).then((updatedUser: IUser) => {
             response = {
-                message: 'Please, provide an ID to update an existing user'
+                code: StatusCodes.OK,
+                message: `User with email: ${updatedUser.email} updated successfully`
             };
-        }
+            LogSuccess(`[/api/users] Update user by email: ${updatedUser.email}`);
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
         
         return response;
     }
 
     @Get('/katas')
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string, @Query()level?: KataLevel): Promise<any> {
-        let response: any = '';
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id: string, @Query()level?: KataLevel): Promise<KatasFromUserResponse | ErrorResponse> {
+        let response: KatasFromUserResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        if (id) {
-            LogSuccess(`[/api/users/katas] Get katas from user by ID: ${id} `);
-            response = await getKatasFromUser(page, limit, order, id, level);
-        } else {
-            LogSuccess('[/api/users/katas] Get all katas without ID');
+        await getKatasFromUser(page, limit, order, id, level).then((katasResponse: KatasORMResponse) => {
             response = {
-                message: 'ID from user is needed'
+                code: StatusCodes.OK,
+                message: 'Katas from user found successfully',
+                user: katasResponse.user,
+                katas: katasResponse.katas,
+                totalPages: katasResponse.totalPages,
+                currentPage: katasResponse.currentPage
             };
-        }
+            LogSuccess(`[/api/users/katas] Get katas from user by ID: ${id}`);
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
         
         return response; 
     }

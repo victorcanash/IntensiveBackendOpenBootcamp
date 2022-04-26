@@ -1,126 +1,124 @@
 import mongoose from 'mongoose';
 
-import { /* LogSuccess, */ LogError } from '../../utils/logger';
 import { userEntity } from '../entities/User.entity';
 import { kataEntity } from '../entities/Kata.entity';
 import { IUserUpdate, IUser } from '../interfaces/IUser.interface';
+import { UsersResponse, KatasFromUserResponse } from '../types';
 import { IKata, KataLevel } from '../interfaces/IKata.interface';
-// import { UserResponse } from '../types/UsersResponse.type';
+import { ModelNotFoundError, ErrorProviders } from '../../errors';
 
 
-// CRUD
+const modelSelect: string = 'name email age katas created_at updated_at';
 
-/**
- * Method to obtain all Users from Collection "Users" in Mongo Server
- */
- export const getAllUsers = async (page: number, limit: number, order: {}): Promise<any[] | undefined> => {
-    try {
-        const userModel = userEntity();
+export const getAllUsers = async (page: number, limit: number, order: {}): Promise<UsersResponse> => {
+    const userModel = userEntity();
 
-        const response: any = {};
+    const response: UsersResponse = {} as UsersResponse;
 
-        // Search all users (using pagination)
-        await userModel.find({ isDeleted: false })
-            .sort(order)
-            .select('name email age katas created_at updated_at')
-            .limit(limit)
-            .skip((page - 1) * limit)
-            .exec().then((users: IUser[]) => {
-                response.users = users;
-            });
-
-        // Count total documents in collection "Users"
-        await userModel.countDocuments().then((total: number) => {
-            response.totalPages = Math.ceil(total / limit);
-            response.currentPage = page;
+    await userModel.find({ isDeleted: false })
+        .sort(order)
+        .select(modelSelect)
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .exec().then((users: IUser[]) => {
+            response.users = users;
         });
 
-        return response;
+    await userModel.countDocuments().then((total: number) => {
+        response.totalPages = Math.ceil(total / limit);
+        response.currentPage = page;
+    });
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Getting All Users: ${error}`);
-        throw new Error(`[ORM ERROR]: Getting All Users: ${error}`);
-    }
+    return response;
 };
 
-/**
- * Method to obtain a User from Collection "Users" passing its id in Mongo Server
- */
-export const getUserByID = async (id: string) : Promise<any | undefined> => {
-    try {
-        const userModel = userEntity();
+export const getUserByID = async (id: string) : Promise<IUser> => {
+    const userModel = userEntity();
 
-        // Search User By ID
-        return await userModel.findById(id).select('name email age katas created_at updated_at');
+    let foundUser: IUser = {} as IUser;
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Getting User By ID: ${error}`);
-        throw new Error(`[ORM ERROR]: Getting User By ID: ${error}`);
-    }
+    await userModel.findById(id).select(modelSelect).then((userResult: IUser) => {
+        foundUser = userResult;
+        if (!foundUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be found by ID: ${id}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+    
+    return foundUser;
 };
 
-/**
- * Method to obtain a User from Collection "Users" passing its email in Mongo Server
- */
- export const getUserByEmail = async (email: string) : Promise<any | undefined> => {
-    try {
-        const userModel = userEntity();
+ export const getUserByEmail = async (email: string) : Promise<IUser> => {
+    const userModel = userEntity();
 
-        // Search User By Email
-        return await userModel.findOne({ email: email }).select('name email age katas created_at updated_at');
+    let foundUser: IUser = {} as IUser;
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Getting User By Email: ${error}`);
-        throw new Error(`[ORM ERROR]: Getting User By Email: ${error}`);
-    }
+    await userModel.findOne({ email: email }).select(modelSelect).then((userResult: IUser) => {
+        foundUser = userResult;
+        if (!foundUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be found by email: ${email}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+    
+    return foundUser;
 };
 
-/**
- * Method to delete a User from Collection "Users" passing its id in Mongo Server
- */
-export const deleteUserByID = async (id: string): Promise<any | undefined> => {
-    try {
-        const userModel = userEntity();
+export const deleteUserByEmail = async (email: string): Promise<IUser> => {
+    const userModel = userEntity();
+    
+    let deletedUser: IUser = {} as IUser;
 
-        // Delete User by ID
-        return await userModel.deleteOne({ _id: id });
+    await userModel.findOneAndDelete({ email: email }).then((userResult: IUser) => {
+        deletedUser = userResult;
+        if (!deletedUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be deleted by email: ${email}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Deleting User By ID: ${error}`);
-        throw new Error(`[ORM ERROR]: Deleting User By ID: ${error}`);
-    }
+    return deletedUser;
 };
 
-/**
- * Method to update a User from Collection "Users" passing its id and IUser object with the values to set in Mongo Server
- */
-export const updateUserByID = async (user: IUserUpdate, id: string): Promise<any | undefined> => {
-    try { 
-        const userModel = userEntity();
+export const updateUserByEmail = async (user: IUserUpdate, email: string): Promise<IUser> => {
+    const userModel = userEntity();
 
-        // Update User
-        return await userModel.findByIdAndUpdate(id, user);
+    let updatedUser: IUser = {} as IUser;
 
-    } catch (error) {
-        LogError(`[ORM ERROR]: Updating User ${id}: ${error}`);
-        throw new Error(`[ORM ERROR]: Updating User ${id}: ${error}`);
-    }
+    await userModel.findOneAndUpdate({ email: email }, user, { returnOriginal: false }).then((userResult: IUser) => {
+        updatedUser = userResult;
+        if (!updatedUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be updated by email: ${email}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    return updatedUser;
 };
 
-/**
- * Method to obtain all Katas Collection from logged User in Mongo Server
- */
- export const getKatasFromUser = async (page: number, limit: number, order: {}, id: string, level?: KataLevel): Promise<any[] | undefined> => {
+export const getKatasFromUser = async (page: number, limit: number, order: {}, id: string, level?: KataLevel): Promise<KatasFromUserResponse> => {
     const userModel = userEntity();
     const kataModel = kataEntity();
-    const response: any = {};
 
-    await userModel.findById(id).then(async (user: IUser) => {
-        response.user = user.email;
+    const response = {} as KatasFromUserResponse;
 
-        // Create types to search
+    await userModel.findById(id).select(modelSelect).then(async (userResult: IUser) => {
+        response.user = userResult;
+        if (!response.user) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be found to get its Katas with id: ${id}`);
+        }
+
+        // Create katas objectIds to search
         const objectIds: mongoose.Types.ObjectId[] = [];
-        user.katas.forEach((kataID: string) => {
+        response.user.katas.forEach((kataID: string) => {
             const objectID = new mongoose.Types.ObjectId(kataID);
             objectIds.push(objectID);
         });
@@ -145,9 +143,9 @@ export const updateUserByID = async (user: IUserUpdate, id: string): Promise<any
                 response.currentPage = page;
         });
 
-    }).catch((error) => {
-        LogError(`[ORM ERROR]: Obtaining User: ${error}`);
-        throw new Error(`[ORM ERROR]: Obtaining User: ${error}`);
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
     });
 
     return response;

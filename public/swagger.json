@@ -44,6 +44,114 @@
 				"type": "object",
 				"description": "Basic JSON response with the current date for Controllers"
 			},
+			"IUser": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"age": {
+						"type": "number",
+						"format": "double"
+					},
+					"katas": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"password",
+					"age",
+					"katas"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserResponse": {
+				"properties": {
+					"user": {
+						"$ref": "#/components/schemas/IUser"
+					},
+					"message": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"user",
+					"message",
+					"code"
+				],
+				"type": "object",
+				"description": "User JSON response for Controllers"
+			},
+			"UsersResponse": {
+				"properties": {
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					},
+					"users": {
+						"items": {
+							"$ref": "#/components/schemas/IUser"
+						},
+						"type": "array"
+					},
+					"message": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"currentPage",
+					"totalPages",
+					"users",
+					"message",
+					"code"
+				],
+				"type": "object",
+				"description": "Users JSON response for Controllers"
+			},
+			"ErrorResponse": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"error": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"message",
+					"error",
+					"code"
+				],
+				"type": "object",
+				"description": "Error JSON response for Controllers"
+			},
 			"IUserUpdate": {
 				"properties": {
 					"name": {
@@ -69,12 +177,103 @@
 				],
 				"type": "string"
 			},
-			"ErrorResponse": {
+			"IKataStars": {
 				"properties": {
-					"message": {
+					"user": {
 						"type": "string"
 					},
-					"error": {
+					"stars": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"user",
+					"stars"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IKata": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"level": {
+						"$ref": "#/components/schemas/KataLevel"
+					},
+					"intents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stars": {
+						"properties": {
+							"users": {
+								"items": {
+									"$ref": "#/components/schemas/IKataStars"
+								},
+								"type": "array"
+							},
+							"average": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"users",
+							"average"
+						],
+						"type": "object"
+					},
+					"creator": {
+						"type": "string"
+					},
+					"solution": {
+						"type": "string"
+					},
+					"participants": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"level",
+					"intents",
+					"stars",
+					"creator",
+					"solution",
+					"participants"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"KatasFromUserResponse": {
+				"properties": {
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					},
+					"katas": {
+						"items": {
+							"$ref": "#/components/schemas/IKata"
+						},
+						"type": "array"
+					},
+					"user": {
+						"$ref": "#/components/schemas/IUser"
+					},
+					"message": {
 						"type": "string"
 					},
 					"code": {
@@ -83,12 +282,15 @@
 					}
 				},
 				"required": [
+					"currentPage",
+					"totalPages",
+					"katas",
+					"user",
 					"message",
-					"error",
 					"code"
 				],
 				"type": "object",
-				"description": "Error JSON response for Controllers"
+				"description": "Katas from User JSON response for Controllers"
 			},
 			"IAuthRegister": {
 				"properties": {
@@ -152,59 +354,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IUser": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
-					"password": {
-						"type": "string"
-					},
-					"age": {
-						"type": "number",
-						"format": "double"
-					},
-					"katas": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"name",
-					"email",
-					"password",
-					"age",
-					"katas"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"UserResponse": {
-				"properties": {
-					"user": {
-						"$ref": "#/components/schemas/IUser"
-					},
-					"message": {
-						"type": "string"
-					},
-					"code": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"user",
-					"message",
-					"code"
-				],
-				"type": "object",
-				"description": "Auth JSON response for Controllers"
-			},
 			"IKataUpdate": {
 				"properties": {
 					"name": {
@@ -230,23 +379,6 @@
 					"level",
 					"intents",
 					"solution"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"IKataStars": {
-				"properties": {
-					"user": {
-						"type": "string"
-					},
-					"stars": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"user",
-					"stars"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -340,19 +472,54 @@
 				"operationId": "GetUsers",
 				"responses": {
 					"200": {
-						"description": "All user o user found by iD",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/UserResponse"
+										},
+										{
+											"$ref": "#/components/schemas/UsersResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to retreive the Users in the Collection \"Users\" of DB",
 				"tags": [
 					"UsersController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -381,7 +548,6 @@
 						}
 					},
 					{
-						"description": "Id of user to retreive (optional)",
 						"in": "query",
 						"name": "id",
 						"required": false,
@@ -395,61 +561,104 @@
 				"operationId": "DeleteUser",
 				"responses": {
 					"200": {
-						"description": "message informing if deletion was correct",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to delete the Users in the Collection \"Users\" of DB",
 				"tags": [
 					"UsersController"
 				],
-				"security": [],
-				"parameters": [
+				"security": [
 					{
-						"description": "Id of user to delete (optional)",
-						"in": "query",
-						"name": "id",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
+						"jwt": []
 					}
-				]
+				],
+				"parameters": []
 			},
 			"put": {
 				"operationId": "UpdateUser",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to update a User in the Collection \"Users\" of DB",
 				"tags": [
 					"UsersController"
 				],
-				"security": [],
-				"parameters": [
+				"security": [
 					{
-						"description": "Id of user to update",
-						"in": "query",
-						"name": "id",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
+						"jwt": []
 					}
 				],
+				"parameters": [],
 				"requestBody": {
-					"description": "IUpdateUser interface to set the new values",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -466,10 +675,39 @@
 				"operationId": "GetKatas",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/KatasFromUserResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
@@ -477,7 +715,11 @@
 				"tags": [
 					"UsersController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -508,7 +750,7 @@
 					{
 						"in": "query",
 						"name": "id",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
 						}
