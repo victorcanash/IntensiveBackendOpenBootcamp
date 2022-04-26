@@ -10,6 +10,7 @@ import { registerUser, loginUser /* ,logoutUser */ } from '../domain/orm/Auth.or
 import { getUserByEmail } from '../domain/orm/Users.orm';
 import { IUser } from '../domain/interfaces/IUser.interface';
 import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface';
+import { AuthResponse as AuthORMResponse } from '../domain/types';
 
 
 @Route('/api/auth')
@@ -24,6 +25,8 @@ export class AuthController implements IAuthController {
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async registerUser(@Body()auth: IAuthRegister): Promise<BasicResponse | ErrorResponse> {
+        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
         const user: IUser = {
             name: auth.name,
             email: auth.email,
@@ -31,10 +34,8 @@ export class AuthController implements IAuthController {
             age: auth.age,
             katas: []
         };
-        
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        await registerUser(user).then((createdUser: IUser | undefined) => {
+        await registerUser(user).then((createdUser: IUser) => {
             response = {
                 code: StatusCodes.CREATED,
                 message: `User registered successfully: ${createdUser?.email}`
@@ -48,20 +49,20 @@ export class AuthController implements IAuthController {
         return response;
     }
 
+    @Post('/login')
     @SuccessResponse(StatusCodes.CREATED)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    @Post('/login')
     public async loginUser(@Body()auth: IAuthLogin): Promise<AuthResponse | ErrorResponse> {
         let response: AuthResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        await loginUser(auth).then((result: {user: IUser | undefined, token: string | undefined}) => {
+        await loginUser(auth).then((authResponse: AuthORMResponse) => {
             response = {
                 code: StatusCodes.CREATED,
-                message: `User logged in successfully: ${result.user?.email}`,
-                token: result.token || ''
+                message: `User logged in successfully: ${authResponse.user.email}`,
+                token: authResponse.token
             };
-            LogSuccess(`[/api/auth/login] Logged in user: ${result.user?.email}`);
+            LogSuccess(`[/api/auth/login] Logged in user: ${authResponse.user.email}`);
 
         }).catch((error: BaseError) => {
             response = error.getResponse();
@@ -70,23 +71,23 @@ export class AuthController implements IAuthController {
         return response;
     }
 
+    @Get('/me')
+    @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    @Security('jwt')
-    @Get('/me')
     public async getLoggedUser(): Promise<UserResponse | ErrorResponse> {
         let response: UserResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email = server.locals.loggedEmail;
+        const email: any = server.locals.loggedEmail;
 
-        await getUserByEmail(email).then((foundUser: IUser | undefined) => {
+        await getUserByEmail(email).then((foundUser: IUser) => {
             response = {
                 code: StatusCodes.OK,
                 message: 'User found successfully',
-                user: foundUser || {} as IUser
+                user: foundUser
             };
-            LogSuccess(`[/api/auth/me] Get logged user by email: ${foundUser?.email}`);
+            LogSuccess(`[/api/auth/me] Get logged user by email: ${foundUser.email}`);
 
         }).catch((error: BaseError) => {
             response = error.getResponse();
@@ -95,10 +96,9 @@ export class AuthController implements IAuthController {
         return response;
     }
     
-    @Security('jwt')
     @Post('/logout')
+    @Security('jwt')
     public async logoutUser(): Promise<any> {
-
         // let response: any = '';
 
         // TODO: Close Session of user
