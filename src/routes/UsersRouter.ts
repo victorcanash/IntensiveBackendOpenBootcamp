@@ -4,8 +4,7 @@ import bodyParser from 'body-parser';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { UsersController } from '../controllers/UsersController';
 import { IUserUpdate } from '../domain/interfaces/IUser.interface';
-import { KataLevel } from '../domain/interfaces/IKata.interface';
-import { fixNumberValue } from '../utils/valuesFixer';
+import { fixNumberValue, fixKataLevelValue } from '../utils/valuesFixer';
 import { BadQueryError, ErrorProviders } from '../errors';
 
 
@@ -20,10 +19,11 @@ usersRouter.route('/')
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
         const id: any = req?.query?.id;
-        const orderQuery: any = req?.query?.order || '{}';
-        const order: {} = JSON.parse(orderQuery);
+        const order: any = req?.query?.order || '{}';
 
-        const controllerRes = await controller.getUsers(page, limit, order, id);
+        const fixedOrder: {} = JSON.parse(order);
+
+        const controllerRes = await controller.getUsers(page, limit, fixedOrder, id);
 
         return res.status(controllerRes.code).send(controllerRes);
     })
@@ -51,7 +51,7 @@ usersRouter.route('/')
             return res.status(controllerRes.code).send(controllerRes);
 
         } else {
-            const badQueryError = new BadQueryError(ErrorProviders.AUTH, 'No user can be updated');
+            const badQueryError = new BadQueryError(ErrorProviders.USERS, 'No user can be updated');
             badQueryError.logError();
             return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
         }
@@ -62,20 +62,13 @@ usersRouter.route('/katas')
         const page: any = req?.query?.page || 1;
         const limit: any = req?.query?.limit || 10;
         const id: any = req?.query?.id;
-        let level: any = req?.query?.level;
-        if (level) {
-            if (level.toUpperCase().includes('BASIC')) {
-                level = KataLevel.BASIC;
-            } else if (level.toUpperCase().includes('MEDIUM')) {
-                level = KataLevel.MEDIUM;
-            } else if (level.toUpperCase().includes('HIGH')) {
-                level = KataLevel.HIGH;
-            }
-        }
-        const orderQuery: any = req?.query?.order || '{}';
-        const order: {} = JSON.parse(orderQuery);
+        const level: any = req?.query?.level;
+        const order: any = req?.query?.order || '{}';
 
-        const controllerRes = await controller.getKatas(page, limit, order, id, level);
+        const fixedLevel: any = level ? fixKataLevelValue(level) : level;
+        const fixedOrder: {} = JSON.parse(order);
+
+        const controllerRes = await controller.getKatas(page, limit, fixedOrder, id, fixedLevel);
         
         return res.status(controllerRes.code).send(controllerRes);
     });
