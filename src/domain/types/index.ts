@@ -28,3 +28,12 @@ export type UsersResponse = {
     totalPages: number,
     currentPage: number
 }
+
+/**
+ * Katas JSON response for ORM
+ */
+ export type KatasResponse = {
+    katas: IKata[],
+    totalPages: number,
+    currentPage: number
+}
