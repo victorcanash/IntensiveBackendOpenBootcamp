@@ -156,12 +156,7 @@ export const deleteUserKataByEmail = async (kataId: string, email: string): Prom
 
     // Delete kata from user katas array
     let updatedUser = foundUser;
-    updatedUser.katas.filter((item: string) => {
-        if (item === kataId) {
-            return false;
-        }
-        return true;
-    });
+    updatedUser.katas = updatedUser.katas.filter((item: string) => item !== kataId);
 
     // Update user
     await userModel.findOneAndUpdate({ email: email }, updatedUser, { returnOriginal: false }).then((userResult: IUser) => {
