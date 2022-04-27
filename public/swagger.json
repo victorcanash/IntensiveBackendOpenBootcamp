@@ -354,6 +354,61 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"KataResponse": {
+				"properties": {
+					"kata": {
+						"$ref": "#/components/schemas/IKata"
+					},
+					"message": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"kata",
+					"message",
+					"code"
+				],
+				"type": "object",
+				"description": "Kata JSON response for Controllers"
+			},
+			"KatasResponse": {
+				"properties": {
+					"currentPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					},
+					"katas": {
+						"items": {
+							"$ref": "#/components/schemas/IKata"
+						},
+						"type": "array"
+					},
+					"message": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"currentPage",
+					"totalPages",
+					"katas",
+					"message",
+					"code"
+				],
+				"type": "object",
+				"description": "Katas JSON response for Controllers"
+			},
 			"IKataUpdate": {
 				"properties": {
 					"name": {
@@ -976,19 +1031,54 @@
 				"operationId": "GetKatas",
 				"responses": {
 					"200": {
-						"description": "All katas o kata found by ID",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/KataResponse"
+										},
+										{
+											"$ref": "#/components/schemas/KatasResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to retreive the katas in the Collection \"Katas\" of DB",
 				"tags": [
 					"KatasController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -1017,7 +1107,6 @@
 						}
 					},
 					{
-						"description": "Id of Kata to retreive (optional)",
 						"in": "query",
 						"name": "id",
 						"required": false,
@@ -1038,32 +1127,54 @@
 			"post": {
 				"operationId": "CreateKata",
 				"responses": {
-					"200": {
-						"description": "message informing if creating was correct",
+					"201": {
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to create a Kata in the Collection \"Katas\" of DB",
 				"tags": [
 					"KatasController"
 				],
-				"security": [],
-				"parameters": [
+				"security": [
 					{
-						"in": "query",
-						"name": "userId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
+						"jwt": []
 					}
 				],
+				"parameters": [],
 				"requestBody": {
-					"description": "Kata interface to create",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -1078,33 +1189,66 @@
 				"operationId": "DeleteKata",
 				"responses": {
 					"200": {
-						"description": "message informing if deletion was correct",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Missing Permissions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to delete the Katas in the Collection \"Katas\" of DB",
 				"tags": [
 					"KatasController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
-						"description": "Id of Kata to delete (optional)",
 						"in": "query",
 						"name": "id",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "userId",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
 						}
@@ -1115,41 +1259,72 @@
 				"operationId": "UpdateKata",
 				"responses": {
 					"200": {
-						"description": "message informing if updating was correct",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Missing Permissions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to update a Kata in the Collection \"Katas\" of DB",
 				"tags": [
 					"KatasController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
-						"description": "Id of Kata to update",
 						"in": "query",
 						"name": "id",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "Id of logged user to update",
-						"in": "query",
-						"name": "userId",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				],
 				"requestBody": {
-					"description": "Kata interface to update",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -1166,32 +1341,72 @@
 				"operationId": "UpdateKataStars",
 				"responses": {
 					"200": {
-						"description": "message informing if updating was correct",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Missing Permissions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to update stars of a Kata in the Collection \"Katas\" of DB",
 				"tags": [
 					"KatasController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
-						"description": "Id of Kata to update stars",
 						"in": "query",
 						"name": "id",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				],
 				"requestBody": {
-					"description": "Kata stars interface to update",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -1208,41 +1423,62 @@
 				"operationId": "SendKataSolution",
 				"responses": {
 					"200": {
-						"description": "message informing if checking was correct",
+						"description": "",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BasicResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
 							}
 						}
 					}
 				},
-				"description": "Endpoint to send a Kata solution in the Collection \"Katas\" of DB",
 				"tags": [
 					"KatasController"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
-						"description": "Id of Kata to check",
 						"in": "query",
 						"name": "id",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "Id of logged user to update participants list",
-						"in": "query",
-						"name": "userId",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				],
 				"requestBody": {
-					"description": "Kata solution of user to check if it is correct",
 					"required": true,
 					"content": {
 						"application/json": {

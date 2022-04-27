@@ -38,9 +38,9 @@ export class AuthController implements IAuthController {
         await registerUser(user).then((createdUser: IUser) => {
             response = {
                 code: StatusCodes.CREATED,
-                message: `User registered successfully: ${createdUser?.email}`
+                message: `User registered successfully: ${createdUser.email}`
             };
-            LogSuccess(`[/api/auth/register] Registered user: ${createdUser?.email}`);
+            LogSuccess(`[/api/auth/register] Registered user: ${createdUser.email}`);
 
         }).catch((error: BaseError) => {
             response = error.getResponse();
