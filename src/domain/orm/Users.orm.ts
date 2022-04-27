@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 import { userEntity } from '../entities/User.entity';
 import { kataEntity } from '../entities/Kata.entity';
 import { IUserUpdate, IUser } from '../interfaces/IUser.interface';
-import { UsersResponse, KatasFromUserResponse } from '../types';
 import { IKata, KataLevel } from '../interfaces/IKata.interface';
+import { UsersResponse, KatasFromUserResponse } from '../types';
 import { ModelNotFoundError, ErrorProviders } from '../../errors';
 
 
@@ -104,6 +104,79 @@ export const updateUserByEmail = async (user: IUserUpdate, email: string): Promi
     return updatedUser;
 };
 
+export const addUserKataByEmail = async (kataId: string, email: string): Promise<IUser> => {
+    const userModel = userEntity();
+
+    let foundUser: IUser = {} as IUser;
+
+    // Find user
+    await userModel.findOne({ email: email }).then((userResult: IUser) => {
+        foundUser = userResult;
+        if (!foundUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user kata can be added by email: ${email}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    // Add kata from user katas array
+    let updatedUser = foundUser;
+    updatedUser.katas.push(kataId);
+
+    // Update user
+    await userModel.findOneAndUpdate({ email: email }, updatedUser, { returnOriginal: false }).then((userResult: IUser) => {
+        updatedUser = userResult;
+        if (!updatedUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user kata can be added by email: ${email}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    }); 
+
+    return updatedUser;
+};
+
+export const deleteUserKataByEmail = async (kataId: string, email: string): Promise<IUser> => {
+    const userModel = userEntity();
+
+    let foundUser: IUser = {} as IUser;
+
+    // Find user
+    await userModel.findOne({ email: email }).then((userResult: IUser) => {
+        foundUser = userResult;
+        if (!foundUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user kata can be deleted by email: ${email}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    // Delete kata from user katas array
+    let updatedUser = foundUser;
+    updatedUser.katas.filter((item: string) => {
+        if (item === kataId) {
+            return false;
+        }
+        return true;
+    });
+
+    // Update user
+    await userModel.findOneAndUpdate({ email: email }, updatedUser, { returnOriginal: false }).then((userResult: IUser) => {
+        updatedUser = userResult;
+        if (!updatedUser) {
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user kata can be deleted by email: ${email}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    }); 
+
+    return updatedUser;
+};
+
 export const getKatasFromUser = async (page: number, limit: number, order: {}, id: string, level?: KataLevel): Promise<KatasFromUserResponse> => {
     const userModel = userEntity();
     const kataModel = kataEntity();
@@ -115,37 +188,46 @@ export const getKatasFromUser = async (page: number, limit: number, order: {}, i
         if (!response.user) {
             throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be found to get its Katas with id: ${id}`);
         }
-
-        // Create katas objectIds to search
-        const objectIds: mongoose.Types.ObjectId[] = [];
-        response.user.katas.forEach((kataID: string) => {
-            const objectID = new mongoose.Types.ObjectId(kataID);
-            objectIds.push(objectID);
-        });
-
-        // Filter by level
-        const levelFilter: string = (level === undefined ? '' : level);
-        const levelReg: RegExp = new RegExp(levelFilter);
-
-        // Search Katas (using pagination)
-        await kataModel.find({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
-            .sort(order)
-            .limit(limit)
-            .skip((page - 1) * limit)
-            .exec().then((katas: IKata[]) => {
-                response.katas = katas;
-            });
-
-        // Count total documents in collection "Katas"
-        await kataModel.countDocuments({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
-            .then((total: number) => {
-                response.totalPages = Math.ceil(total / limit);
-                response.currentPage = page;
-        });
-
     }).catch((error: ModelNotFoundError) => {
         error.logError();
         throw error;
+    });
+
+    const objectIds: mongoose.Types.ObjectId[] = [];
+    response.user.katas.forEach((kataID: string) => {
+        const objectID = new mongoose.Types.ObjectId(kataID);
+        objectIds.push(objectID);
+    });
+
+    const levelFilter: string = (level === undefined ? '' : level);
+    const levelReg: RegExp = new RegExp(levelFilter);
+
+    await kataModel.find({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
+        .sort(order)
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .exec().then((katas: IKata[]) => {
+            response.katas = katas;
+        });
+
+    await kataModel.countDocuments({ '_id': { '$in': objectIds }, level: { $regex: levelReg } })
+        .then((total: number) => {
+            response.totalPages = Math.ceil(total / limit);
+            response.currentPage = page;
+    });
+
+    return response;
+};
+
+export const isKataFromUser = async (email: string, kataId: string): Promise<boolean> => {
+    const userModel = userEntity();
+
+    let response: boolean = false;
+
+    await userModel.findOne({ email: email, katas: kataId }).then((foundUser: IUser) => {
+        if (foundUser) {
+            response = true;
+        }
     });
 
     return response;
