@@ -62,6 +62,26 @@ export type BasicResponse = {
 }
 
 /**
+ * Kata JSON response for Controllers
+ */
+ export type KataResponse = {
+    code: number,
+    message: string,
+    kata: IKata,
+}
+
+/**
+ * Katas JSON response for Controllers
+ */
+ export type KatasResponse = {
+    code: number,
+    message: string,
+    katas: IKata[],
+    totalPages: number,
+    currentPage: number
+}
+
+/**
  * Basic JSON response with the current date for Controllers
  */
  export type DateResponse = {
