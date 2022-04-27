@@ -104,6 +104,8 @@ export const updateUserByEmail = async (user: IUserUpdate, email: string): Promi
     return updatedUser;
 };
 
+/* KATAS */
+
 export const addUserKataByEmail = async (kataId: string, email: string): Promise<IUser> => {
     const userModel = userEntity();
 

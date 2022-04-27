@@ -2,11 +2,12 @@ import { Delete, Get, Put, Route, Query, Tags, Body, Security, Response, Success
 import { StatusCodes } from 'http-status-codes';
 
 import { IUsersController } from './interfaces';
-import { ErrorResponse, BasicResponse, UserResponse, UsersResponse, KatasFromUserResponse } from './types';
+import { ErrorResponse, BasicResponse, UserResponse, UsersResponse, KatasFromUserResponse, DeleteKatasFromUserResponse } from './types';
 import server from '../server';
 import { SomethingWrongError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
 import { LogSuccess } from '../utils/logger';
-import { getAllUsers, getUserByID, deleteUserByEmail, updateUserByEmail, getKatasFromUser } from '../domain/orm/Users.orm';
+import { getAllUsers, getUserByID, getUserByEmail, deleteUserByEmail, updateUserByEmail, getKatasFromUser } from '../domain/orm/Users.orm';
+import { deleteKatasByID } from '../domain/orm/Katas.orm';
 import { IUser, IUserUpdate } from '../domain/interfaces/IUser.interface';
 import { KataLevel } from '../domain/interfaces/IKata.interface';
 import { UsersResponse as UsersORMResponse, KatasFromUserResponse as KatasORMResponse } from '../domain/types';
@@ -130,5 +131,58 @@ export class UsersController implements IUsersController {
         });
         
         return response; 
+    }
+
+    @Delete('/katas')
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async deleteKatas(): Promise<DeleteKatasFromUserResponse | ErrorResponse> { 
+        let response: DeleteKatasFromUserResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        const email: any = server.locals.loggedEmail;
+
+        let foundUser = {} as IUser;
+
+        await getUserByEmail(email).then((userResult: IUser) => {
+            foundUser = userResult;
+            
+        }).catch((error: BaseError) => {
+            error.logError();
+            response = error.getResponse();
+        });
+
+        if (!foundUser) {
+            return response;
+        }
+
+        let deletedCount = -1;
+        await deleteKatasByID(foundUser.katas).then((countResult: number) => {
+            deletedCount = countResult;
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
+
+        if (deletedCount === -1) {
+            return response;
+        }
+
+        const katas = foundUser.katas;
+        foundUser.katas = [];
+        await updateUserByEmail(foundUser, foundUser.email).then((updatedUser: IUser) => {
+            response = {
+                code: StatusCodes.OK,
+                message: `Katas from user deleted successfully with email: ${updatedUser.email} and with ${katas.length} katas id: [${katas}]`,
+                deletedCount: deletedCount
+            };
+            LogSuccess(`[/api/users/katas] Delete katas from user with email: ${updatedUser.email} and with ${katas.length} katas id: [${katas}]`);
+        
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
+        
+        return response;
     }
 }

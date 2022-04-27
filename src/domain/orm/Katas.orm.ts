@@ -64,6 +64,24 @@ export const deleteKataByID = async (id: string): Promise<IKata> => {
     return deletedKata;
 };
 
+export const deleteKatasByID = async (ids: string[]): Promise<number> => {
+    const kataModel = kataEntity();
+    
+    let deletedCount: number = 0;
+
+    await kataModel.deleteMany({ id: { $in: ids } }).then((deleteResult) => {
+        deletedCount = deleteResult?.deletedCount;
+        if (!deleteResult?.acknowledged) {
+            throw new ModelNotFoundError(ErrorProviders.KATAS, `No katas can be deleted by id: ${ids}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    return deletedCount;
+};
+
 export const createKata = async (kata: IKata): Promise<IKata> => { 
     const kataModel = kataEntity();
 

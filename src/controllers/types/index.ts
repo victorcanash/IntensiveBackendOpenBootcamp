@@ -62,6 +62,15 @@ export type BasicResponse = {
 }
 
 /**
+ * Delete Katas from User JSON response for Controllers
+ */
+ export type DeleteKatasFromUserResponse = {
+    code: number,
+    message: string,
+    deletedCount: number
+ }
+
+/**
  * Kata JSON response for Controllers
  */
  export type KataResponse = {

@@ -71,6 +71,12 @@ usersRouter.route('/katas')
         const controllerRes = await controller.getKatas(page, limit, fixedOrder, id, fixedLevel);
         
         return res.status(controllerRes.code).send(controllerRes);
+    })
+
+    .delete(verifyToken, async (req: Request, res: Response) => {
+        const controllerRes = await controller.deleteKatas();
+
+        return res.status(controllerRes.code).send(controllerRes);
     });
 
 export default usersRouter;
