@@ -14,6 +14,7 @@ export enum ErrorProviders {
 
 export enum ErrorTypes {
     SOMETHING_WRONG = 'Something Wrong',
+    MISSING_PERMISSIONS = 'Missing Permissions',
     MISSING_DATA = 'Missing Data',
     BAD_DATA = 'Bad Data',
     MODEL_NOT_FOUND = 'Model Not Found'
@@ -61,6 +62,16 @@ export class SomethingWrongError extends BaseError {
         const type = ErrorTypes.SOMETHING_WRONG;
         const httpCode = StatusCodes.INTERNAL_SERVER_ERROR;
         const message = 'Something went wrong, try again';
+        super(provider, type, httpCode, message);
+    }
+}
+
+/* MISSING PERMISSIONS ERRORS */
+
+export class MissingPermissionsError extends BaseError {
+    constructor(provider: ErrorProviders, message: string) {
+        const type = ErrorTypes.MISSING_PERMISSIONS;
+        const httpCode = StatusCodes.FORBIDDEN;
         super(provider, type, httpCode, message);
     }
 }
