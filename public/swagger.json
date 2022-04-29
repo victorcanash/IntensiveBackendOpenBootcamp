@@ -292,6 +292,28 @@
 				"type": "object",
 				"description": "Katas from User JSON response for Controllers"
 			},
+			"DeleteKatasFromUserResponse": {
+				"properties": {
+					"deletedCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"message": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"deletedCount",
+					"message",
+					"code"
+				],
+				"type": "object",
+				"description": "Delete Katas from User JSON response for Controllers"
+			},
 			"IAuthRegister": {
 				"properties": {
 					"name": {
@@ -819,6 +841,57 @@
 						}
 					}
 				]
+			},
+			"delete": {
+				"operationId": "DeleteKatas",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/DeleteKatasFromUserResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"UsersController"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/api/auth/register": {
