@@ -88,7 +88,7 @@ class MissingDataError extends BaseError {
 export class MissingTokenError extends MissingDataError {
     constructor(message: string) {
         const provider = ErrorProviders.JWT_MIDDLEWARE;
-        const httpCode = StatusCodes.FORBIDDEN;
+        const httpCode = StatusCodes.UNAUTHORIZED;
         super(provider, httpCode, message);
     }
 }
@@ -112,7 +112,7 @@ class BadDataError extends BaseError {
 export class BadTokenError extends BadDataError {
     constructor(message: string) {
         const provider = ErrorProviders.JWT_MIDDLEWARE;
-        const httpCode = StatusCodes.FORBIDDEN;
+        const httpCode = StatusCodes.UNAUTHORIZED;
         super(provider, httpCode, message);
     }
 }
