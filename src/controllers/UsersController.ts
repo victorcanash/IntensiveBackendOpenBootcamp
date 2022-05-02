@@ -16,7 +16,7 @@ import { UsersResponse as UsersORMResponse, KatasFromUserResponse as KatasORMRes
 @Route('/api/users')
 @Tags('UsersController')
 export class UsersController implements IUsersController {
-    private readonly somethingWrongError = new SomethingWrongError(ErrorProviders.AUTH);
+    private readonly somethingWrongError = new SomethingWrongError(ErrorProviders.USERS);
 
 
     @Get('/')
@@ -86,6 +86,7 @@ export class UsersController implements IUsersController {
     @Put('/')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async updateUser(@Body()user: IUserUpdate): Promise<BasicResponse | ErrorResponse> { 

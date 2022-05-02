@@ -51,6 +51,7 @@ export class AuthController implements IAuthController {
 
     @Post('/login')
     @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async loginUser(@Body()auth: IAuthLogin): Promise<AuthResponse | ErrorResponse> {

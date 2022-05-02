@@ -62,6 +62,7 @@ export class KatasController implements IKatasController {
     @Post('/')
     @Security('jwt')
     @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async createKata(@Body()kata: IKataUpdate): Promise<BasicResponse | ErrorResponse> {
@@ -125,6 +126,7 @@ export class KatasController implements IKatasController {
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async deleteKata(@Query()id: string): Promise<BasicResponse | ErrorResponse> {
@@ -180,6 +182,7 @@ export class KatasController implements IKatasController {
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async updateKata(@Body()kata: IKataUpdate, @Query()id: string): Promise<BasicResponse | ErrorResponse> { 
@@ -222,6 +225,7 @@ export class KatasController implements IKatasController {
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async updateKataStars(@Body()kataStars: IKataStars, @Query()id: string): Promise<BasicResponse | ErrorResponse> {
@@ -275,6 +279,7 @@ export class KatasController implements IKatasController {
     @Put('/resolve')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async sendKataSolution(@Body()solution: string, @Query()id: string): Promise<BasicResponse | ErrorResponse> { 
@@ -317,6 +322,7 @@ export class KatasController implements IKatasController {
     @Post('/upload')
     @Security('jwt')
     @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     // eslint-disable-next-line no-undef
