@@ -22,6 +22,8 @@ export class KatasController implements IKatasController {
     @Get('/')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string, @Query()level?: KataLevel): Promise<KataResponse | KatasResponse | ErrorResponse> { 
@@ -62,6 +64,8 @@ export class KatasController implements IKatasController {
     @Post('/')
     @Security('jwt')
     @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
@@ -125,6 +129,8 @@ export class KatasController implements IKatasController {
     @Delete('/')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
@@ -181,6 +187,8 @@ export class KatasController implements IKatasController {
     @Put('/')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
@@ -224,7 +232,9 @@ export class KatasController implements IKatasController {
     @Put('/stars')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
-    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
+    // @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
@@ -233,7 +243,7 @@ export class KatasController implements IKatasController {
 
         const email: any = server.locals.loggedEmail;
 
-        let exists: boolean = false;
+        /* let exists: boolean = false;
 
         await isKataFromUser(email, id).then((existsResult: boolean) => {
             exists = existsResult;
@@ -248,7 +258,7 @@ export class KatasController implements IKatasController {
 
         if (!exists) {
             return response;
-        }
+        } */
 
         await getUserByEmail(email).then((userResult: IUser | any) => {
             kataStars.user = userResult!._id;
@@ -279,6 +289,8 @@ export class KatasController implements IKatasController {
     @Put('/resolve')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
@@ -322,6 +334,8 @@ export class KatasController implements IKatasController {
     @Post('/upload')
     @Security('jwt')
     @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)

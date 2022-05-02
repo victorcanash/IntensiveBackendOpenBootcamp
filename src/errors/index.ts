@@ -93,12 +93,12 @@ export class MissingTokenError extends MissingDataError {
     }
 }
 
-export class MissingQueryError extends MissingDataError {
+/* export class MissingQueryError extends MissingDataError {
     constructor(provider: ErrorProviders, message: string) {
         const httpCode = StatusCodes.BAD_REQUEST;
         super(provider, httpCode, message);
     }
-}
+} */
 
 /* BAD DATA ERRORS */
 
@@ -112,7 +112,7 @@ class BadDataError extends BaseError {
 export class BadTokenError extends BadDataError {
     constructor(message: string) {
         const provider = ErrorProviders.JWT_MIDDLEWARE;
-        const httpCode = StatusCodes.INTERNAL_SERVER_ERROR;
+        const httpCode = StatusCodes.FORBIDDEN;
         super(provider, httpCode, message);
     }
 }

@@ -75,6 +75,8 @@ export class AuthController implements IAuthController {
     @Get('/me')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     public async getLoggedUser(): Promise<UserResponse | ErrorResponse> {
