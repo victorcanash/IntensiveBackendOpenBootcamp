@@ -1,14 +1,19 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
+import multer from 'multer';
 
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
 import { KataLevel, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 import { fixKataLevelValue, fixNumberValue } from '../utils/valuesFixer';
-import { BadQueryError, ErrorProviders } from '../errors';
+import { BadQueryError, SomethingWrongError, ErrorProviders } from '../errors';
 
 
 const jsonParser = bodyParser.json();
+
+const multerUpload = multer({ dest: 'uploads/' });
+const multerFieldName = 'file';
+const multerSingle = multerUpload.single(multerFieldName);
 
 const katasRouter = express.Router();
 
@@ -150,6 +155,36 @@ katasRouter.route('/resolve')
             badQueryError.logError();
             return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
         }
+    });
+
+katasRouter.route('/upload')
+    .post(verifyToken, async (req: Request, res: Response) => {
+        multerSingle(req, res, async (err) => {
+            if (err instanceof multer.MulterError) {
+                const errorMessage = `${err.message}. The field name must be called ${multerFieldName} and must contain a single file`;
+                const badQueryError = new BadQueryError(ErrorProviders.KATAS, errorMessage);
+                badQueryError.logError();
+                return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+
+            } else if (err) {
+                const somethingWrongError = new SomethingWrongError(ErrorProviders.KATAS);
+                somethingWrongError.logError();
+                return res.status(somethingWrongError.statusCode).send(somethingWrongError.getResponse());
+            }
+        
+            // eslint-disable-next-line no-undef
+            const file: Express.Multer.File | undefined = req.file;
+            if (!file) {
+                const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'File field not found');
+                badQueryError.logError();
+                return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+                
+            } else {
+                const controllerRes = await controller.updateKataFile(file);
+
+                return res.status(controllerRes.code).send(controllerRes);
+            }
+        });
     });
 
 export default katasRouter;

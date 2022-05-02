@@ -1,4 +1,4 @@
-import { Delete, Get, Post, Put, Query, Route, Tags, Body, Security, Response, SuccessResponse } from 'tsoa';
+import { Delete, Get, Post, Put, Query, Route, Tags, Body, Security, Response, SuccessResponse, UploadedFile } from 'tsoa';
 import { StatusCodes } from 'http-status-codes';
 
 import { IKatasController } from './interfaces';
@@ -16,9 +16,9 @@ import { KatasResponse as KatasORMResponse } from '../domain/types';
 @Route('/api/katas')
 @Tags('KatasController')
 export class KatasController implements IKatasController {
-    private readonly somethingWrongError = new SomethingWrongError(ErrorProviders.AUTH);
+    private readonly somethingWrongError = new SomethingWrongError(ErrorProviders.KATAS);
 
-
+    
     @Get('/')
     @Security('jwt')
     @SuccessResponse(StatusCodes.OK)
@@ -312,5 +312,34 @@ export class KatasController implements IKatasController {
         });
         
         return response;
+    }
+
+    @Post('/upload')
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    // eslint-disable-next-line no-undef
+    public async updateKataFile(@UploadedFile() file: Express.Multer.File): Promise<BasicResponse | ErrorResponse> {
+        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        // const email: any = server.locals.loggedEmail;
+
+        response = {
+            code: StatusCodes.CREATED,
+            message: 'File was uploaded successfuly'
+        };
+
+        return response;
+
+        /* return {
+            status: true,
+            message: 'File was uploaded successfuly',
+            payload: {
+                name: file.name,
+                mimetype: file.mimetype,
+                size: file.size
+            },
+        }; */
     }
 }
