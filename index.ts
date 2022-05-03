@@ -1,21 +1,15 @@
-import dotenv from 'dotenv';
-
 import server from './src/server';
 import { LogError, LogSuccess } from './src/utils/logger';
+import { envConfig } from './src/config';
+import { initMongo } from './src/domain/repositories/mongo.repo';
 
 
-// * Configuration the .env file
-dotenv.config();
-
-const host: string = process.env.HOST || 'localhost';
-const port: string | number = process.env.PORT || 8000;
-
-// * Execute SERVER
-server.listen(port, () => {
-    LogSuccess(`[SERVER ON]: Running in http://${host}:${port}/api`);
+server.listen(+envConfig.PORT, envConfig.HOST, () => {
+    LogSuccess(`[SERVER ON]: Running in http://${envConfig.HOST}:${envConfig.PORT}/api`);
 });
 
-// * Control SERVER ERROR
 server.on('error', (error) => {
     LogError(`[SERVER ERROR]: ${error}`);
 });
+
+initMongo();

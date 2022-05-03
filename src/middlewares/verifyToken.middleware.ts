@@ -1,19 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 
 import server from '../server';
+import { envConfig } from '../config';
 import client from '../domain/cache';
 import { MissingTokenError, BadTokenError } from '../errors';
 
 
-// Config dotenv to read environment variables
-dotenv.config();
-
-const secret = process.env.SECRETKEY || 'MYSECRETKEY';
-
 const clearLocals = () => {
     server.locals.loggedEmail = null;
+    server.locals.loggedRole = null;
     server.locals.tokenExp = null;
 };
 
@@ -47,17 +43,17 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Verify the token obtained
-    jwt.verify(token, secret, async (err: any, decoded: any) => {
+    jwt.verify(token, envConfig.SECRET_KEY, async (err: any, decoded: any) => {
         if (err) {
             clearLocals();
             const badTokenError = new BadTokenError('Failed to verify JWT token in request');
             badTokenError.logError();
             return res.status(badTokenError.statusCode).send(badTokenError.getResponse());
         }
-        console.log(decoded);
 
         // Pass something to next request (object of user || other info)
         server.locals.loggedEmail = decoded.email;
+        server.locals.loggedRole = decoded.role;
         server.locals.tokenExp = decoded.exp;
 
         // Execute Next Function -> Protected Routes will be executed

@@ -9,7 +9,7 @@ import { SomethingWrongError, BaseError, ErrorProviders, ErrorTypes } from '../e
 import { LogSuccess } from '../utils/logger';
 import { registerUser, loginUser, logoutUser } from '../domain/orm/Auth.orm';
 import { getUserByEmail } from '../domain/orm/Users.orm';
-import { IUser } from '../domain/interfaces/IUser.interface';
+import { IUser, UserRoles } from '../domain/interfaces/IUser.interface';
 import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface';
 import { AuthResponse as AuthORMResponse } from '../domain/types';
 
@@ -32,6 +32,7 @@ export class AuthController implements IAuthController {
             name: auth.name,
             email: auth.email,
             password: auth.password,
+            role: UserRoles.USER,
             age: auth.age,
             katas: []
         };
@@ -121,8 +122,9 @@ export class AuthController implements IAuthController {
                 throw this.somethingWrongError;
             }
 
-        }).catch((error: Error) => {
-            console.log(error);
+        }).catch((error: BaseError) => {
+            error.logError();
+            response = error.getResponse();
         });
 
         if (!succeeded) {

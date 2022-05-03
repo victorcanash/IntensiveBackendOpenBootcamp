@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import client from '../cache';
+import { jwtSignOptions } from '../../config';
 import { userEntity } from '../entities/User.entity';
 import { IAuthLogin } from '../interfaces/IAuth.interface';
 import { IUser } from '../interfaces/IUser.interface';
@@ -11,7 +12,7 @@ import { ModelNotFoundError, ErrorProviders, BadQueryError } from '../../errors'
 
 
 dotenv.config();
-const secret: string = process.env.SECRETKEY || 'MYSECRETKEY';
+const secret: string = process.env.SECRET_KEY || 'MYSECRETKEY';
 
 export const registerUser = async (user: IUser): Promise<IUser> => {
     const userModel = userEntity();
@@ -67,9 +68,11 @@ export const loginUser = async (auth: IAuthLogin): Promise<AuthResponse> => {
         throw passwordError;
     }
     
-    response.token = jwt.sign({ email: response.user.email }, secret, {
-        expiresIn: '24h'
-    });
+    const payload = {
+        email: response.user.email,
+        role: response.user.role
+    };
+    response.token = jwt.sign(payload, secret, jwtSignOptions);
 
     return response;
 };

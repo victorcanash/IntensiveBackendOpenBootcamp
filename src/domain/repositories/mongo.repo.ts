@@ -1,16 +1,10 @@
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
+import { envConfig } from '../../config';
 import { LogError, LogSuccess } from '../../utils/logger';
 
 
-dotenv.config();
-
-const dbHost: string = process.env.DB_HOST || 'localhost';
-const dbPort: string | number = process.env.DB_PORT || 27017;
-const dbName: string = process.env.DB_NAME || 'intensive_ob_db';
-
-const mongooseUri = `mongodb://${dbHost}:${dbPort}/${dbName}`;
+const mongooseUri = `mongodb://${envConfig.DB_HOST}:${envConfig.DB_PORT}/${envConfig.DB_NAME}`;
 
 const options = {
     autoIndex: true, // Don't build indexes

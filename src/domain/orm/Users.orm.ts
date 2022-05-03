@@ -8,7 +8,7 @@ import { UsersResponse, KatasFromUserResponse } from '../types';
 import { ModelNotFoundError, ErrorProviders } from '../../errors';
 
 
-const modelSelect: string = 'name email age katas created_at updated_at';
+const modelSelect: string = 'name email role age katas created_at updated_at';
 
 export const getAllUsers = async (page: number, limit: number, order: {}): Promise<UsersResponse> => {
     const userModel = userEntity();

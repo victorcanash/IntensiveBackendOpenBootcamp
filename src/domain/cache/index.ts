@@ -1,15 +1,10 @@
-import dotenv from 'dotenv';
 import * as redis from 'redis';
 
+import { envConfig } from '../../config';
 import { LogError, LogSuccess } from '../../utils/logger';
 
 
-dotenv.config();
-
-const redisHost: string = process.env.REDIS_HOST || 'localhost';
-const redisPort: string | number = process.env.REDIS_PORT || 6379;
-
-const redisUrl = `redis://${redisHost}:${redisPort}`;
+const redisUrl = `redis://${envConfig.REDIS_HOST}:${envConfig.REDIS_PORT}`;
 
 const client = redis.createClient({ 
     url: redisUrl 

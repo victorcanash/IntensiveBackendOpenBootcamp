@@ -5,12 +5,16 @@ import helmet from 'helmet';
 
 // TODO: HTTPS
 
+import { envConfig, corsOptions } from '../config';
 import rootRouter from '../routes';
-import { initMongo } from '../domain/repositories/mongo.repo';
 
 
-// * Create EXPRESS SERVER
+// * Create express server
 const server: Express = express();
+
+
+// * Server settings
+server.set('port', envConfig.PORT);
 
 
 // * Swagger Config and route
@@ -39,12 +43,6 @@ server.use(express.static('public'));
 
 // * Security Config
 server.use(helmet());
-
-const corsOptions: cors.CorsOptions = {
-    origin: [
-        'http://localhost:3000'
-    ]
-};
 server.use(cors(corsOptions));
 
 
@@ -64,10 +62,6 @@ server.use(express.json(
 server.get('/', (req: Request, res: Response) => {
     res.redirect('/api');
 });
-
-
-// * Start Mongoose
-initMongo();
 
 
 export default server;
