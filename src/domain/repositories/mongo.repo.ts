@@ -20,7 +20,7 @@ const options = {
     family: 4 // Use IPv4, skip trying IPv6
 };
 
-export const mongooseConnect = () => {
+export const initMongo = () => {
     mongoose.connect(mongooseUri, options).then(
         () => { 
             LogSuccess(`[MONGOOSE ON]: Running in ${mongooseUri}`);

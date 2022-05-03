@@ -6,7 +6,7 @@ import helmet from 'helmet';
 // TODO: HTTPS
 
 import rootRouter from '../routes';
-import { mongooseConnect } from '../domain/repositories/mongo.repo';
+import { initMongo } from '../domain/repositories/mongo.repo';
 
 
 // * Create EXPRESS SERVER
@@ -67,7 +67,7 @@ server.get('/', (req: Request, res: Response) => {
 
 
 // * Start Mongoose
-mongooseConnect();
+initMongo();
 
 
 export default server;
