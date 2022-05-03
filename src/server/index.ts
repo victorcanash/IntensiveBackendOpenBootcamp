@@ -1,7 +1,5 @@
 import express, { Express, Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
-
-// Security
 import cors from 'cors';
 import helmet from 'helmet';
 
@@ -41,7 +39,13 @@ server.use(express.static('public'));
 
 // * Security Config
 server.use(helmet());
-server.use(cors());
+
+const corsOptions: cors.CorsOptions = {
+    origin: [
+        'http://localhost:3000'
+    ]
+};
+server.use(cors(corsOptions));
 
 
 // * Content Type Config
