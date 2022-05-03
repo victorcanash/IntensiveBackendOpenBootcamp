@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
 import bodyParser from 'body-parser';
 
+import { hashSync } from '../utils/hashing';
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { AuthController } from '../controllers/AuthController';
 import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface';
@@ -25,7 +25,7 @@ authRouter.route('/register')
         if (name && password && email && age) {
             const fixedAge = fixNumberValue(age, 1, 100, true);
 
-            const hashedPassword = bcrypt.hashSync(password, 8);
+            const hashedPassword = hashSync(password);
 
             const auth: IAuthRegister = {
                 name: name,

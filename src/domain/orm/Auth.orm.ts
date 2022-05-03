@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import client from '../cache';
+import { compareSync } from '../../utils/hashing';
 import { jwtSignOptions } from '../../config';
 import { userEntity } from '../entities/User.entity';
 import { IAuthLogin } from '../interfaces/IAuth.interface';
@@ -60,7 +60,7 @@ export const loginUser = async (auth: IAuthLogin): Promise<AuthResponse> => {
         throw error;
     });
 
-    const validPassword = bcrypt.compareSync(auth.password, response.user.password);
+    const validPassword = compareSync(auth.password, response.user.password);
 
     if (!validPassword) {
         const passwordError = new ModelNotFoundError(ErrorProviders.AUTH, 'Invalid password to login');

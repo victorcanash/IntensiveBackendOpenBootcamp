@@ -1,21 +1,13 @@
 import mongoose from 'mongoose';
 
-import { envConfig } from '../../config';
+import { envConfig, mongooseOptions } from '../../config';
 import { LogError, LogSuccess } from '../../utils/logger';
 
 
 const mongooseUri = `mongodb://${envConfig.DB_HOST}:${envConfig.DB_PORT}/${envConfig.DB_NAME}`;
 
-const options = {
-    autoIndex: true, // Don't build indexes
-    maxPoolSize: 10, // Maintain up to 10 socket connections
-    serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
-    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-    family: 4 // Use IPv4, skip trying IPv6
-};
-
 export const initMongo = () => {
-    mongoose.connect(mongooseUri, options).then(
+    mongoose.connect(mongooseUri, mongooseOptions).then(
         () => { 
             LogSuccess(`[MONGOOSE ON]: Running in ${mongooseUri}`);
         },
