@@ -1,6 +1,4 @@
 import express, { Express, Request, Response } from 'express';
-
-// Swagger
 import swaggerUi from 'swagger-ui-express';
 
 // Security
@@ -9,15 +7,13 @@ import helmet from 'helmet';
 
 // TODO: HTTPS
 
-// Root Router
 import rootRouter from '../routes';
-
-// MongoDB
-import mongoose from 'mongoose';
+import { mongooseConnect } from '../domain/repositories/mongo.repo';
 
 
 // * Create EXPRESS SERVER
 const server: Express = express();
+
 
 // * Swagger Config and route
 server.use(
@@ -31,22 +27,22 @@ server.use(
     })
 );
 
+
 // * Define SERVER to use "/api" and use rootRouter from 'index.ts' in routes
-// From this point onover: http://localhost:8000/api/...
 server.use(
     '/api',
     rootRouter
 );
 
+
 // * Static server
 server.use(express.static('public'));
 
-// * Mongoose Connection
-mongoose.connect('mongodb://localhost:27017/intensive_ob_db');
 
 // * Security Config
 server.use(helmet());
 server.use(cors());
+
 
 // * Content Type Config
 server.use(express.urlencoded({
@@ -59,10 +55,15 @@ server.use(express.json(
     }
 ));
 
+
 // * Redirection Config
-// http://localhost:8000/ --> http://localhost:8000/api/
 server.get('/', (req: Request, res: Response) => {
     res.redirect('/api');
 });
+
+
+// * Start Mongoose
+mongooseConnect();
+
 
 export default server;
