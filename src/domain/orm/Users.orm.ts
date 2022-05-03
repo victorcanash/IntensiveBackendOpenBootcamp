@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { userEntity } from '../entities/User.entity';
 import { kataEntity } from '../entities/Kata.entity';
 import { IUserUpdate, IUser } from '../interfaces/IUser.interface';
-import { IKata, KataLevel } from '../interfaces/IKata.interface';
+import { IKata, KataLevels } from '../interfaces/IKata.interface';
 import { UsersResponse, KatasFromUserResponse } from '../types';
 import { ModelNotFoundError, ErrorProviders } from '../../errors';
 
@@ -174,7 +174,7 @@ export const deleteUserKataByEmail = async (kataId: string, email: string): Prom
     return updatedUser;
 };
 
-export const getKatasFromUser = async (page: number, limit: number, order: {}, id: string, level?: KataLevel): Promise<KatasFromUserResponse> => {
+export const getKatasFromUser = async (page: number, limit: number, order: {}, id: string, level?: KataLevels): Promise<KatasFromUserResponse> => {
     const userModel = userEntity();
     const kataModel = kataEntity();
 

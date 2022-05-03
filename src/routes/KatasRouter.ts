@@ -4,7 +4,7 @@ import multer from 'multer';
 
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
-import { KataLevel, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
+import { KataLevels, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 import { fixKataLevelValue, fixNumberValue } from '../utils/valuesFixer';
 import { BadQueryError, SomethingWrongError, ErrorProviders } from '../errors';
 
@@ -55,7 +55,7 @@ katasRouter.route('/')
         
         const name: string = req?.body?.name;
         const description: string = req?.body?.description || '';
-        const level: any = req?.body?.level || KataLevel.BASIC;
+        const level: any = req?.body?.level || KataLevels.BASIC;
         const intents: number = req?.body?.intents || 1;
         const solution: string = req?.body?.solution || '';
 
@@ -86,7 +86,7 @@ katasRouter.route('/')
     .post(jsonParser, verifyToken, async (req: Request, res: Response) => {
         const name: string = req?.body?.name;
         const description: string = req?.body?.description || '';
-        const level: any = req?.body?.level || KataLevel.BASIC;
+        const level: any = req?.body?.level || KataLevels.BASIC;
         const intents: number = req?.body?.intents || 1;
         const solution: string = req?.body?.solution || '';
 

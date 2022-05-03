@@ -8,7 +8,7 @@ import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders
 import { LogSuccess } from '../utils/logger';
 import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataParticipantsByID, deleteKataByID, createKata } from '../domain/orm/Katas.orm';
 import { getUserByEmail, addUserKataByEmail, deleteUserKataByEmail, isKataFromUser } from '../domain/orm/Users.orm';
-import { IKata, IKataUpdate, IKataStars, KataLevel } from '../domain/interfaces/IKata.interface';
+import { IKata, IKataUpdate, IKataStars, KataLevels } from '../domain/interfaces/IKata.interface';
 import { IUser } from '../domain/interfaces/IUser.interface';
 import { KatasResponse as KatasORMResponse } from '../domain/types';
 
@@ -26,7 +26,7 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string, @Query()level?: KataLevel): Promise<KataResponse | KatasResponse | ErrorResponse> { 
+    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string, @Query()level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse> { 
         let response: KataResponse | KatasResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         if (id) {

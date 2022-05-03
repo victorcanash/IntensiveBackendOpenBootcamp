@@ -54,6 +54,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
             badTokenError.logError();
             return res.status(badTokenError.statusCode).send(badTokenError.getResponse());
         }
+        console.log(decoded);
 
         // Pass something to next request (object of user || other info)
         server.locals.loggedEmail = decoded.email;

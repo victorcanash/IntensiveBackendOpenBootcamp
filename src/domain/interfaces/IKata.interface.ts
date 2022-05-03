@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-export enum KataLevel {
+export enum KataLevels {
     BASIC = 'Basic',
     MEDIUM = 'Medium',
     HIGH = 'High'
@@ -13,7 +13,7 @@ export interface IKataStars {
 export interface IKata {
     name: string,
     description: string,
-    level: KataLevel,
+    level: KataLevels,
     intents: number,
     stars: {
         average: number,
@@ -27,7 +27,7 @@ export interface IKata {
 export interface IKataCreate {
     name: string,
     description: string,
-    level: KataLevel,
+    level: KataLevels,
     intents: number,
     creator: string,
     solution: string,
@@ -36,7 +36,7 @@ export interface IKataCreate {
 export interface IKataUpdate {
     name: string,
     description: string,
-    level: KataLevel,
+    level: KataLevels,
     intents: number,
     solution: string,
 }

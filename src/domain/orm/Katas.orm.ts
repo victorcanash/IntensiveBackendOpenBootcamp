@@ -1,10 +1,10 @@
 import { kataEntity } from '../entities/Kata.entity';
-import { IKata, IKataStars, IKataUpdate, KataLevel } from '../interfaces/IKata.interface';
+import { IKata, IKataStars, IKataUpdate, KataLevels } from '../interfaces/IKata.interface';
 import { KatasResponse } from '../types';
 import { ModelNotFoundError, ErrorProviders } from '../../errors';
 
 
-export const getAllKatas = async (page: number, limit: number, order: {}, level?: KataLevel): Promise<KatasResponse> => {
+export const getAllKatas = async (page: number, limit: number, order: {}, level?: KataLevels): Promise<KatasResponse> => {
     const kataModel = kataEntity();
 
     const response: KatasResponse = {} as KatasResponse;

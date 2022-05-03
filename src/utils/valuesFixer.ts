@@ -1,4 +1,4 @@
-import { KataLevel } from '../domain/interfaces/IKata.interface';
+import { KataLevels } from '../domain/interfaces/IKata.interface';
 
 
 export const fixNumberValue = (value: number, min: number, max: number, round: boolean = false) => {
@@ -15,11 +15,11 @@ export const fixNumberValue = (value: number, min: number, max: number, round: b
 export const fixKataLevelValue = (level: string) => {
     let newLevel = level;
     if (newLevel.toUpperCase().includes('MEDIUM')) {
-        newLevel = KataLevel.MEDIUM;
+        newLevel = KataLevels.MEDIUM;
     } else if (level.toUpperCase().includes('HIGH')) {
-        newLevel = KataLevel.HIGH;
+        newLevel = KataLevels.HIGH;
     } else {
-        newLevel = KataLevel.BASIC;
+        newLevel = KataLevels.BASIC;
     }
     return newLevel;
 };

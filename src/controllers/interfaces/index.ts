@@ -2,7 +2,7 @@ import { Request } from 'express';
 
 import { IUserUpdate } from '../../domain/interfaces/IUser.interface';
 import { IAuthLogin, IAuthRegister } from '@/domain/interfaces/IAuth.interface';
-import { IKataStars, IKataUpdate, KataLevel } from '../../domain/interfaces/IKata.interface';
+import { IKataStars, IKataUpdate, KataLevels } from '../../domain/interfaces/IKata.interface';
 import { BasicResponse, DateResponse, AuthResponse, UserResponse, UsersResponse, KatasFromUserResponse, KataResponse, KatasResponse, ErrorResponse } from '../types';
 
 
@@ -22,7 +22,7 @@ export interface IUsersController {
     // Update logged user
     updateUser(user: IUserUpdate): Promise<BasicResponse | ErrorResponse>
     // Get Katas of user with pagination
-    getKatas(page: number, limit: number, order: any, id: string, level?: KataLevel): Promise<KatasFromUserResponse | ErrorResponse>
+    getKatas(page: number, limit: number, order: any, id: string, level?: KataLevels): Promise<KatasFromUserResponse | ErrorResponse>
 }
 
 export interface IAuthController {
@@ -38,7 +38,7 @@ export interface IAuthController {
 
 export interface IKatasController {
     // Get all katas from database with pagination || Get kata By ID
-    getKatas(page: number, limit: number, order: any, id?: string, level?: KataLevel): Promise<KataResponse | KatasResponse | ErrorResponse>
+    getKatas(page: number, limit: number, order: any, id?: string, level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse>
     // Create New Kata
     createKata(kata: IKataUpdate): Promise<BasicResponse | ErrorResponse>
     // Delete Kata By ID
