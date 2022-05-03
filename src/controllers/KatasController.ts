@@ -43,7 +43,7 @@ export class KatasController implements IKatasController {
             });
 
         } else {
-            await getAllKatas(page, limit, order).then((katasResponse: KatasORMResponse) => {
+            await getAllKatas(page, limit, order, level).then((katasResponse: KatasORMResponse) => {
                 response = {
                     code: StatusCodes.OK,
                     message: 'Katas found successfully',
