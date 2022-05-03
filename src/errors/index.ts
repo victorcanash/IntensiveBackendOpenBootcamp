@@ -7,6 +7,7 @@ import { ErrorResponse } from '../controllers/types';
 /* eslint-disable no-unused-vars */
 export enum ErrorProviders {
     JWT_MIDDLEWARE = 'JWT Middleware',
+    ROLE_MIDDLEWARE = 'Role Middleware',
     AUTH = 'Auth',
     USERS = 'Users',
     KATAS = 'Katas'
@@ -73,6 +74,13 @@ export class MissingPermissionsError extends BaseError {
         const type = ErrorTypes.MISSING_PERMISSIONS;
         const httpCode = StatusCodes.FORBIDDEN;
         super(provider, type, httpCode, message);
+    }
+}
+
+export class MissingRoleError extends MissingPermissionsError {
+    constructor(message: string) {
+        const provider = ErrorProviders.ROLE_MIDDLEWARE;
+        super(provider, message);
     }
 }
 
