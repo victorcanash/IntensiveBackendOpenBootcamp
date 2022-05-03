@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+import client from '../cache';
 import { userEntity } from '../entities/User.entity';
 import { IAuthLogin } from '../interfaces/IAuth.interface';
 import { IUser } from '../interfaces/IUser.interface';
@@ -74,6 +75,10 @@ export const loginUser = async (auth: IAuthLogin): Promise<AuthResponse> => {
 };
 
 
-export const logoutUser = async (): Promise<any> => {
-    // TODO: NOT IMPLEMENTED
+export const logoutUser = async (token: string, tokenExp: number): Promise<boolean> => {
+    const tokenKey = `bl_${token}`;
+    await client.set(tokenKey, token);
+    client.expireAt(tokenKey, tokenExp);
+
+    return true;
 };

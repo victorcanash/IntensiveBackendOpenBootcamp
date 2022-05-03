@@ -16,7 +16,7 @@ const authRouter = express.Router();
 const controller: AuthController = new AuthController();
 
 authRouter.route('/register')
-    .post(jsonParser, async (req:Request, res: Response) => {
+    .post(jsonParser, async (req: Request, res: Response) => {
         const name: string = req?.body?.name;
         const email: string = req?.body?.email;
         const password: string = req?.body?.password;
@@ -46,7 +46,7 @@ authRouter.route('/register')
     });
 
 authRouter.route('/login')
-    .post(jsonParser, async (req:Request, res: Response) => {
+    .post(jsonParser, async (req: Request, res: Response) => {
         const email: string = req?.body?.email;
         const password: string = req?.body?.password;
 
@@ -65,6 +65,13 @@ authRouter.route('/login')
             badQueryError.logError();
             return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
         }
+    });
+
+authRouter.route('/logout')
+    .post(verifyToken, async (req: Request, res: Response) => {
+        const controllerRes = await controller.logoutUser(req);
+
+        return res.status(controllerRes.code).send(controllerRes);
     });
 
 authRouter.route('/me')

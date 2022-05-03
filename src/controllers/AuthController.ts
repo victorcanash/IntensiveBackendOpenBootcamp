@@ -1,4 +1,5 @@
-import { Get, Post, Route, Tags, Body, Security, Response, SuccessResponse } from 'tsoa';
+import { Request } from 'express';
+import { Get, Post, Route, Tags, Body, Security, Response, SuccessResponse, Inject } from 'tsoa';
 import { StatusCodes } from 'http-status-codes';
 
 import { IAuthController } from './interfaces';
@@ -6,7 +7,7 @@ import { ErrorResponse, BasicResponse, AuthResponse, UserResponse } from './type
 import server from '../server';
 import { SomethingWrongError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
 import { LogSuccess } from '../utils/logger';
-import { registerUser, loginUser /* ,logoutUser */ } from '../domain/orm/Auth.orm';
+import { registerUser, loginUser, logoutUser } from '../domain/orm/Auth.orm';
 import { getUserByEmail } from '../domain/orm/Users.orm';
 import { IUser } from '../domain/interfaces/IUser.interface';
 import { IAuthLogin, IAuthRegister } from '../domain/interfaces/IAuth.interface';
@@ -101,10 +102,39 @@ export class AuthController implements IAuthController {
     
     @Post('/logout')
     @Security('jwt')
-    public async logoutUser(): Promise<any> {
-        // let response: any = '';
+    @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async logoutUser(@Inject()request: Request): Promise<BasicResponse | ErrorResponse> {
+        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        // TODO: Close Session of user
-        throw new Error('Method not implemented');
+        const email: any = server.locals.loggedEmail;
+        const token: any = request.headers['x-access-token'];
+        const tokenExp: any = server.locals.tokenExp;
+
+        let succeeded: boolean = false;
+
+        await logoutUser(token, tokenExp).then((result: boolean) => {
+            succeeded = result;
+            if (!result) {
+                throw this.somethingWrongError;
+            }
+
+        }).catch((error: Error) => {
+            console.log(error);
+        });
+
+        if (!succeeded) {
+            return response;
+        }
+
+        response = {
+            code: StatusCodes.CREATED,
+            message: `Logged out user: ${email}`,
+        };
+        LogSuccess(`[/api/auth/logout] Logged out user: ${email}`);
+
+        return response;
     }
 }
