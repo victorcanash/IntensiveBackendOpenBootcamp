@@ -6,7 +6,7 @@ import { ErrorResponse, BasicResponse, KataResponse, KatasResponse } from './typ
 import server from '../server';
 import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
 import { LogSuccess } from '../utils/logger';
-import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataParticipantsByID, deleteKataByID, createKata } from '../domain/orm/Katas.orm';
+import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataParticipantsByID, deleteKataByID, createKata, existsKataParticipant } from '../domain/orm/Katas.orm';
 import { getUserByEmail, addUserKataByEmail, deleteUserKataByEmail, isKataFromUser } from '../domain/orm/Users.orm';
 import { IKata, IKataUpdate, IKataStars, KataLevels } from '../domain/interfaces/IKata.interface';
 import { IUser } from '../domain/interfaces/IUser.interface';
@@ -234,7 +234,7 @@ export class KatasController implements IKatasController {
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
-    // @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
@@ -243,9 +243,21 @@ export class KatasController implements IKatasController {
 
         const email: any = server.locals.loggedEmail;
 
-        /* let exists: boolean = false;
+        await getUserByEmail(email).then((userResult: IUser | any) => {
+            kataStars.user = userResult!._id;
+            
+        }).catch((error: BaseError) => {
+            error.logError();
+            response = error.getResponse();
+        });
 
-        await isKataFromUser(email, id).then((existsResult: boolean) => {
+        if (kataStars.user === '') {
+            return response;
+        }
+
+        let exists: boolean = false;
+
+        await existsKataParticipant(id, kataStars.user).then((existsResult: boolean) => {
             exists = existsResult;
             if (!exists) {
                 throw new MissingPermissionsError(ErrorProviders.KATAS, `No kata stars can be updated by id: ${id}`);
@@ -257,18 +269,6 @@ export class KatasController implements IKatasController {
         });
 
         if (!exists) {
-            return response;
-        } */
-
-        await getUserByEmail(email).then((userResult: IUser | any) => {
-            kataStars.user = userResult!._id;
-            
-        }).catch((error: BaseError) => {
-            error.logError();
-            response = error.getResponse();
-        });
-
-        if (kataStars.user === '') {
             return response;
         }
 
@@ -284,6 +284,38 @@ export class KatasController implements IKatasController {
         });
 
         return response;
+    }
+
+    @Post('/upload')
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.CREATED)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    // eslint-disable-next-line no-undef
+    public async updateKataFile(@UploadedFile() file: Express.Multer.File): Promise<BasicResponse | ErrorResponse> {
+        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        // const email: any = server.locals.loggedEmail;
+
+        response = {
+            code: StatusCodes.CREATED,
+            message: 'File was uploaded successfuly'
+        };
+
+        return response;
+
+        /* return {
+            status: true,
+            message: 'File was uploaded successfuly',
+            payload: {
+                name: file.name,
+                mimetype: file.mimetype,
+                size: file.size
+            },
+        }; */
     }
 
     @Put('/resolve')
@@ -329,37 +361,5 @@ export class KatasController implements IKatasController {
         });
         
         return response;
-    }
-
-    @Post('/upload')
-    @Security('jwt')
-    @SuccessResponse(StatusCodes.CREATED)
-    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
-    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
-    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
-    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
-    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    // eslint-disable-next-line no-undef
-    public async updateKataFile(@UploadedFile() file: Express.Multer.File): Promise<BasicResponse | ErrorResponse> {
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
-
-        // const email: any = server.locals.loggedEmail;
-
-        response = {
-            code: StatusCodes.CREATED,
-            message: 'File was uploaded successfuly'
-        };
-
-        return response;
-
-        /* return {
-            status: true,
-            message: 'File was uploaded successfuly',
-            payload: {
-                name: file.name,
-                mimetype: file.mimetype,
-                size: file.size
-            },
-        }; */
     }
 }

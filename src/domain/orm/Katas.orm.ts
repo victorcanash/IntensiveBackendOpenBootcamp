@@ -211,3 +211,28 @@ export const updateKataParticipantsByID = async (id: string, participant: string
 
     return updatedKata;
 };
+
+export const existsKataParticipant = async (id: string, participant: string) : Promise<boolean> => {
+    const kataModel = kataEntity();
+
+    // Find kata
+    let foundKata: IKata = {} as IKata;
+
+    await kataModel.findById(id).then((kataResult: IKata) => {
+        foundKata = kataResult;
+        if (!foundKata) {
+            throw new ModelNotFoundError(ErrorProviders.KATAS, `No kata can be found to check if exist a participant by kata id: ${id}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    // Check Kata Participant
+    for (let i = 0; i < foundKata.participants.length; i++) {
+        if (foundKata.participants[i] === participant) {
+            return true;
+        }
+    }
+    return false;
+};
