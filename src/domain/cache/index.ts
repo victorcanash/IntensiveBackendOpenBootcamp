@@ -1,6 +1,6 @@
 import * as redis from 'redis';
 
-import { envConfig } from '../../config';
+import { envConfig } from '../../config/env.config';
 import { LogError, LogSuccess } from '../../utils/logger';
 
 

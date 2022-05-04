@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
-import { envConfig, mongooseOptions } from '../../config';
+import { envConfig } from '../../config/env.config';
+import { mongooseOptions } from '../../config/mongo.config';
 import { LogError, LogSuccess } from '../../utils/logger';
 
 

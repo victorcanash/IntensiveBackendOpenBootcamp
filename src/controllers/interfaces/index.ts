@@ -16,13 +16,13 @@ export interface IGoodbyeController {
 
 export interface IUsersController {
     // Get all users from database with pagination || Get user by id
-    getUsers(page: number, limit: number, order: any, id?: string): Promise<UserResponse | UsersResponse | ErrorResponse>
+    getUsers(page?: number, limit?: number, order?: any, id?: string): Promise<UserResponse | UsersResponse | ErrorResponse>
     // Delete logged user
-    deleteUser(): Promise<BasicResponse | ErrorResponse>
+    deleteUser(id?: string): Promise<BasicResponse | ErrorResponse>
     // Update logged user
-    updateUser(user: IUserUpdate): Promise<BasicResponse | ErrorResponse>
+    updateUser(user: IUserUpdate, id?: string): Promise<BasicResponse | ErrorResponse>
     // Get Katas of user with pagination
-    getKatas(page: number, limit: number, order: any, id: string, level?: KataLevels): Promise<KatasFromUserResponse | ErrorResponse>
+    getKatas(page?: number, limit?: number, order?: any, id?: string, level?: KataLevels): Promise<KatasFromUserResponse | ErrorResponse>
 }
 
 export interface IAuthController {
@@ -31,14 +31,14 @@ export interface IAuthController {
     // Login user
     loginUser(auth: IAuthLogin): Promise<AuthResponse | ErrorResponse>
     // Get logged user
-    getLoggedUser(id: string): Promise<UserResponse | ErrorResponse>
+    getLoggedUser(): Promise<UserResponse | ErrorResponse>
     // Logout user
     logoutUser(request: Request): Promise<BasicResponse | ErrorResponse>
 }
 
 export interface IKatasController {
     // Get all katas from database with pagination || Get kata By ID
-    getKatas(page: number, limit: number, order: any, id?: string, level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse>
+    getKatas(page?: number, limit?: number, order?: any, id?: string, level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse>
     // Create New Kata
     createKata(kata: IKataUpdate): Promise<BasicResponse | ErrorResponse>
     // Delete Kata By ID

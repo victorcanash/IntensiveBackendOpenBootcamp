@@ -77,13 +77,6 @@ export class MissingPermissionsError extends BaseError {
     }
 }
 
-export class MissingRoleError extends MissingPermissionsError {
-    constructor(message: string) {
-        const provider = ErrorProviders.ROLE_MIDDLEWARE;
-        super(provider, message);
-    }
-}
-
 /* MISSING DATA ERRORS */
 
 class MissingDataError extends BaseError {
@@ -100,13 +93,6 @@ export class MissingTokenError extends MissingDataError {
         super(provider, httpCode, message);
     }
 }
-
-/* export class MissingQueryError extends MissingDataError {
-    constructor(provider: ErrorProviders, message: string) {
-        const httpCode = StatusCodes.BAD_REQUEST;
-        super(provider, httpCode, message);
-    }
-} */
 
 /* BAD DATA ERRORS */
 

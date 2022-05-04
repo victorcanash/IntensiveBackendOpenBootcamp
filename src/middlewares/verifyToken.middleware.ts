@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 import server from '../server';
-import { envConfig } from '../config';
+import { envConfig } from '../config/env.config';
 import client from '../domain/cache';
 import { MissingTokenError, BadTokenError } from '../errors';
 

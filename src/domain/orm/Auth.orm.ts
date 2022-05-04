@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import server from '../../server';
 import client from '../cache';
 import { compareSync } from '../../utils/hashing';
-import { jwtSignOptions } from '../../config';
+import { jwtSignOptions } from '../../config/jwt.config';
 import { userEntity } from '../entities/User.entity';
 import { IAuthLogin, IAuthPayload } from '../interfaces/IAuth.interface';
 import { IUser } from '../interfaces/IUser.interface';
