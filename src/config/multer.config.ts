@@ -1,9 +1,12 @@
+import { Request } from 'express';
 import multer from 'multer';
+
+import { BadQueryError, ErrorProviders } from '../errors';
 
 
 const katasStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, '/tmp/uploads/katas');
+        cb(null, 'uploads/katas');
       },
       filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -11,28 +14,36 @@ const katasStorage = multer.diskStorage({
       }
 });
 
-const fileFilter = (req: any, file: any, cb: any) => {
+const katasAllowedMimes = [
+    'image/jpeg', 
+    'image/jpg', 
+    'image/png',
+    'video/mp4',
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
+    'application/x-rar-compressed', // rar
+    'application/zip', 'application/octet-stream', 'application/x-zip-compressed', 'multipart/x-zip', // zip
+    'application/octet-stream' // rar and zip
+];
 
-    // The function should call `cb` with a boolean
-    // to indicate if the file should be accepted
-  
-    // To reject this file pass `false`, like so:
-    // cb(null, false);
-  
-    // To accept the file pass `true`, like so:
+export const katasFileLimits = {
+    fileSize: 200000000 // bytes(B)
+};
+
+// eslint-disable-next-line no-undef
+const katasFileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
+    if (!katasAllowedMimes.includes(file.mimetype)) {
+        cb(new BadQueryError(ErrorProviders.KATAS, `Invalid file type. Only ${katasAllowedMimes} types are allowed.`));
+    }
     cb(null, true);
-  
-    // You can always pass an error if something goes wrong:
-    // cb(new Error('I don\'t have a clue!'));  
 };
 
 const katasMulter = multer({ 
     storage: katasStorage,
-    limits: {
-        fieldNameSize: 100,
-        fieldSize: 1000,
-    },
-    fileFilter: fileFilter,
+    fileFilter: katasFileFilter,
+    limits: katasFileLimits,
     preservePath: false
 });
 

@@ -6,8 +6,8 @@ import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
 import { KataLevels, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 import { fixKataLevelValue, fixNumberValue } from '../utils/valuesFixer';
-import { BadQueryError, SomethingWrongError, ErrorProviders } from '../errors';
-import { katasMulterSingle, katasMulterFieldName } from '../config/multer.config';
+import { BaseError, BadQueryError, SomethingWrongError, ErrorProviders } from '../errors';
+import { katasMulterSingle, katasMulterFieldName, katasFileLimits } from '../config/multer.config';
 
 
 const jsonParser = bodyParser.json();
@@ -155,30 +155,41 @@ katasRouter.route('/resolve')
 
 katasRouter.route('/upload')
     .post(verifyToken, async (req: Request, res: Response) => {
-        katasMulterSingle(req, res, async (err) => {
+        katasMulterSingle(req, res, async (err: any) => {
+            let multerError: BaseError | undefined = undefined;
             if (err instanceof multer.MulterError) {
-                const errorMessage = `${err.message}. The field name must be called ${katasMulterFieldName} and must contain a single file`;
-                const badQueryError = new BadQueryError(ErrorProviders.KATAS, errorMessage);
-                badQueryError.logError();
-                return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+                let errorMessage = '';
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    const fileSizeGB = katasFileLimits.fileSize / 1000000;
+                    errorMessage = `${err.message}. The file can size at most ${fileSizeGB}GB`;
+                } else {
+                    errorMessage = `${err.message}. The field name must be called ${katasMulterFieldName} and must contain a single file`;
+                }
+                multerError = new BadQueryError(ErrorProviders.KATAS, errorMessage);
+
+            } else if (err instanceof BadQueryError) {
+                multerError = err;
 
             } else if (err) {
-                const somethingWrongError = new SomethingWrongError(ErrorProviders.KATAS);
-                somethingWrongError.logError();
-                return res.status(somethingWrongError.statusCode).send(somethingWrongError.getResponse());
+                multerError = new SomethingWrongError(ErrorProviders.KATAS);
             }
-        
+
+            if (multerError) {
+                multerError.logError();
+                return res.status(multerError.statusCode).send(multerError.getResponse());
+            }
+
             // eslint-disable-next-line no-undef
             const file: Express.Multer.File | undefined = req.file;
             if (!file) {
-                const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'File field not found');
-                badQueryError.logError();
-                return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+                const notFoundFieldError = new BadQueryError(ErrorProviders.KATAS, 'File field not found');
+                notFoundFieldError.logError();
+                return res.status(notFoundFieldError.statusCode).send(notFoundFieldError.getResponse());
                 
             } else {
                 const controllerRes = await controller.updateKataFile(file);
 
-                return res.status(controllerRes.code).send(controllerRes);
+                return res.status(controllerRes?.code).send(controllerRes);
             }
         });
     });
