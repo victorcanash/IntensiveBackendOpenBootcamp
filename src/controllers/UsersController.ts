@@ -71,7 +71,7 @@ export class UsersController implements IUsersController {
     public async deleteUser(): Promise<BasicResponse | ErrorResponse> { 
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
 
         await deleteUserByEmail(email).then((deletedUser: IUser) => {
             response = {
@@ -98,7 +98,7 @@ export class UsersController implements IUsersController {
     public async updateUser(@Body()user: IUserUpdate): Promise<BasicResponse | ErrorResponse> { 
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
         
         await updateUserByEmail(user, email).then((updatedUser: IUser) => {
             response = {
@@ -152,7 +152,7 @@ export class UsersController implements IUsersController {
     public async deleteKatas(): Promise<DeleteKatasFromUserResponse | ErrorResponse> { 
         let response: DeleteKatasFromUserResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
 
         let foundUser = {} as IUser;
 

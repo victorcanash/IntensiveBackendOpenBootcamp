@@ -1,14 +1,15 @@
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 
+import server from '../../server';
 import client from '../cache';
 import { compareSync } from '../../utils/hashing';
 import { jwtSignOptions } from '../../config';
 import { userEntity } from '../entities/User.entity';
-import { IAuthLogin } from '../interfaces/IAuth.interface';
+import { IAuthLogin, IAuthPayload } from '../interfaces/IAuth.interface';
 import { IUser } from '../interfaces/IUser.interface';
 import { AuthResponse } from '../types';
-import { ModelNotFoundError, ErrorProviders, BadQueryError } from '../../errors';
+import { BaseError, ModelNotFoundError, ErrorProviders, BadQueryError, SomethingWrongError } from '../../errors';
 
 
 dotenv.config();
@@ -53,12 +54,17 @@ export const loginUser = async (auth: IAuthLogin): Promise<AuthResponse> => {
         token: ''
     } as AuthResponse;
 
-    await userModel.findOne({ email: auth.email }).then((userResult: IUser) => {
+    let userId = '';
+
+    await userModel.findOne({ email: auth.email }).then((userResult: IUser | any) => {
         response.user = userResult;
+        userId = userResult!.id;
         if (!response.user) {
             throw new ModelNotFoundError(ErrorProviders.AUTH, 'Invalid email to login');
+        } else if (userId === '') {
+            throw new SomethingWrongError(ErrorProviders.AUTH);
         }
-    }).catch((error: ModelNotFoundError) => {
+    }).catch((error: BaseError) => {
         error.logError();
         throw error;
     });
@@ -71,7 +77,8 @@ export const loginUser = async (auth: IAuthLogin): Promise<AuthResponse> => {
         throw passwordError;
     }
     
-    const payload = {
+    const payload: IAuthPayload = {
+        id: userId,
         email: response.user.email,
         role: response.user.role
     };
@@ -85,6 +92,8 @@ export const logoutUser = async (token: string, tokenExp: number): Promise<boole
     const tokenKey = `bl_${token}`;
     await client.set(tokenKey, token);
     client.expireAt(tokenKey, tokenExp);
+
+    server.locals.payload = null;
 
     return true;
 };

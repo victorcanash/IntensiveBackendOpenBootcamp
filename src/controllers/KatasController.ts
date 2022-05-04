@@ -72,7 +72,7 @@ export class KatasController implements IKatasController {
     public async createKata(@Body()kata: IKataUpdate): Promise<BasicResponse | ErrorResponse> {
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
 
         const newKata: IKata = {
             name: kata.name,
@@ -138,8 +138,8 @@ export class KatasController implements IKatasController {
     public async deleteKata(@Query()id: string): Promise<BasicResponse | ErrorResponse> {
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
-        const email: any = server.locals.loggedEmail;
-        const role: any = server.locals.loggedRole;
+        const email: any = server.locals.payload?.email;
+        const role: any = server.locals.payload?.role;
 
         if (role !== UserRoles.ADMIN) {
             let exists: boolean = false;
@@ -199,8 +199,8 @@ export class KatasController implements IKatasController {
     public async updateKata(@Body()kata: IKataUpdate, @Query()id: string): Promise<BasicResponse | ErrorResponse> { 
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
-        const email: any = server.locals.loggedEmail;
-        const role: any = server.locals.loggedRole;
+        const email: any = server.locals.payload?.email;
+        const role: any = server.locals.payload?.role;
 
         if (role !== UserRoles.ADMIN) {
             let exists: boolean = false;
@@ -247,7 +247,7 @@ export class KatasController implements IKatasController {
     public async updateKataStars(@Body()kataStars: IKataStars, @Query()id: string): Promise<BasicResponse | ErrorResponse> {
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
 
         await getUserByEmail(email).then((userResult: IUser | any) => {
             kataStars.user = userResult!._id;
@@ -335,7 +335,7 @@ export class KatasController implements IKatasController {
     public async sendKataSolution(@Body()solution: string, @Query()id: string): Promise<BasicResponse | ErrorResponse> { 
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
 
         let participant: string = '';
 

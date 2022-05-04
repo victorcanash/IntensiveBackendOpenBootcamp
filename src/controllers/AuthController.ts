@@ -84,7 +84,7 @@ export class AuthController implements IAuthController {
     public async getLoggedUser(): Promise<UserResponse | ErrorResponse> {
         let response: UserResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
 
         await getUserByEmail(email).then((foundUser: IUser) => {
             response = {
@@ -110,9 +110,9 @@ export class AuthController implements IAuthController {
     public async logoutUser(@Inject()request: Request): Promise<BasicResponse | ErrorResponse> {
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.loggedEmail;
+        const email: any = server.locals.payload?.email;
         const token: any = request.headers['x-access-token'];
-        const tokenExp: any = server.locals.tokenExp;
+        const tokenExp: any = server.locals.payload?.tokenExp;
 
         let succeeded: boolean = false;
 

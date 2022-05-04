@@ -7,12 +7,6 @@ import client from '../domain/cache';
 import { MissingTokenError, BadTokenError } from '../errors';
 
 
-const clearLocals = () => {
-    server.locals.loggedEmail = null;
-    server.locals.loggedRole = null;
-    server.locals.tokenExp = null;
-};
-
 /**
  * 
  * @param { Request } req Original request previous middleware of verification JWT
@@ -27,7 +21,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 
     // Verify if jwt is present
     if (!token) {
-        clearLocals();
         const missingTokenError = new MissingTokenError('Missing JWT token in request');
         missingTokenError.logError();
         return res.status(missingTokenError.statusCode).send(missingTokenError.getResponse());
@@ -36,7 +29,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     // Verify if token is in deny list
     const inDenyList = await client.get(`bl_${token}`);
     if (inDenyList) {
-        clearLocals();
         const badTokenError = new BadTokenError('Failed to verify JWT token in request');
         badTokenError.logError();
         return res.status(badTokenError.statusCode).send(badTokenError.getResponse());
@@ -45,16 +37,18 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     // Verify the token obtained
     jwt.verify(token, envConfig.SECRET_KEY, async (err: any, decoded: any) => {
         if (err) {
-            clearLocals();
             const badTokenError = new BadTokenError('Failed to verify JWT token in request');
             badTokenError.logError();
             return res.status(badTokenError.statusCode).send(badTokenError.getResponse());
         }
 
         // Pass something to next request (object of user || other info)
-        server.locals.loggedEmail = decoded.email;
-        server.locals.loggedRole = decoded.role;
-        server.locals.tokenExp = decoded.exp;
+        server.locals.payload = {
+            id: decoded.id,
+            email: decoded.email,
+            role: decoded.role,
+            tokenExp: decoded.exp
+        };
 
         // Execute Next Function -> Protected Routes will be executed
         next();
