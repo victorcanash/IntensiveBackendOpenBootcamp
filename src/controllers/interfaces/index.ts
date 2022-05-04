@@ -51,5 +51,5 @@ export interface IKatasController {
     sendKataSolution(solution: string, id: string): Promise<BasicResponse | ErrorResponse>
     // Update kata file
     // eslint-disable-next-line no-undef
-    updateKataFile(file: Express.Multer.File): Promise<BasicResponse | ErrorResponse>
+    updateKataFiles(file: Express.Multer.File[]): Promise<BasicResponse | ErrorResponse>
 }

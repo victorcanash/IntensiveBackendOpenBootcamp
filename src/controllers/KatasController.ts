@@ -1,4 +1,4 @@
-import { Delete, Get, Post, Put, Query, Route, Tags, Body, Security, Response, SuccessResponse, UploadedFile } from 'tsoa';
+import { Delete, Get, Post, Put, Query, Route, Tags, Body, Security, Response, SuccessResponse, UploadedFiles } from 'tsoa';
 import { StatusCodes } from 'http-status-codes';
 
 import { IKatasController } from './interfaces';
@@ -304,7 +304,7 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     // eslint-disable-next-line no-undef
-    public async updateKataFile(@UploadedFile() file: Express.Multer.File): Promise<BasicResponse | ErrorResponse> {
+    public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[]): Promise<BasicResponse | ErrorResponse> {
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
         // const email: any = server.locals.loggedEmail;

@@ -1760,7 +1760,7 @@
 		},
 		"/api/katas/upload": {
 			"post": {
-				"operationId": "UpdateKataFile",
+				"operationId": "UpdateKataFiles",
 				"responses": {
 					"201": {
 						"description": "",
@@ -1836,13 +1836,16 @@
 							"schema": {
 								"type": "object",
 								"properties": {
-									"file": {
-										"type": "string",
-										"format": "binary"
+									"files": {
+										"items": {
+											"type": "string",
+											"format": "binary"
+										},
+										"type": "array"
 									}
 								},
 								"required": [
-									"file"
+									"files"
 								]
 							}
 						}
