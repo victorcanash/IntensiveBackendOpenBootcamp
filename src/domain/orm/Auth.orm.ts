@@ -19,9 +19,12 @@ export const registerUser = async (user: IUser): Promise<IUser> => {
 
     let createdUser: IUser = {} as IUser;
 
-    await userModel.findOne({ email: user.email }).then((userResult: IUser) => {
+    await userModel.findOne({ $or: [{ email: user.email }, { name: user.name }] }).then((userResult: IUser) => {
         if (userResult) {
-            throw new BadQueryError(ErrorProviders.AUTH, 'Entered email already exists');
+            if (userResult.name === user.name) {
+                throw new BadQueryError(ErrorProviders.AUTH, 'Entered name already exists');
+            }
+            throw new BadQueryError(ErrorProviders.AUTH, 'Entered email already exists'); 
         }
     }).catch((error: BadQueryError) => {
         error.logError();
