@@ -7,13 +7,10 @@ import { KatasController } from '../controllers/KatasController';
 import { KataLevels, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 import { fixKataLevelValue, fixNumberValue } from '../utils/valuesFixer';
 import { BadQueryError, SomethingWrongError, ErrorProviders } from '../errors';
+import { katasMulterSingle, katasMulterFieldName } from '../config/multer.config';
 
 
 const jsonParser = bodyParser.json();
-
-const multerUpload = multer({ dest: 'uploads/' });
-const multerFieldName = 'file';
-const multerSingle = multerUpload.single(multerFieldName);
 
 const katasRouter = express.Router();
 
@@ -158,9 +155,9 @@ katasRouter.route('/resolve')
 
 katasRouter.route('/upload')
     .post(verifyToken, async (req: Request, res: Response) => {
-        multerSingle(req, res, async (err) => {
+        katasMulterSingle(req, res, async (err) => {
             if (err instanceof multer.MulterError) {
-                const errorMessage = `${err.message}. The field name must be called ${multerFieldName} and must contain a single file`;
+                const errorMessage = `${err.message}. The field name must be called ${katasMulterFieldName} and must contain a single file`;
                 const badQueryError = new BadQueryError(ErrorProviders.KATAS, errorMessage);
                 badQueryError.logError();
                 return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
