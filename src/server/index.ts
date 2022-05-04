@@ -6,7 +6,8 @@ import helmet from 'helmet';
 // TODO: HTTPS
 
 import pkg from '../../package.json';
-import { envConfig, corsOptions } from '../config';
+import { envConfig } from '../config/env.config';
+import { corsOptions } from '../config/cors.config';
 import rootRouter from '../routes';
 
 
