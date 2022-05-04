@@ -26,7 +26,7 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string, @Query()level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse> { 
+    public async getKatas(@Query()page?: number, @Query()limit?: number, @Query()order?: any, @Query()id?: string, @Query()level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse> { 
         let response: KataResponse | KatasResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         if (id) {
@@ -43,7 +43,10 @@ export class KatasController implements IKatasController {
             });
 
         } else {
-            await getAllKatas(page, limit, order, level).then((katasResponse: KatasORMResponse) => {
+            let fixedOrder = order || '{}';
+            fixedOrder = JSON.parse(order);
+
+            await getAllKatas(page || 1, limit || 10, fixedOrder, level).then((katasResponse: KatasORMResponse) => {
                 response = {
                     code: StatusCodes.OK,
                     message: 'Katas found successfully',

@@ -4,11 +4,11 @@ import { StatusCodes } from 'http-status-codes';
 import { IUsersController } from './interfaces';
 import { ErrorResponse, BasicResponse, UserResponse, UsersResponse, KatasFromUserResponse, DeleteKatasFromUserResponse } from './types';
 import server from '../server';
-import { SomethingWrongError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
+import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
 import { LogSuccess } from '../utils/logger';
-import { getAllUsers, getUserByID, getUserByEmail, deleteUserByEmail, updateUserByEmail, getKatasFromUser } from '../domain/orm/Users.orm';
+import { getAllUsers, getUserByID, deleteUserById, updateUserById, getKatasFromUser } from '../domain/orm/Users.orm';
 import { deleteKatasByID } from '../domain/orm/Katas.orm';
-import { IUser, IUserUpdate } from '../domain/interfaces/IUser.interface';
+import { IUser, IUserUpdate, UserRoles } from '../domain/interfaces/IUser.interface';
 import { KataLevels } from '../domain/interfaces/IKata.interface';
 import { UsersResponse as UsersORMResponse, KatasFromUserResponse as KatasORMResponse } from '../domain/types';
 
@@ -26,7 +26,7 @@ export class UsersController implements IUsersController {
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async getUsers(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id?: string): Promise<UserResponse | UsersResponse | ErrorResponse> {
+    public async getUsers(@Query()page?: number, @Query()limit?: number, @Query()order?: any, @Query()id?: string): Promise<UserResponse | UsersResponse | ErrorResponse> {
         let response: UserResponse | UsersResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         if (id) {
@@ -43,7 +43,10 @@ export class UsersController implements IUsersController {
             });
 
         } else {
-            await getAllUsers(page, limit, order).then((usersResponse: UsersORMResponse) => {
+            let fixedOrder = order || '{}';
+            fixedOrder = JSON.parse(order);
+
+            await getAllUsers(page || 1, limit || 10, fixedOrder).then((usersResponse: UsersORMResponse) => {
                 response = {
                     code: StatusCodes.OK,
                     message: 'Users found successfully',
@@ -66,14 +69,24 @@ export class UsersController implements IUsersController {
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async deleteUser(): Promise<BasicResponse | ErrorResponse> { 
+    public async deleteUser(@Query()id?: string): Promise<BasicResponse | ErrorResponse> { 
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.payload?.email;
+        const payload: any = server.locals.payload;
 
-        await deleteUserByEmail(email).then((deletedUser: IUser) => {
+        let findId: string = '';
+        if (!id) {
+            findId = payload.id;
+        } else if (id !== payload.id && payload.role === UserRoles.USER) {
+            throw new MissingPermissionsError(ErrorProviders.USERS, `No user can be deleted by id: ${id}`);
+        } else if (id === payload.id || (id !== payload.id && payload.role === UserRoles.ADMIN)) {
+            findId = id;
+        }
+
+        await deleteUserById(findId).then((deletedUser: IUser) => {
             response = {
                 code: StatusCodes.OK,
                 message: `User with email: ${deletedUser.email} deleted successfully`
@@ -92,15 +105,25 @@ export class UsersController implements IUsersController {
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async updateUser(@Body()user: IUserUpdate): Promise<BasicResponse | ErrorResponse> { 
+    public async updateUser(@Body()user: IUserUpdate, @Query()id?: string): Promise<BasicResponse | ErrorResponse> { 
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.payload?.email;
+        const payload: any = server.locals.payload;
+
+        let findId: string = '';
+        if (!id) {
+            findId = payload.id;
+        } else if (id !== payload.id && payload.role === UserRoles.USER) {
+            throw new MissingPermissionsError(ErrorProviders.USERS, `No user can be updated by id: ${id}`);
+        } else if (id === payload.id || (id !== payload.id && payload.role === UserRoles.ADMIN)) {
+            findId = id;
+        }
         
-        await updateUserByEmail(user, email).then((updatedUser: IUser) => {
+        await updateUserById(user, findId).then((updatedUser: IUser) => {
             response = {
                 code: StatusCodes.OK,
                 message: `User with email: ${updatedUser.email} updated successfully`
@@ -121,10 +144,15 @@ export class UsersController implements IUsersController {
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async getKatas(@Query()page: number, @Query()limit: number, @Query()order: any, @Query()id: string, @Query()level?: KataLevels): Promise<KatasFromUserResponse | ErrorResponse> {
+    public async getKatas(@Query()page?: number, @Query()limit?: number, @Query()order?: any, @Query()id?: string, @Query()level?: KataLevels): Promise<KatasFromUserResponse | ErrorResponse> {
         let response: KatasFromUserResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        await getKatasFromUser(page, limit, order, id, level).then((katasResponse: KatasORMResponse) => {
+        const payload = server.locals.payload;
+
+        let fixedOrder = order || '{}';
+        fixedOrder = JSON.parse(order);
+
+        await getKatasFromUser(page || 1, limit || 10, fixedOrder, id || payload.id, level).then((katasResponse: KatasORMResponse) => {
             response = {
                 code: StatusCodes.OK,
                 message: 'Katas from user found successfully',
@@ -147,16 +175,26 @@ export class UsersController implements IUsersController {
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async deleteKatas(): Promise<DeleteKatasFromUserResponse | ErrorResponse> { 
+    public async deleteKatas(@Query()id?: string): Promise<DeleteKatasFromUserResponse | ErrorResponse> { 
         let response: DeleteKatasFromUserResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
-        const email: any = server.locals.payload?.email;
+        const payload: any = server.locals.payload;
+
+        let findId: string = '';
+        if (!id) {
+            findId = payload.id;
+        } else if (id !== payload.id && payload.role === UserRoles.USER) {
+            throw new MissingPermissionsError(ErrorProviders.USERS, `No katas can be deleted by id: ${id}`);
+        } else if (id === payload.id || (id !== payload.id && payload.role === UserRoles.ADMIN)) {
+            findId = id;
+        }
 
         let foundUser = {} as IUser;
 
-        await getUserByEmail(email).then((userResult: IUser) => {
+        await getUserByID(findId).then((userResult: IUser) => {
             foundUser = userResult;
             
         }).catch((error: BaseError) => {
@@ -182,7 +220,7 @@ export class UsersController implements IUsersController {
 
         const katas = foundUser.katas;
         foundUser.katas = [];
-        await updateUserByEmail(foundUser, foundUser.email).then((updatedUser: IUser) => {
+        await updateUserById(foundUser, foundUser.email).then((updatedUser: IUser) => {
             response = {
                 code: StatusCodes.OK,
                 message: `Katas from user deleted successfully with email: ${updatedUser.email} and with ${katas.length} katas id: [${katas}]`,

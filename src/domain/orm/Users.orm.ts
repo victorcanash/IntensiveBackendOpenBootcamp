@@ -68,15 +68,15 @@ export const getUserByID = async (id: string) : Promise<IUser> => {
     return foundUser;
 };
 
-export const deleteUserByEmail = async (email: string): Promise<IUser> => {
+export const deleteUserById = async (id: string): Promise<IUser> => {
     const userModel = userEntity();
     
     let deletedUser: IUser = {} as IUser;
 
-    await userModel.findOneAndDelete({ email: email }).then((userResult: IUser) => {
+    await userModel.findByIdAndDelete(id).then((userResult: IUser) => {
         deletedUser = userResult;
         if (!deletedUser) {
-            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be deleted by email: ${email}`);
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be deleted by id: ${id}`);
         }
     }).catch((error: ModelNotFoundError) => {
         error.logError();
@@ -86,15 +86,15 @@ export const deleteUserByEmail = async (email: string): Promise<IUser> => {
     return deletedUser;
 };
 
-export const updateUserByEmail = async (user: IUserUpdate, email: string): Promise<IUser> => {
+export const updateUserById = async (user: IUserUpdate, id: string): Promise<IUser> => {
     const userModel = userEntity();
 
     let updatedUser: IUser = {} as IUser;
 
-    await userModel.findOneAndUpdate({ email: email }, user, { returnOriginal: false }).then((userResult: IUser) => {
+    await userModel.findByIdAndUpdate(id, user, { returnOriginal: false }).then((userResult: IUser) => {
         updatedUser = userResult;
         if (!updatedUser) {
-            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be updated by email: ${email}`);
+            throw new ModelNotFoundError(ErrorProviders.USERS, `No user can be updated by id: ${id}`);
         }
     }).catch((error: ModelNotFoundError) => {
         error.logError();

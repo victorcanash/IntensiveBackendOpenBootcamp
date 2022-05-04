@@ -16,25 +16,27 @@ const controller: UsersController = new UsersController();
 
 usersRouter.route('/')
     .get(verifyToken, async (req: Request, res: Response) => {
-        const page: any = req?.query?.page || 1;
-        const limit: any = req?.query?.limit || 10;
+        const page: any = req?.query?.page;
+        const limit: any = req?.query?.limit;
         const id: any = req?.query?.id;
-        const order: any = req?.query?.order || '{}';
+        const order: any = req?.query?.order;
 
-        const fixedOrder: {} = JSON.parse(order);
-
-        const controllerRes = await controller.getUsers(page, limit, fixedOrder, id);
+        const controllerRes = await controller.getUsers(page, limit, order, id);
 
         return res.status(controllerRes.code).send(controllerRes);
     })
 
     .delete(verifyToken, async (req: Request, res: Response) => {
-        const controllerRes = await controller.deleteUser();
+        const id: any = req?.query?.id;
+
+        const controllerRes = await controller.deleteUser(id);
 
         return res.status(controllerRes.code).send(controllerRes);
     })
 
     .put(jsonParser, verifyToken, async (req: Request, res: Response) => {
+        const id: any = req?.query?.id;
+
         const name: string = req?.body?.name;
         const age: number = req?.body?.age;
 
@@ -46,7 +48,7 @@ usersRouter.route('/')
                 age: fixedAge,
             };
 
-            const controllerRes = await controller.updateUser(user);
+            const controllerRes = await controller.updateUser(user, id);
 
             return res.status(controllerRes.code).send(controllerRes);
 
@@ -59,22 +61,23 @@ usersRouter.route('/')
 
 usersRouter.route('/katas')
     .get(verifyToken, async (req: Request, res: Response) => {
-        const page: any = req?.query?.page || 1;
-        const limit: any = req?.query?.limit || 10;
+        const page: any = req?.query?.page;
+        const limit: any = req?.query?.limit;
         const id: any = req?.query?.id;
         const level: any = req?.query?.level;
-        const order: any = req?.query?.order || '{}';
+        const order: any = req?.query?.order;
 
         const fixedLevel: any = level ? fixKataLevelValue(level) : level;
-        const fixedOrder: {} = JSON.parse(order);
 
-        const controllerRes = await controller.getKatas(page, limit, fixedOrder, id, fixedLevel);
+        const controllerRes = await controller.getKatas(page, limit, order, id, fixedLevel);
         
         return res.status(controllerRes.code).send(controllerRes);
     })
 
     .delete(verifyToken, async (req: Request, res: Response) => {
-        const controllerRes = await controller.deleteKatas();
+        const id: any = req?.query?.id;
+
+        const controllerRes = await controller.deleteKatas(id);
 
         return res.status(controllerRes.code).send(controllerRes);
     });

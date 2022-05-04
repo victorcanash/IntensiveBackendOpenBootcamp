@@ -21,16 +21,15 @@ const controller: KatasController = new KatasController();
 
 katasRouter.route('/')
     .get(verifyToken, async (req: Request, res: Response) => {
-        const page: any = req?.query?.page || 1;
-        const limit: any = req?.query?.limit || 10;
+        const page: any = req?.query?.page;
+        const limit: any = req?.query?.limit;
         const id: any = req?.query?.id;
         const level: any = req?.query?.level;
-        const order: any = req?.query?.order || '{}';
+        const order: any = req?.query?.order;
 
         const fixedLevel: any = level ? fixKataLevelValue(level) : level;
-        const fixedOrder: {} = JSON.parse(order);
 
-        const controllerRes: any = await controller.getKatas(page, limit, fixedOrder, id, fixedLevel);
+        const controllerRes: any = await controller.getKatas(page, limit, order, id, fixedLevel);
 
         return res.status(controllerRes.code).send(controllerRes);
     })

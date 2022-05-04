@@ -622,7 +622,7 @@
 					{
 						"in": "query",
 						"name": "page",
-						"required": true,
+						"required": false,
 						"schema": {
 							"format": "double",
 							"type": "number"
@@ -631,7 +631,7 @@
 					{
 						"in": "query",
 						"name": "limit",
-						"required": true,
+						"required": false,
 						"schema": {
 							"format": "double",
 							"type": "number"
@@ -640,7 +640,7 @@
 					{
 						"in": "query",
 						"name": "order",
-						"required": true,
+						"required": false,
 						"schema": {
 							"type": "string"
 						}
@@ -685,6 +685,16 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Missing Permissions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Model Not Found",
 						"content": {
@@ -714,7 +724,16 @@
 						"jwt": []
 					}
 				],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			},
 			"put": {
 				"operationId": "UpdateUser",
@@ -756,6 +775,16 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Missing Permissions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Model Not Found",
 						"content": {
@@ -785,7 +814,16 @@
 						"jwt": []
 					}
 				],
-				"parameters": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -862,7 +900,7 @@
 					{
 						"in": "query",
 						"name": "page",
-						"required": true,
+						"required": false,
 						"schema": {
 							"format": "double",
 							"type": "number"
@@ -871,7 +909,7 @@
 					{
 						"in": "query",
 						"name": "limit",
-						"required": true,
+						"required": false,
 						"schema": {
 							"format": "double",
 							"type": "number"
@@ -880,7 +918,7 @@
 					{
 						"in": "query",
 						"name": "order",
-						"required": true,
+						"required": false,
 						"schema": {
 							"type": "string"
 						}
@@ -888,7 +926,7 @@
 					{
 						"in": "query",
 						"name": "id",
-						"required": true,
+						"required": false,
 						"schema": {
 							"type": "string"
 						}
@@ -933,6 +971,16 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Missing Permissions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Model Not Found",
 						"content": {
@@ -962,7 +1010,16 @@
 						"jwt": []
 					}
 				],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "id",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/api/auth/register": {
@@ -1286,7 +1343,7 @@
 					{
 						"in": "query",
 						"name": "page",
-						"required": true,
+						"required": false,
 						"schema": {
 							"format": "double",
 							"type": "number"
@@ -1295,7 +1352,7 @@
 					{
 						"in": "query",
 						"name": "limit",
-						"required": true,
+						"required": false,
 						"schema": {
 							"format": "double",
 							"type": "number"
@@ -1304,7 +1361,7 @@
 					{
 						"in": "query",
 						"name": "order",
-						"required": true,
+						"required": false,
 						"schema": {
 							"type": "string"
 						}
