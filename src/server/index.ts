@@ -5,6 +5,7 @@ import helmet from 'helmet';
 
 // TODO: HTTPS
 
+import pkg from '../../package.json';
 import { envConfig, corsOptions } from '../config';
 import rootRouter from '../routes';
 
@@ -12,10 +13,25 @@ import rootRouter from '../routes';
 // * Create express server
 const server: Express = express();
 
-
 // * Server settings
 server.set('port', envConfig.PORT);
+server.set('pkg', pkg);
+server.set('json spaces', 4);
 
+// * Security Config
+server.use(helmet());
+server.use(cors(corsOptions));
+
+// * Content Type Config
+server.use(express.urlencoded({
+    extended: true,
+    limit: '50mb'
+}));
+server.use(express.json(
+    {
+        limit: '50mb'
+    }
+));
 
 // * Swagger Config and route
 server.use(
@@ -29,34 +45,14 @@ server.use(
     })
 );
 
-
 // * Define SERVER to use "/api" and use rootRouter from 'index.ts' in routes
 server.use(
     '/api',
     rootRouter
 );
 
-
 // * Static server
 server.use(express.static('public'));
-
-
-// * Security Config
-server.use(helmet());
-server.use(cors(corsOptions));
-
-
-// * Content Type Config
-server.use(express.urlencoded({
-    extended: true,
-    limit: '50mb'
-}));
-server.use(express.json(
-    {
-        limit: '50mb'
-    }
-));
-
 
 // * Redirection Config
 server.get('/', (req: Request, res: Response) => {
