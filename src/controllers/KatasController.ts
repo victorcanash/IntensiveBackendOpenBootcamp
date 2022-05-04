@@ -9,7 +9,7 @@ import { LogSuccess } from '../utils/logger';
 import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataParticipantsByID, deleteKataByID, createKata, existsKataParticipant } from '../domain/orm/Katas.orm';
 import { getUserByEmail, addUserKataByEmail, deleteUserKataByEmail, isKataFromUser } from '../domain/orm/Users.orm';
 import { IKata, IKataUpdate, IKataStars, KataLevels } from '../domain/interfaces/IKata.interface';
-import { IUser } from '../domain/interfaces/IUser.interface';
+import { IUser, UserRoles } from '../domain/interfaces/IUser.interface';
 import { KatasResponse as KatasORMResponse } from '../domain/types';
 
 
@@ -139,22 +139,25 @@ export class KatasController implements IKatasController {
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         const email: any = server.locals.loggedEmail;
+        const role: any = server.locals.loggedRole;
 
-        let exists: boolean = false;
+        if (role !== UserRoles.ADMIN) {
+            let exists: boolean = false;
 
-        await isKataFromUser(email, id).then((existsResult: boolean) => {
-            exists = existsResult;
-            if (!existsResult) {
-                throw new MissingPermissionsError(ErrorProviders.KATAS, `No kata can be deleted by ID: ${id}`);
+            await isKataFromUser(email, id).then((existsResult: boolean) => {
+                exists = existsResult;
+                if (!existsResult) {
+                    throw new MissingPermissionsError(ErrorProviders.KATAS, `No kata can be deleted by ID: ${id}`);
+                }
+                
+            }).catch((error: BaseError) => {
+                error.logError();
+                response = error.getResponse();
+            });
+
+            if (!exists) {
+                return response;
             }
-            
-        }).catch((error: BaseError) => {
-            error.logError();
-            response = error.getResponse();
-        });
-
-        if (!exists) {
-            return response;
         }
 
         let deletedKata = {} as IKata;
@@ -197,22 +200,25 @@ export class KatasController implements IKatasController {
         let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         const email: any = server.locals.loggedEmail;
+        const role: any = server.locals.loggedRole;
 
-        let exists: boolean = false;
+        if (role !== UserRoles.ADMIN) {
+            let exists: boolean = false;
 
-        await isKataFromUser(email, id).then((existsResult: boolean) => {
-            exists = existsResult;
+            await isKataFromUser(email, id).then((existsResult: boolean) => {
+                exists = existsResult;
+                if (!exists) {
+                    throw new MissingPermissionsError(ErrorProviders.KATAS, `No kata can be updated by id: ${id}`);
+                }
+                
+            }).catch((error: BaseError) => {
+                error.logError();
+                response = error.getResponse();
+            });
+
             if (!exists) {
-                throw new MissingPermissionsError(ErrorProviders.KATAS, `No kata can be updated by id: ${id}`);
+                return response;
             }
-            
-        }).catch((error: BaseError) => {
-            error.logError();
-            response = error.getResponse();
-        });
-
-        if (!exists) {
-            return response;
         }
 
         await updateKataByID(kata, id).then((updatedKata: IKata) => {
