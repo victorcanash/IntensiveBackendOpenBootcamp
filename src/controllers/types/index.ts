@@ -91,6 +91,19 @@ export type BasicResponse = {
 }
 
 /**
+ * Uploaded files response for Controllers
+ */
+export type FilesResponse = {
+    code: number,
+    message: string,
+    files: {
+            name: string,
+            mimetype: string,
+            size: string
+    }[]
+}
+
+/**
  * Basic JSON response with the current date for Controllers
  */
  export type DateResponse = {

@@ -2,11 +2,11 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body, Security, Response, S
 import { StatusCodes } from 'http-status-codes';
 
 import { IKatasController } from './interfaces';
-import { ErrorResponse, BasicResponse, KataResponse, KatasResponse } from './types';
+import { ErrorResponse, BasicResponse, FilesResponse, KataResponse, KatasResponse } from './types';
 import server from '../server';
 import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
 import { LogSuccess } from '../utils/logger';
-import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataParticipantsByID, deleteKataByID, createKata, existsKataParticipant } from '../domain/orm/Katas.orm';
+import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataFilesByID, updateKataParticipantsByID, deleteKataByID, createKata, existsKataParticipant } from '../domain/orm/Katas.orm';
 import { getUserByEmail, addUserKataByEmail, deleteUserKataByEmail, isKataFromUser } from '../domain/orm/Users.orm';
 import { IKata, IKataUpdate, IKataStars, KataLevels } from '../domain/interfaces/IKata.interface';
 import { IUser, UserRoles } from '../domain/interfaces/IUser.interface';
@@ -87,8 +87,8 @@ export class KatasController implements IKatasController {
                 users: []
             },
             creator: '',
-            solution: kata.solution,
-            participants: []
+            participants: [],
+            files: []
         };
 
         await getUserByEmail(email).then((foundUser: IUser | any) => {
@@ -192,7 +192,7 @@ export class KatasController implements IKatasController {
 
     @Put('/')
     @Security('jwt')
-    @SuccessResponse(StatusCodes.OK)
+    @SuccessResponse(StatusCodes.CREATED)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
@@ -226,7 +226,7 @@ export class KatasController implements IKatasController {
 
         await updateKataByID(kata, id).then((updatedKata: IKata) => {
             response = {
-                code: StatusCodes.OK,
+                code: StatusCodes.CREATED,
                 message: `Kata updated successfully by ID: ${id}`
             };
             LogSuccess(`[/api/katas] Update Kata by ID: ${id}`);
@@ -240,7 +240,7 @@ export class KatasController implements IKatasController {
 
     @Put('/stars')
     @Security('jwt')
-    @SuccessResponse(StatusCodes.OK)
+    @SuccessResponse(StatusCodes.CREATED)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
@@ -283,7 +283,7 @@ export class KatasController implements IKatasController {
 
         await updateKataStarsByID(kataStars, id).then((r) => {
             response = {
-                code: StatusCodes.OK,
+                code: StatusCodes.CREATED,
                 message: `Kata Stars updated successfully by ID: ${id}`,
             };
             LogSuccess(`[/api/katas/stars] Update Kata Stars by ID: ${id}`);
@@ -295,7 +295,7 @@ export class KatasController implements IKatasController {
         return response;
     }
 
-    @Post('/upload')
+    @Put('/files')
     @Security('jwt')
     @SuccessResponse(StatusCodes.CREATED)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
@@ -304,32 +304,62 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     // eslint-disable-next-line no-undef
-    public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[]): Promise<BasicResponse | ErrorResponse> {
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[], @Query()id: string): Promise<BasicResponse | ErrorResponse> {
+        let response: FilesResponse | ErrorResponse = this.somethingWrongError.getResponse();
+        
+        const email: any = server.locals.payload?.email;
+        const role: any = server.locals.payload?.role;
 
-        // const email: any = server.locals.loggedEmail;
+        if (role !== UserRoles.ADMIN) {
+            let exists: boolean = false;
 
-        response = {
-            code: StatusCodes.CREATED,
-            message: 'File was uploaded successfuly'
-        };
+            await isKataFromUser(email, id).then((existsResult: boolean) => {
+                exists = existsResult;
+                if (!exists) {
+                    throw new MissingPermissionsError(ErrorProviders.KATAS, `No kata files can be updated by id: ${id}`);
+                }
+                
+            }).catch((error: BaseError) => {
+                error.logError();
+                response = error.getResponse();
+            });
 
+            if (!exists) {
+                return response;
+            }
+        }
+
+        const filenames: string[] = [];
+        files.forEach((file) => {
+            filenames.push(file.filename);
+        });
+
+        await updateKataFilesByID(id, filenames).then((updatedKata: IKata) => {
+            const filesInfo = [] as {name: string, mimetype: string, size: string}[];
+            files.forEach((file) => {
+                filesInfo.push({
+                    name: file.originalname,
+                    mimetype: file.mimetype,
+                    size: `${file.size} Bytes`
+                });
+            });
+            response = {
+                code: StatusCodes.CREATED,
+                message: `Kata files was uploaded successfuly by ID: ${id}`,
+                files: filesInfo
+            };
+            LogSuccess(`[/api/katas] Update Kata Files by ID: ${id}`);
+
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
+        
         return response;
-
-        /* return {
-            status: true,
-            message: 'File was uploaded successfuly',
-            payload: {
-                name: file.name,
-                mimetype: file.mimetype,
-                size: file.size
-            },
-        }; */
     }
 
     @Put('/resolve')
     @Security('jwt')
-    @SuccessResponse(StatusCodes.OK)
+    @SuccessResponse(StatusCodes.CREATED)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
@@ -355,14 +385,14 @@ export class KatasController implements IKatasController {
      
         await updateKataParticipantsByID(id, participant).then((kata) => {
             response = {
-                code: StatusCodes.OK,
+                code: StatusCodes.CREATED,
                 message: '',
             };
-            if (kata.solution === solution) {
+            /* if (kata.solution === solution) {
                 response.message = `Kata Solution with id ${id} checked successfully, CORRECT solution`;
             } else {
                 response.message = `Kata Solution with id ${id} checked successfully, WRONG solution`;
-            }
+            } */
             LogSuccess(`[/api/katas/solution] Check Kata Solution: ${solution} By ID: ${id}`);
 
         }).catch((error: BaseError) => {

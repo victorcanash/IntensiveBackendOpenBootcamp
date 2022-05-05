@@ -19,24 +19,14 @@ export interface IKata {
         average: number,
         users: IKataStars[]
     },
-    creator: string, // Id of user
-    solution: string,
-    participants: string[]
-}
-
-export interface IKataCreate {
-    name: string,
-    description: string,
-    level: KataLevels,
-    intents: number,
     creator: string,
-    solution: string,
+    participants: string[],
+    files: string[]
 }
 
 export interface IKataUpdate {
     name: string,
     description: string,
     level: KataLevels,
-    intents: number,
-    solution: string,
+    intents: number
 }

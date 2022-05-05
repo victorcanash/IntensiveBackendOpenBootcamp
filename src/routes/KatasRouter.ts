@@ -52,10 +52,9 @@ katasRouter.route('/')
         const description: string = req?.body?.description || '';
         const level: any = req?.body?.level || KataLevels.BASIC;
         const intents: number = req?.body?.intents || 1;
-        const solution: string = req?.body?.solution || '';
 
         if (id && name && description && 
-            level && intents && solution) {
+            level && intents) {
             const fixedIntents = fixNumberValue(intents, 1, 1000, true);
             const fixedLevel: any = level ? fixKataLevelValue(level) : level;
 
@@ -63,8 +62,7 @@ katasRouter.route('/')
                 name: name,
                 description: description,
                 level: fixedLevel,
-                intents: fixedIntents,
-                solution: solution,
+                intents: fixedIntents
             };
 
             const controllerRes = await controller.updateKata(kata, id);
@@ -83,10 +81,9 @@ katasRouter.route('/')
         const description: string = req?.body?.description || '';
         const level: any = req?.body?.level || KataLevels.BASIC;
         const intents: number = req?.body?.intents || 1;
-        const solution: string = req?.body?.solution || '';
 
         if (name && description && level && 
-            intents && solution) {
+            intents) {
             const fixedIntents = fixNumberValue(intents, 1, 1000, true);
             const fixedLevel: any = level ? fixKataLevelValue(level) : level;
 
@@ -94,8 +91,7 @@ katasRouter.route('/')
                 name: name,
                 description: description,
                 level: fixedLevel,
-                intents: fixedIntents,
-                solution: solution
+                intents: fixedIntents
             };
 
             const controllerRes = await controller.createKata(kata);
@@ -152,25 +148,33 @@ katasRouter.route('/resolve')
         }
     });
 
-katasRouter.route('/upload')
+katasRouter.route('/files')
     // .get(verifyToken, async)
 
-    .post(verifyToken, async (req: Request, res: Response) => {
-        const upload = getKatasUpload();
-        upload(req, res, async (err: any) => {
-            const multerError: BaseError | undefined = getKatasUploadErrors(req, err);
-            if (multerError) {
-                multerError.logError();
-                return res.status(multerError.statusCode).send(multerError.getResponse());
-            }
+    .put(verifyToken, async (req: Request, res: Response) => {
+        const id: any = req?.query?.id;
 
-            const files: any = req.files;
-            
-            const controllerRes = await controller.updateKataFiles(files);
+        if (id) {
+            const upload = getKatasUpload();
+            upload(req, res, async (err: any) => {
+                const multerError: BaseError | undefined = getKatasUploadErrors(req, err);
+                if (multerError) {
+                    multerError.logError();
+                    return res.status(multerError.statusCode).send(multerError.getResponse());
+                }
 
-            return res.status(controllerRes?.code).send(controllerRes);
-            
-        });
+                const files: any = req.files;
+                
+                const controllerRes = await controller.updateKataFiles(files, id);
+
+                return res.status(controllerRes?.code).send(controllerRes);   
+            });
+
+        } else {
+            const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'No kata files can be uploaded');
+            badQueryError.logError();
+            return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+        }
     });
 
 export default katasRouter;

@@ -47,9 +47,10 @@ export interface IKatasController {
     updateKata(kata: IKataUpdate, id: string): Promise<BasicResponse | ErrorResponse>
     // Update Kata Stars
     updateKataStars(kataStars: IKataStars, id: string): Promise<BasicResponse | ErrorResponse>
+    // Update Kata Files
+    // eslint-disable-next-line no-undef
+    updateKataFiles(file: Express.Multer.File[], id: string): Promise<BasicResponse | ErrorResponse>
     // Check Kata Solution
     sendKataSolution(solution: string, id: string): Promise<BasicResponse | ErrorResponse>
     // Update kata file
-    // eslint-disable-next-line no-undef
-    updateKataFiles(file: Express.Multer.File[]): Promise<BasicResponse | ErrorResponse>
 }

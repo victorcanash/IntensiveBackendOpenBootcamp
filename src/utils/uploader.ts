@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import multer from 'multer';
+import * as fs from 'fs';
 
 import { BadQueryError, BaseError, ErrorProviders, SomethingWrongError } from '../errors';
 import { katasMulterConfig } from '../config/multer.config';
@@ -12,11 +13,11 @@ const getUpload = (_config: any, _errorProvider: ErrorProviders) => {
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, config.destination);
-            },
-            filename: function (req, file, cb) {
+        },
+        filename: function (req, file, cb) {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
             cb(null, file.fieldname + '-' + uniqueSuffix);
-            }
+        }
     });
 
     // eslint-disable-next-line no-undef
@@ -68,10 +69,23 @@ const getUploadErrors = (_config: any, _errorProvider: ErrorProviders, req: Requ
         multerError = new SomethingWrongError(errorProvider);
 
     } else if (!req.files) {
+        multerError = new BadQueryError(errorProvider, `There is no ${config.fieldName} field`);
+    } else if (req.files.length < 1) {
         multerError = new BadQueryError(errorProvider, `${config.fieldName} field is empty`);
     }
 
     return multerError;
+};
+
+// eslint-disable-next-line no-undef
+const deleteFiles = (errorProvider: ErrorProviders, path: string, filenames: string[]) => {
+    try {
+        filenames.forEach((filename) => {
+            fs.unlinkSync(path + filename);
+        });     
+    } catch (error) {
+        new SomethingWrongError(errorProvider).logError();
+    }
 };
 
 export const getKatasUpload = () => {
@@ -80,4 +94,10 @@ export const getKatasUpload = () => {
 
 export const getKatasUploadErrors = (req: Request, error: any) => {
     return getUploadErrors(katasMulterConfig, ErrorProviders.KATAS, req, error);
+};
+
+// eslint-disable-next-line no-undef
+export const deleteKataFiles = (filenames: string[]) => {
+    const path: string = katasMulterConfig.destination + '/';
+    deleteFiles(ErrorProviders.KATAS, path, filenames);
 };

@@ -102,7 +102,7 @@ export class UsersController implements IUsersController {
 
     @Put('/')
     @Security('jwt')
-    @SuccessResponse(StatusCodes.OK)
+    @SuccessResponse(StatusCodes.CREATED)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
@@ -125,7 +125,7 @@ export class UsersController implements IUsersController {
         
         await updateUserById(user, findId).then((updatedUser: IUser) => {
             response = {
-                code: StatusCodes.OK,
+                code: StatusCodes.CREATED,
                 message: `User with email: ${updatedUser.email} updated successfully`
             };
             LogSuccess(`[/api/users] Update user by email: ${updatedUser.email}`);

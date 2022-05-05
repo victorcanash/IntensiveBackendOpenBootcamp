@@ -21,8 +21,8 @@ export const kataEntity = () => {
                 ]
             },
             creator: { type: String, required: true },
-            solution: { type: String, required: true },
-            participants: { type: [String], required: true }
+            participants: { type: [String], required: true },
+            files: { type: [String], required: true }
         },
         { 
             timestamps: { 

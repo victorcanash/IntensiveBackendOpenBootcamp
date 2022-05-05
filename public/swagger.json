@@ -242,10 +242,13 @@
 					"creator": {
 						"type": "string"
 					},
-					"solution": {
-						"type": "string"
-					},
 					"participants": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"files": {
 						"items": {
 							"type": "string"
 						},
@@ -259,8 +262,8 @@
 					"intents",
 					"stars",
 					"creator",
-					"solution",
-					"participants"
+					"participants",
+					"files"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -456,17 +459,13 @@
 					"intents": {
 						"type": "number",
 						"format": "double"
-					},
-					"solution": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"name",
 					"description",
 					"level",
-					"intents",
-					"solution"
+					"intents"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -738,7 +737,7 @@
 			"put": {
 				"operationId": "UpdateUser",
 				"responses": {
-					"200": {
+					"201": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -1558,7 +1557,7 @@
 			"put": {
 				"operationId": "UpdateKata",
 				"responses": {
-					"200": {
+					"201": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -1660,7 +1659,7 @@
 			"put": {
 				"operationId": "UpdateKataStars",
 				"responses": {
-					"200": {
+					"201": {
 						"description": "",
 						"content": {
 							"application/json": {
@@ -1758,8 +1757,8 @@
 				}
 			}
 		},
-		"/api/katas/upload": {
-			"post": {
+		"/api/katas/files": {
+			"put": {
 				"operationId": "UpdateKataFiles",
 				"responses": {
 					"201": {
@@ -1828,7 +1827,16 @@
 						"jwt": []
 					}
 				],
-				"parameters": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -1857,7 +1865,7 @@
 			"put": {
 				"operationId": "SendKataSolution",
 				"responses": {
-					"200": {
+					"201": {
 						"description": "",
 						"content": {
 							"application/json": {

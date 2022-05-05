@@ -2,7 +2,10 @@ import { kataEntity } from '../entities/Kata.entity';
 import { IKata, IKataStars, IKataUpdate, KataLevels } from '../interfaces/IKata.interface';
 import { KatasResponse } from '../types';
 import { ModelNotFoundError, ErrorProviders } from '../../errors';
+import { deleteKataFiles } from '../../utils/uploader';
 
+
+const modelSelect: string = 'description level intents stars creator participants created_at updated_at';
 
 export const getAllKatas = async (page: number, limit: number, order: {}, level?: KataLevels): Promise<KatasResponse> => {
     const kataModel = kataEntity();
@@ -14,6 +17,7 @@ export const getAllKatas = async (page: number, limit: number, order: {}, level?
 
     await kataModel.find({ level: { $regex: levelReg } })
         .sort(order)
+        .select(modelSelect)
         .limit(limit)
         .skip((page - 1) * limit)
         .exec().then((katas: IKata[]) => {
@@ -33,7 +37,7 @@ export const getKataByID = async (id: string) : Promise<IKata> => {
 
     let foundKata: IKata = {} as IKata;
 
-    await kataModel.findById(id).then((kataResult: IKata) => {
+    await kataModel.findById(id).select(modelSelect).then((kataResult: IKata) => {
         foundKata = kataResult;
         if (!foundKata) {
             throw new ModelNotFoundError(ErrorProviders.KATAS, `No kata can be found by ID: ${id}`);
@@ -61,6 +65,10 @@ export const deleteKataByID = async (id: string): Promise<IKata> => {
         throw error;
     });
 
+    if (deletedKata.files.length > 0) {
+        deleteKataFiles(deletedKata.files);
+    }
+
     return deletedKata;
 };
 
@@ -74,10 +82,13 @@ export const deleteKatasByID = async (ids: string[]): Promise<number> => {
         if (!deleteResult?.acknowledged) {
             throw new ModelNotFoundError(ErrorProviders.KATAS, `No katas can be deleted by id: ${ids}`);
         }
+        
     }).catch((error: ModelNotFoundError) => {
         error.logError();
         throw error;
     });
+
+    // TODO: Delete Katas Files
 
     return deletedCount;
 };
@@ -158,6 +169,44 @@ export const updateKataStarsByID = async (kataStars: IKataStars, id: string): Pr
         updatedKata = kataResult;
         if (!updatedKata) {
             throw new ModelNotFoundError(ErrorProviders.KATAS, `No kata stars can be updated by id: ${id}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    return updatedKata;
+};
+
+// eslint-disable-next-line no-undef
+export const updateKataFilesByID = async (id: string, filenames: string[]) : Promise<IKata> => {
+    const kataModel = kataEntity();
+
+    // Find kata
+    let foundKata: IKata = {} as IKata;
+
+    await kataModel.findById(id).then((kataResult: IKata) => {
+        foundKata = kataResult;
+        if (!foundKata) {
+            throw new ModelNotFoundError(ErrorProviders.KATAS, `No kata participants can be updated by id: ${id}`);
+        }
+    }).catch((error: ModelNotFoundError) => {
+        error.logError();
+        throw error;
+    });
+
+    // Delete old kata files
+    if (foundKata.files.length > 0) {
+        deleteKataFiles(foundKata.files);
+    }
+
+    // Update Kata Files
+    let updatedKata: IKata = {} as IKata;
+
+    await kataModel.findByIdAndUpdate(id, { files: filenames }, { returnOriginal: false }).then((kataResult: IKata) => {
+        updatedKata = kataResult;
+        if (!updatedKata) {
+            throw new ModelNotFoundError(ErrorProviders.KATAS, `No kata files can be updated by id: ${id}`);
         }
     }).catch((error: ModelNotFoundError) => {
         error.logError();
