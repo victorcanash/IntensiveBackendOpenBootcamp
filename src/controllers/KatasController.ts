@@ -304,7 +304,7 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     // eslint-disable-next-line no-undef
-    public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[], @Query()id: string): Promise<BasicResponse | ErrorResponse> {
+    public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[], @Query()id: string): Promise<FilesResponse | ErrorResponse> {
         let response: FilesResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         const email: any = server.locals.payload?.email;

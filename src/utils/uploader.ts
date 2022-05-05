@@ -77,7 +77,6 @@ const getUploadErrors = (_config: any, _errorProvider: ErrorProviders, req: Requ
     return multerError;
 };
 
-// eslint-disable-next-line no-undef
 const deleteFiles = (errorProvider: ErrorProviders, path: string, filenames: string[]) => {
     try {
         filenames.forEach((filename) => {
@@ -88,6 +87,18 @@ const deleteFiles = (errorProvider: ErrorProviders, path: string, filenames: str
     }
 };
 
+const getFilesDatas = (errorProvider: ErrorProviders, path: string, filenames: string[]) => {
+    const filesDatas: string[] = [];
+    try {
+        filenames.forEach((filename) => {
+            filesDatas.push(fs.readFileSync(path + filename, 'utf8'));
+        });
+    } catch (error) {
+        new SomethingWrongError(errorProvider).logError();
+    }
+    return filesDatas;
+};
+
 export const getKatasUpload = () => {
     return getUpload(katasMulterConfig, ErrorProviders.KATAS);
 };
@@ -96,8 +107,12 @@ export const getKatasUploadErrors = (req: Request, error: any) => {
     return getUploadErrors(katasMulterConfig, ErrorProviders.KATAS, req, error);
 };
 
-// eslint-disable-next-line no-undef
 export const deleteKataFiles = (filenames: string[]) => {
     const path: string = katasMulterConfig.destination + '/';
     deleteFiles(ErrorProviders.KATAS, path, filenames);
+};
+
+export const getKataFilesDatas = (filenames: string[]) => {
+    const path: string = katasMulterConfig.destination + '/';
+    return getFilesDatas(ErrorProviders.KATAS, path, filenames);
 };
