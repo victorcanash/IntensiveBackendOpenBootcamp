@@ -6,7 +6,7 @@ import { KatasController } from '../controllers/KatasController';
 import { KataLevels, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 import { fixKataLevelValue, fixNumberValue } from '../utils/valuesFixer';
 import { BaseError, BadQueryError, ErrorProviders } from '../errors';
-import { katasUpload, getKatasMulterError } from '../config/multer.config';
+import { getKatasUpload, getKatasUploadErrors } from '../utils/uploader';
 
 
 const jsonParser = bodyParser.json();
@@ -153,9 +153,12 @@ katasRouter.route('/resolve')
     });
 
 katasRouter.route('/upload')
+    // .get(verifyToken, async)
+
     .post(verifyToken, async (req: Request, res: Response) => {
-        katasUpload(req, res, async (err: any) => {
-            const multerError: BaseError | undefined = getKatasMulterError(req, err);
+        const upload = getKatasUpload();
+        upload(req, res, async (err: any) => {
+            const multerError: BaseError | undefined = getKatasUploadErrors(req, err);
             if (multerError) {
                 multerError.logError();
                 return res.status(multerError.statusCode).send(multerError.getResponse());
