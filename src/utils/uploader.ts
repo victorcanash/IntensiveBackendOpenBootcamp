@@ -12,11 +12,11 @@ const getUpload = (_config: any, _errorProvider: ErrorProviders) => {
 
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, config.destination);
+            cb(null, 'public/' + config.destination);
         },
         filename: function (req, file, cb) {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-            cb(null, file.fieldname + '-' + uniqueSuffix);
+            cb(null, uniqueSuffix + '-' + file.originalname);
         }
     });
 
@@ -87,18 +87,6 @@ const deleteFiles = (errorProvider: ErrorProviders, path: string, filenames: str
     }
 };
 
-const getFilesDatas = (errorProvider: ErrorProviders, path: string, filenames: string[]) => {
-    const filesDatas: string[] = [];
-    try {
-        filenames.forEach((filename) => {
-            filesDatas.push(fs.readFileSync(path + filename, 'utf8'));
-        });
-    } catch (error) {
-        new SomethingWrongError(errorProvider).logError();
-    }
-    return filesDatas;
-};
-
 export const getKatasUpload = () => {
     return getUpload(katasMulterConfig, ErrorProviders.KATAS);
 };
@@ -108,11 +96,6 @@ export const getKatasUploadErrors = (req: Request, error: any) => {
 };
 
 export const deleteKataFiles = (filenames: string[]) => {
-    const path: string = katasMulterConfig.destination + '/';
+    const path: string = 'public/' + katasMulterConfig.destination;
     deleteFiles(ErrorProviders.KATAS, path, filenames);
-};
-
-export const getKataFilesDatas = (filenames: string[]) => {
-    const path: string = katasMulterConfig.destination + '/';
-    return getFilesDatas(ErrorProviders.KATAS, path, filenames);
 };
