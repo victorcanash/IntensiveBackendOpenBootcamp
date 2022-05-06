@@ -6,7 +6,7 @@ import { KatasController } from '../controllers/KatasController';
 import { KataLevels, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 import { fixKataLevelValue, fixNumberValue } from '../utils/valuesFixer';
 import { BaseError, BadQueryError, ErrorProviders } from '../errors';
-import { getKatasUpload, getKatasUploadErrors } from '../utils/uploader';
+import { getKatasUpload, getKatasUploadErrors } from '../utils/multerUploader';
 
 
 const jsonParser = bodyParser.json();

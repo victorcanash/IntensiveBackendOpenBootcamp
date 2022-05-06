@@ -2,7 +2,7 @@ import { kataEntity } from '../entities/Kata.entity';
 import { IKata, IKataStars, IKataUpdate, KataLevels } from '../interfaces/IKata.interface';
 import { KatasResponse } from '../types';
 import { ModelNotFoundError, ErrorProviders } from '../../errors';
-import { deleteKataFiles } from '../../utils/uploader';
+import { deleteKataFiles } from '../../utils/multerUploader';
 
 
 const modelSelect: string = 'description level intents stars creator participants created_at updated_at';
