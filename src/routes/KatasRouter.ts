@@ -149,8 +149,6 @@ katasRouter.route('/resolve')
     });
 
 katasRouter.route('/files')
-    // .get(verifyToken, async)
-
     .put(verifyToken, async (req: Request, res: Response) => {
         const id: any = req?.query?.id;
 

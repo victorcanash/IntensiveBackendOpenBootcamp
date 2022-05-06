@@ -91,7 +91,16 @@ export type BasicResponse = {
 }
 
 /**
- * Uploaded files response for Controllers
+ * Kata Solution JSON response for Controllers
+ */
+ export type KataSolutionResponse = {
+    code: number,
+    message: string,
+    filepaths: string[]
+}
+
+/**
+ * Uploaded files JSON response for Controllers
  */
 export type FilesResponse = {
     code: number,

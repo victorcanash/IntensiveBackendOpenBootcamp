@@ -34,7 +34,15 @@ server.use(express.json(
     }
 ));
 
-// * Swagger Config and route
+// * Define SERVER to use "/api" and use rootRouter from 'index.ts' in routes
+server.use(
+    '/api',
+    rootRouter
+);
+
+// * Static server
+server.use(express.static('public'));
+
 server.use(
     '/docs',
     swaggerUi.serve,
@@ -45,15 +53,6 @@ server.use(
         }
     })
 );
-
-// * Define SERVER to use "/api" and use rootRouter from 'index.ts' in routes
-server.use(
-    '/api',
-    rootRouter
-);
-
-// * Static server
-server.use(express.static('public'));
 
 // * Redirection Config
 server.get('/', (req: Request, res: Response) => {

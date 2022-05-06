@@ -2,7 +2,7 @@ import { Delete, Get, Post, Put, Query, Route, Tags, Body, Security, Response, S
 import { StatusCodes } from 'http-status-codes';
 
 import { IKatasController } from './interfaces';
-import { ErrorResponse, BasicResponse, FilesResponse, KataResponse, KatasResponse } from './types';
+import { ErrorResponse, BasicResponse, FilesResponse, KataResponse, KatasResponse, KataSolutionResponse } from './types';
 import server from '../server';
 import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
 import { LogSuccess } from '../utils/logger';
@@ -11,6 +11,7 @@ import { getUserByEmail, addUserKataByEmail, deleteUserKataByEmail, isKataFromUs
 import { IKata, IKataUpdate, IKataStars, KataLevels } from '../domain/interfaces/IKata.interface';
 import { IUser, UserRoles } from '../domain/interfaces/IUser.interface';
 import { KatasResponse as KatasORMResponse } from '../domain/types';
+import { katasMulterConfig } from '../config/multer.config';
 
 
 @Route('/api/katas')
@@ -365,8 +366,8 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async sendKataSolution(@Body()solution: string, @Query()id: string): Promise<BasicResponse | ErrorResponse> { 
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async sendKataSolution(@Body()solution: string, @Query()id: string): Promise<KataSolutionResponse | ErrorResponse> { 
+        let response: KataSolutionResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
         const email: any = server.locals.payload?.email;
 
@@ -382,18 +383,18 @@ export class KatasController implements IKatasController {
         if (participant === '') {
             return response;
         }
-     
-        await updateKataParticipantsByID(id, participant).then((kata) => {
+
+        await updateKataParticipantsByID(id, participant).then((kataResult: IKata) => {
+            const filepathsInfo: string[] = [];
+            kataResult.files.forEach((file) => {
+                filepathsInfo.push(katasMulterConfig.destination + file);
+            });
             response = {
                 code: StatusCodes.CREATED,
-                message: '',
+                message: `Kata solution was sent successfuly by ID: ${id}`,
+                filepaths: filepathsInfo
             };
-            /* if (kata.solution === solution) {
-                response.message = `Kata Solution with id ${id} checked successfully, CORRECT solution`;
-            } else {
-                response.message = `Kata Solution with id ${id} checked successfully, WRONG solution`;
-            } */
-            LogSuccess(`[/api/katas/solution] Check Kata Solution: ${solution} By ID: ${id}`);
+            LogSuccess(`[/api/katas/solution] Send Kata Solution By ID: ${id}`);
 
         }).catch((error: BaseError) => {
             response = error.getResponse();
