@@ -1,12 +1,12 @@
 import { Request } from 'express';
 import multer from 'multer';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 
 import { BadQueryError, BaseError, ErrorProviders, SomethingWrongError } from '../errors';
 import { katasMulterConfig } from '../config/multer.config';
 
 
-const getUpload = (_config: any, _errorProvider: ErrorProviders) => {
+const getMulterHandler = (_config: any, _errorProvider: ErrorProviders) => {
     const config = _config;
     const errorProvider = _errorProvider;
 
@@ -45,7 +45,7 @@ const getUpload = (_config: any, _errorProvider: ErrorProviders) => {
     return newUpload;
 };
 
-const getUploadErrors = (_config: any, _errorProvider: ErrorProviders, req: Request, error: any) => {
+const getMulterError = (_config: any, _errorProvider: ErrorProviders, req: Request, error: any) => {
     const config = _config;
     const errorProvider: ErrorProviders = _errorProvider;
 
@@ -77,7 +77,7 @@ const getUploadErrors = (_config: any, _errorProvider: ErrorProviders, req: Requ
     return multerError;
 };
 
-const deleteFiles = (errorProvider: ErrorProviders, path: string, filenames: string[]) => {
+/* const deleteFiles = (errorProvider: ErrorProviders, path: string, filenames: string[]) => {
     try {
         filenames.forEach((filename) => {
             fs.unlinkSync(path + filename);
@@ -85,17 +85,17 @@ const deleteFiles = (errorProvider: ErrorProviders, path: string, filenames: str
     } catch (error) {
         new SomethingWrongError(errorProvider).logError();
     }
+}; */
+
+export const getKatasMulterHandler = () => {
+    return getMulterHandler(katasMulterConfig, ErrorProviders.KATAS);
 };
 
-export const getKatasUpload = () => {
-    return getUpload(katasMulterConfig, ErrorProviders.KATAS);
+export const getKatasMulterError = (req: Request, error: any) => {
+    return getMulterError(katasMulterConfig, ErrorProviders.KATAS, req, error);
 };
 
-export const getKatasUploadErrors = (req: Request, error: any) => {
-    return getUploadErrors(katasMulterConfig, ErrorProviders.KATAS, req, error);
-};
-
-export const deleteKataFiles = (filenames: string[]) => {
+/* export const deleteKataFiles = (filenames: string[]) => {
     const path: string = 'public/' + katasMulterConfig.destination;
     deleteFiles(ErrorProviders.KATAS, path, filenames);
-};
+}; */
