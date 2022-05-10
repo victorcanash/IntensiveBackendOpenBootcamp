@@ -5,7 +5,7 @@ import { mongooseOptions } from '../../config/mongo.config';
 import { LogError, LogSuccess } from '../../utils/logger';
 
 
-const mongooseUri = envConfig.DB_URI;
+const mongooseUri = `${envConfig.DB_URI}`;
 
 export const initMongo = () => {
     mongoose.connect(mongooseUri, mongooseOptions).then(
