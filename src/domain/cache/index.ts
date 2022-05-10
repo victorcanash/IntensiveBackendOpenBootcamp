@@ -4,7 +4,7 @@ import { envConfig } from '../../config/env.config';
 import { LogError, LogSuccess } from '../../utils/logger';
 
 
-const redisUrl = `redis://${envConfig.REDIS_HOST}:${envConfig.REDIS_PORT}`;
+const redisUrl = envConfig.REDIS_URI;
 
 const client = redis.createClient({ 
     url: redisUrl 
