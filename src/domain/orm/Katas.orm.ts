@@ -2,7 +2,7 @@ import { kataEntity } from '../entities/Kata.entity';
 import { IKata, IKataStars, IKataUpdate, KataLevels } from '../interfaces/IKata.interface';
 import { KatasResponse } from '../types';
 import { ModelNotFoundError, ErrorProviders } from '../../errors';
-import { deleteKataFiles } from '../../utils/multerUploader';
+import { deleteKataFilesS3 } from '../../utils/s3';
 
 
 const modelSelect: string = 'description level intents stars creator participants created_at updated_at';
@@ -66,7 +66,7 @@ export const deleteKataByID = async (id: string): Promise<IKata> => {
     });
 
     if (deletedKata.files.length > 0) {
-        deleteKataFiles(deletedKata.files);
+        deleteKataFilesS3(deletedKata.files);
     }
 
     return deletedKata;
@@ -197,7 +197,7 @@ export const updateKataFilesByID = async (id: string, filenames: string[]) : Pro
 
     // Delete old kata files
     if (foundKata.files.length > 0) {
-        deleteKataFiles(foundKata.files);
+        deleteKataFilesS3(foundKata.files);
     }
 
     // Update Kata Files
@@ -219,6 +219,8 @@ export const updateKataFilesByID = async (id: string, filenames: string[]) : Pro
 export const updateKataParticipantsByID = async (id: string, participant: string) : Promise<IKata> => {
     const kataModel = kataEntity();
 
+    const participantId = participant.toString();
+
     // Find kata
     let foundKata: IKata = {} as IKata;
 
@@ -235,14 +237,14 @@ export const updateKataParticipantsByID = async (id: string, participant: string
     // Set Kata Participants
     let existsParticipant: boolean = false;
     for (let i = 0; i < foundKata.participants.length; i++) {
-        if (foundKata.participants[i] === participant) {
-            foundKata.participants[i] = participant;
+        if (foundKata.participants[i] === participantId) {
+            foundKata.participants[i] = participantId;
             existsParticipant = true;
             break;
         }
     }
     if (!existsParticipant) {
-        foundKata.participants.push(participant);
+        foundKata.participants.push(participantId);
     }
 
     // Update Kata Participants

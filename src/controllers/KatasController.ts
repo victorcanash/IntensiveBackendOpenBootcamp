@@ -1,17 +1,19 @@
 import { Delete, Get, Post, Put, Query, Route, Tags, Body, Security, Response, SuccessResponse, UploadedFiles } from 'tsoa';
 import { StatusCodes } from 'http-status-codes';
+import fs from 'fs';
+import * as util from 'util';
 
 import { IKatasController } from './interfaces';
-import { ErrorResponse, BasicResponse, FilesResponse, KataResponse, KatasResponse, KataSolutionResponse } from './types';
+import { ErrorResponse, BasicResponse, FilesResponse, KataResponse, KatasResponse, KataSolutionResponse, ReadableResponse } from './types';
 import server from '../server';
-import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders, ErrorTypes } from '../errors';
+import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders, ErrorTypes, BadQueryError } from '../errors';
 import { LogSuccess } from '../utils/logger';
 import { getAllKatas, getKataByID, updateKataByID, updateKataStarsByID, updateKataFilesByID, updateKataParticipantsByID, deleteKataByID, createKata, existsKataParticipant } from '../domain/orm/Katas.orm';
 import { getUserByEmail, addUserKataByEmail, deleteUserKataByEmail, isKataFromUser } from '../domain/orm/Users.orm';
 import { IKata, IKataUpdate, IKataStars, KataLevels } from '../domain/interfaces/IKata.interface';
 import { IUser, UserRoles } from '../domain/interfaces/IUser.interface';
 import { KatasResponse as KatasORMResponse } from '../domain/types';
-import { katasMulterConfig } from '../config/multer.config';
+import { uploadKataFilesS3, getFileStreamS3, existsFileS3 } from '../utils/s3';
 
 
 @Route('/api/katas')
@@ -296,17 +298,53 @@ export class KatasController implements IKatasController {
         return response;
     }
 
+    @Get('/files')
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async getKataFile(@Query()filename: string): Promise<ReadableResponse | ErrorResponse> {
+        let response: ReadableResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        const exists: boolean = await existsFileS3(filename);
+
+        if (exists) {
+            const readStream = await getFileStreamS3(filename);
+            response = {
+                code: StatusCodes.OK,
+                readable: readStream
+            };
+
+        } else {
+            const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'No kata file can be obtained, filename cannot be found');
+            badQueryError.logError();
+            response = badQueryError.getResponse();
+        }
+
+        return response;
+    }
+
     @Put('/files')
     @Security('jwt')
     @SuccessResponse(StatusCodes.CREATED)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.FORBIDDEN, ErrorTypes.MISSING_PERMISSIONS)
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     // eslint-disable-next-line no-undef
     public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[], @Query()id: string): Promise<FilesResponse | ErrorResponse> {
         let response: FilesResponse | ErrorResponse = this.somethingWrongError.getResponse();
+
+        await uploadKataFilesS3(files);
+
+        const unlinkFile = util.promisify(fs.unlink);
+        files.forEach(async (file: any) => {
+            await unlinkFile(file.path);
+        });
         
         const email: any = server.locals.payload?.email;
         const role: any = server.locals.payload?.role;
@@ -385,14 +423,10 @@ export class KatasController implements IKatasController {
         }
 
         await updateKataParticipantsByID(id, participant).then((kataResult: IKata) => {
-            const filepathsInfo: string[] = [];
-            kataResult.files.forEach((file) => {
-                filepathsInfo.push(katasMulterConfig.destination + file);
-            });
             response = {
                 code: StatusCodes.CREATED,
                 message: `Kata solution was sent successfuly by ID: ${id}`,
-                filepaths: filepathsInfo
+                filenames: kataResult.files
             };
             LogSuccess(`[/api/katas/solution] Send Kata Solution By ID: ${id}`);
 

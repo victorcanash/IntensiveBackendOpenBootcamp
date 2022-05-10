@@ -45,6 +45,9 @@ export class BaseError extends Error {
 
     public logError(): void {
         LogError(`[ERROR ${this.name}]: ${this.message}`);
+        /* if (this.stack) {
+            LogError(this.stack);
+        } */
     }
 
     public getResponse(): ErrorResponse {

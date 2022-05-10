@@ -1,12 +1,13 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
+import { StatusCodes } from 'http-status-codes';
 
 import { verifyToken } from '../middlewares/verifyToken.middleware';
 import { KatasController } from '../controllers/KatasController';
 import { KataLevels, IKataUpdate, IKataStars } from '../domain/interfaces/IKata.interface';
 import { fixKataLevelValue, fixNumberValue } from '../utils/valuesFixer';
-import { BaseError, BadQueryError, ErrorProviders } from '../errors';
-import { getKatasUpload, getKatasUploadErrors } from '../utils/multerUploader';
+import { BaseError, BadQueryError, SomethingWrongError, ErrorProviders } from '../errors';
+import { getKatasMulterHandler, getKatasMulterError } from '../utils/multerUploader';
 
 
 const jsonParser = bodyParser.json();
@@ -149,13 +150,34 @@ katasRouter.route('/resolve')
     });
 
 katasRouter.route('/files')
+    .get(verifyToken, async (req: Request, res: Response) => {
+        const filename: any = req?.query?.filename;
+
+        if (filename) {
+            const controllerRes: any = await controller.getKataFile(filename);
+            if (controllerRes?.code === StatusCodes.OK && controllerRes?.readable) {
+                controllerRes.readable.pipe(res);
+
+            } else {
+                const somethingError = new SomethingWrongError(ErrorProviders.KATAS);
+                somethingError.logError();
+                return res.status(somethingError.statusCode).send(somethingError.getResponse());
+            }
+            
+        } else {
+            const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'No kata file can be obtained, missing filename');
+            badQueryError.logError();
+            return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+        }
+    })
+
     .put(verifyToken, async (req: Request, res: Response) => {
         const id: any = req?.query?.id;
 
         if (id) {
-            const upload = getKatasUpload();
-            upload(req, res, async (err: any) => {
-                const multerError: BaseError | undefined = getKatasUploadErrors(req, err);
+            const uploadMulter = getKatasMulterHandler();
+            uploadMulter(req, res, async (err: any) => {
+                const multerError: BaseError | undefined = getKatasMulterError(req, err);
                 if (multerError) {
                     multerError.logError();
                     return res.status(multerError.statusCode).send(multerError.getResponse());

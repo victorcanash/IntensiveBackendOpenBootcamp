@@ -3,7 +3,7 @@ import { Request } from 'express';
 import { IUserUpdate } from '../../domain/interfaces/IUser.interface';
 import { IAuthLogin, IAuthRegister } from '@/domain/interfaces/IAuth.interface';
 import { IKataStars, IKataUpdate, KataLevels } from '../../domain/interfaces/IKata.interface';
-import { BasicResponse, DateResponse, FilesResponse, AuthResponse, UserResponse, UsersResponse, KatasFromUserResponse, KataResponse, KatasResponse, KataSolutionResponse, ErrorResponse } from '../types';
+import { BasicResponse, DateResponse, FilesResponse, AuthResponse, UserResponse, UsersResponse, KatasFromUserResponse, KataResponse, KatasResponse, KataSolutionResponse, ErrorResponse, ReadableResponse } from '../types';
 
 
 export interface IHelloController {
@@ -47,6 +47,8 @@ export interface IKatasController {
     updateKata(kata: IKataUpdate, id: string): Promise<BasicResponse | ErrorResponse>
     // Update Kata Stars
     updateKataStars(kataStars: IKataStars, id: string): Promise<BasicResponse | ErrorResponse>
+    // Get Kata File
+    getKataFile(filename: string): Promise<ReadableResponse | ErrorResponse> 
     // Update Kata Files
     // eslint-disable-next-line no-undef
     updateKataFiles(file: Express.Multer.File[], id: string): Promise<FilesResponse | ErrorResponse>

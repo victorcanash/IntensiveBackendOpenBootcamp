@@ -470,6 +470,24 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ReadableResponse": {
+				"properties": {
+					"readable": {
+						"type": "string",
+						"format": "byte"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"readable",
+					"code"
+				],
+				"type": "object",
+				"description": "Get file JSON response for Controllers"
+			},
 			"FilesResponse": {
 				"properties": {
 					"files": {
@@ -512,7 +530,7 @@
 			},
 			"KataSolutionResponse": {
 				"properties": {
-					"filepaths": {
+					"filenames": {
 						"items": {
 							"type": "string"
 						},
@@ -527,7 +545,7 @@
 					}
 				},
 				"required": [
-					"filepaths",
+					"filenames",
 					"message",
 					"code"
 				],
@@ -1822,6 +1840,76 @@
 			}
 		},
 		"/api/katas/files": {
+			"get": {
+				"operationId": "GetKataFile",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ReadableResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"KatasController"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "filename",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
 			"put": {
 				"operationId": "UpdateKataFiles",
 				"responses": {
@@ -1854,6 +1942,16 @@
 					},
 					"401": {
 						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Missing Permissions",
 						"content": {
 							"application/json": {
 								"schema": {

@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+
 import { IUser } from '../../domain/interfaces/IUser.interface';
 import { IKata } from '../../domain/interfaces/IKata.interface';
 
@@ -96,7 +98,7 @@ export type BasicResponse = {
  export type KataSolutionResponse = {
     code: number,
     message: string,
-    filepaths: string[]
+    filenames: string[]
 }
 
 /**
@@ -110,6 +112,14 @@ export type FilesResponse = {
             mimetype: string,
             size: string
     }[]
+}
+
+/**
+ * Get file JSON response for Controllers
+ */
+export type ReadableResponse = {
+    code: number,
+    readable: Readable
 }
 
 /**
