@@ -10,7 +10,7 @@ const mongooseUri = `${envConfig.DB_URI}`;
 export const initMongo = () => {
     mongoose.connect(mongooseUri, mongooseOptions).then(
         () => { 
-            LogSuccess(`[MONGOOSE ON]: Running in ${mongooseUri}`);
+            LogSuccess('[MONGOOSE ON]: Running');
         },
         error => { 
             LogError(`[MONGOOSE ERROR]: ${error}`); 

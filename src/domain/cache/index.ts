@@ -15,7 +15,7 @@ client.on('error', (error) => {
 });
 
 client.on('connect', () => {
-    LogSuccess(`[REDIS CLIENT ON]: Running in ${redisUrl}`);
+    LogSuccess('[REDIS CLIENT ON]: Running');
 });
 
 (async () => {

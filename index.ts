@@ -3,9 +3,9 @@ import { LogError, LogSuccess } from './src/utils/logger';
 import { envConfig } from './src/config/env.config';
 import { initMongo } from './src/domain/repositories/mongo.repo';
 
-console.log('STARTING SERVER', +envConfig.PORT);
+
 server.listen(+envConfig.PORT, () => {
-    LogSuccess(`[SERVER ON]: Running in http://${envConfig.HOST}:${envConfig.PORT}/api`);
+    LogSuccess('[SERVER ON]: Running');
 });
 
 server.on('error', (error) => {
