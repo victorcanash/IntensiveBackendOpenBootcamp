@@ -12,8 +12,8 @@ const getMulterHandler = (_config: any, _errorProvider: ErrorProviders) => {
     const errorProvider = _errorProvider;
 
     const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            checkUploadPath(config.destination);
+        destination: async function (req, file, cb) {
+            await checkUploadPath(config.destination);
             cb(null, config.destination);
         },
         filename: function (req, file, cb) {
