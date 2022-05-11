@@ -347,7 +347,7 @@ export class KatasController implements IKatasController {
         
         const email: any = server.locals.payload?.email;
         const role: any = server.locals.payload?.role;
-        console.log('entra3');
+
         if (role !== UserRoles.ADMIN) {
             let exists: boolean = false;
 
@@ -366,13 +366,11 @@ export class KatasController implements IKatasController {
                 return response;
             }
         }
-        console.log('entra4');
 
         const filenames: string[] = [];
         files.forEach((file) => {
             filenames.push(file.filename);
         });
-        console.log('entra5');
 
         await updateKataFilesByID(id, filenames).then((updatedKata: IKata) => {
             const filesInfo = [] as {name: string, mimetype: string, size: string}[];
@@ -393,7 +391,6 @@ export class KatasController implements IKatasController {
         }).catch((error: BaseError) => {
             response = error.getResponse();
         });
-        console.log('entra6');
         
         return response;
     }

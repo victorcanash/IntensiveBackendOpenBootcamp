@@ -1,9 +1,10 @@
 import { Request } from 'express';
 import multer from 'multer';
-// import * as fs from 'fs';
+import * as fs from 'fs';
 
 import { BadQueryError, BaseError, ErrorProviders, SomethingWrongError } from '../errors';
 import { katasMulterConfig } from '../config/multer.config';
+import { LogError } from './logger';
 
 
 const getMulterHandler = (_config: any, _errorProvider: ErrorProviders) => {
@@ -12,7 +13,8 @@ const getMulterHandler = (_config: any, _errorProvider: ErrorProviders) => {
 
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, 'public/' + config.destination);
+            checkUploadPath(config.destination);
+            cb(null, config.destination);
         },
         filename: function (req, file, cb) {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -67,7 +69,6 @@ const getMulterError = (_config: any, _errorProvider: ErrorProviders, req: Reque
 
     } else if (error) {
         multerError = new SomethingWrongError(errorProvider);
-        console.log(error);
 
     } else if (!req.files) {
         multerError = new BadQueryError(errorProvider, `There is no ${config.fieldName} field`);
@@ -87,6 +88,18 @@ const getMulterError = (_config: any, _errorProvider: ErrorProviders, req: Reque
         new SomethingWrongError(errorProvider).logError();
     }
 }; */
+
+const checkUploadPath = (destination: string) => {
+    fs.stat(destination, (err, stats) => {
+        if (!stats && err) {
+            fs.mkdir(destination, (err) => {
+                if (err) {
+                    LogError(err.message);
+                }  
+            });
+        }
+    });
+};
 
 export const getKatasMulterHandler = () => {
     return getMulterHandler(katasMulterConfig, ErrorProviders.KATAS);
