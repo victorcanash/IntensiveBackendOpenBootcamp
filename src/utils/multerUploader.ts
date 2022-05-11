@@ -67,6 +67,7 @@ const getMulterError = (_config: any, _errorProvider: ErrorProviders, req: Reque
 
     } else if (error) {
         multerError = new SomethingWrongError(errorProvider);
+        console.log(error);
 
     } else if (!req.files) {
         multerError = new BadQueryError(errorProvider, `There is no ${config.fieldName} field`);
