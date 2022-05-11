@@ -136,6 +136,8 @@ export const updateKataByID = async (kata: IKataUpdate, id: string): Promise<IKa
 export const updateKataStarsByID = async (kataStars: IKataStars, id: string): Promise<IKata> => {
     const kataModel = kataEntity();
 
+    kataStars.user = kataStars.user.toString();
+
     // Find kata
     let foundKata: IKata = {} as IKata;
 
@@ -270,6 +272,8 @@ export const updateKataParticipantsByID = async (id: string, participant: string
 export const existsKataParticipant = async (id: string, participant: string) : Promise<boolean> => {
     const kataModel = kataEntity();
 
+    const participantId = participant.toString();
+
     // Find kata
     let foundKata: IKata = {} as IKata;
 
@@ -285,7 +289,7 @@ export const existsKataParticipant = async (id: string, participant: string) : P
 
     // Check Kata Participant
     for (let i = 0; i < foundKata.participants.length; i++) {
-        if (foundKata.participants[i] === participant) {
+        if (foundKata.participants[i] === participantId) {
             return true;
         }
     }
