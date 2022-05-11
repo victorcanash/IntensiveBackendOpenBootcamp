@@ -46,8 +46,7 @@ export class KatasController implements IKatasController {
             });
 
         } else {
-            let fixedOrder = order || '{}';
-            fixedOrder = JSON.parse(order);
+            const fixedOrder = order ? JSON.parse(order) : {};
 
             await getAllKatas(page || 1, limit || 10, fixedOrder, level).then((katasResponse: KatasORMResponse) => {
                 response = {

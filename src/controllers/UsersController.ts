@@ -43,8 +43,7 @@ export class UsersController implements IUsersController {
             });
 
         } else {
-            let fixedOrder = order || '{}';
-            fixedOrder = JSON.parse(order);
+            const fixedOrder = order ? JSON.parse(order) : {};
 
             await getAllUsers(page || 1, limit || 10, fixedOrder).then((usersResponse: UsersORMResponse) => {
                 response = {
@@ -149,8 +148,7 @@ export class UsersController implements IUsersController {
 
         const payload = server.locals.payload;
 
-        let fixedOrder = order || '{}';
-        fixedOrder = JSON.parse(order);
+        const fixedOrder = order ? JSON.parse(order) : {};
 
         await getKatasFromUser(page || 1, limit || 10, fixedOrder, id || payload.id, level).then((katasResponse: KatasORMResponse) => {
             response = {
