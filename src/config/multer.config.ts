@@ -17,6 +17,6 @@ export const katasMulterConfig = {
         files: 3
     },
     fieldName: 'files',
-    destination: './tmp/',
+    destination: 'tmp/',
     preservePath: false
 };

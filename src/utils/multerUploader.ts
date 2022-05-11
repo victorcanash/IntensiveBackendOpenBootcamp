@@ -1,10 +1,9 @@
 import { Request } from 'express';
 import multer from 'multer';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 
 import { BadQueryError, BaseError, ErrorProviders, SomethingWrongError } from '../errors';
 import { katasMulterConfig } from '../config/multer.config';
-import { LogError } from './logger';
 
 
 const getMulterHandler = (_config: any, _errorProvider: ErrorProviders) => {
@@ -13,7 +12,6 @@ const getMulterHandler = (_config: any, _errorProvider: ErrorProviders) => {
 
     const storage = multer.diskStorage({
         destination: async function (req, file, cb) {
-            await checkUploadPath(config.destination);
             cb(null, config.destination);
         },
         filename: function (req, file, cb) {
@@ -89,18 +87,6 @@ const getMulterError = (_config: any, _errorProvider: ErrorProviders, req: Reque
         new SomethingWrongError(errorProvider).logError();
     }
 }; */
-
-const checkUploadPath = (destination: string) => {
-    fs.stat(destination, (err, stats) => {
-        if (!stats && err) {
-            fs.mkdir(destination, (err) => {
-                if (err) {
-                    LogError(err.message);
-                }  
-            });
-        }
-    });
-};
 
 export const getKatasMulterHandler = () => {
     return getMulterHandler(katasMulterConfig, ErrorProviders.KATAS);
