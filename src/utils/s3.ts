@@ -4,7 +4,7 @@ import fs from 'fs';
 
 import { envConfig } from '../config/env.config';
 import { ErrorProviders, SomethingWrongError } from '../errors';
-// import { LogError } from './logger';
+import { LogError } from './logger';
 
 
 const bucketName = envConfig.AWS_BUCKET_NAME;
@@ -33,12 +33,9 @@ const uploadFilesS3 = async (files: Express.Multer.File[], _errorProvider: Error
         };
 
         await s3.upload(params).promise().then((data) => {
-            console.log('DataUpload: ', data);
+
         }).catch((err) => {
-            console.log('ErrorUpload: ', err);
-            // LogError(err.message);
-            // const error = new SomethingWrongError(errorProvider);
-            // error.logError();
+            LogError(err.message);
         });
     });
 };
@@ -52,10 +49,10 @@ export const existsFileS3 = async (filename: string) => {
     let exists: boolean = false;
 
     await s3.headObject(params).promise().then((data) => {
-        console.log('DataExists: ', data);
+
         exists = true;
     }).catch((err) => {
-        console.log('ErrorExists:', err);
+        LogError(err.message);
     });
 
     return exists;
