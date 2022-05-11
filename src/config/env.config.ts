@@ -10,5 +10,8 @@ export const envConfig = {
     REDIS_PORT: process.env.REDIS_PORT || '6379',
     REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
     SECRET_KEY: process.env.SECRET_KEY || 'MYSECRETKEY',
+    AWS_KEY_ID: process.env.AWS_KEY_ID || '',
+    AWS_SECRET_KEY: process.env.AWS_SECRET_KEY || '',
+    AWS_REGION: process.env.AWS_REGION || 'eu-west-3',
     AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME || 'bucket_example'
 };

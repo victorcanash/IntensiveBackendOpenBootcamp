@@ -1,4 +1,5 @@
-import S3, { PutObjectRequest, GetObjectRequest, DeleteObjectsRequest } from 'aws-sdk/clients/s3';
+import aws from 'aws-sdk';
+import { PutObjectRequest, GetObjectRequest, DeleteObjectsRequest } from 'aws-sdk/clients/s3';
 import fs from 'fs';
 
 import { envConfig } from '../config/env.config';
@@ -8,7 +9,17 @@ import { ErrorProviders, SomethingWrongError } from '../errors';
 
 const bucketName = envConfig.AWS_BUCKET_NAME;
 
-const s3 = new S3();
+aws.config.update({
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+    accessKeyId: process.env.AWS_KEY_ID,
+    region: process.env.AWS_REGION
+});
+
+const s3 = new aws.S3({
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+    accessKeyId: process.env.AWS_KEY_ID,
+    region: process.env.AWS_REGION
+});
 
 // eslint-disable-next-line no-undef
 const uploadFilesS3 = async (files: Express.Multer.File[], _errorProvider: ErrorProviders) => {
