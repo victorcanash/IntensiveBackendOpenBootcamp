@@ -179,10 +179,11 @@ katasRouter.route('/files')
             uploadMulter(req, res, async (err: any) => {
                 const multerError: BaseError | undefined = getKatasMulterError(req, err);
                 if (multerError) {
+                    console.log('entra1');
                     multerError.logError();
                     return res.status(multerError.statusCode).send(multerError.getResponse());
                 }
-
+                console.log('entra2');
                 const files: any = req.files;
                 
                 const controllerRes = await controller.updateKataFiles(files, id);
