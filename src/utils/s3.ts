@@ -3,6 +3,7 @@ import fs from 'fs';
 
 import { envConfig } from '../config/env.config';
 import { ErrorProviders, SomethingWrongError } from '../errors';
+// import { LogError } from './logger';
 
 
 const bucketName = envConfig.AWS_BUCKET_NAME;
@@ -10,49 +11,52 @@ const bucketName = envConfig.AWS_BUCKET_NAME;
 const s3 = new S3();
 
 // eslint-disable-next-line no-undef
-const uploadFilesS3 = (files: Express.Multer.File[], _errorProvider: ErrorProviders) => {
-    const errorProvider = _errorProvider;
-
+const uploadFilesS3 = async (files: Express.Multer.File[], _errorProvider: ErrorProviders) => {
+    // const errorProvider = _errorProvider;
     files.forEach(async (file) => {
         const fileContent = fs.readFileSync(file.path);
-        const uploadParams: PutObjectRequest = {
+        const params: PutObjectRequest = {
             Bucket: bucketName,
             Body: fileContent,
             Key: file.filename,
         };
 
-        await s3.upload(uploadParams).promise().catch(() => {
-            const error = new SomethingWrongError(errorProvider);
-            error.logError();
+        await s3.upload(params).promise().then((data) => {
+            console.log('DataUpload: ', data);
+        }).catch((err) => {
+            console.log('ErrorUpload: ', err);
+            // LogError(err.message);
+            // const error = new SomethingWrongError(errorProvider);
+            // error.logError();
         });
     });
 };
 
 export const existsFileS3 = async (filename: string) => {
-    const searchParams: GetObjectRequest = {
+    const params: GetObjectRequest = {
         Bucket: bucketName,
         Key: filename,
     };
+
     let exists: boolean = false;
-    await s3.headObject(searchParams).promise().then(
-        () => {
-            exists = true;
-        }, 
-        (error) => {
-            if (error.statusCode) {
-                exists = false;
-            }
-        }
-    );
+
+    await s3.headObject(params).promise().then((data) => {
+        console.log('DataExists: ', data);
+        exists = true;
+    }).catch((err) => {
+        console.log('ErrorExists:', err);
+    });
+
     return exists;
 };
 
-export const getFileStreamS3 = (filename: string) => {
+export const getFileStreamS3 = async (filename: string) => {
     const downloadParams: GetObjectRequest = {
         Bucket: bucketName,
         Key: filename,
     };
-    return s3.getObject(downloadParams).createReadStream();
+    const result = await s3.getObject(downloadParams).createReadStream();
+    return result;
 };
 
 const deleteFilesS3 = async (filenames: string[], _errorProvider: ErrorProviders) => {
@@ -76,10 +80,10 @@ const deleteFilesS3 = async (filenames: string[], _errorProvider: ErrorProviders
 };
 
 // eslint-disable-next-line no-undef
-export const uploadKataFilesS3 = (files: Express.Multer.File[]) => {
-    uploadFilesS3(files, ErrorProviders.KATAS);
+export const uploadKataFilesS3 = async (files: Express.Multer.File[]) => {
+    await uploadFilesS3(files, ErrorProviders.KATAS);
 };
 
-export const deleteKataFilesS3 = (filenames: string[]) => {
-    deleteFilesS3(filenames, ErrorProviders.KATAS);
+export const deleteKataFilesS3 = async (filenames: string[]) => {
+    await deleteFilesS3(filenames, ErrorProviders.KATAS);
 };

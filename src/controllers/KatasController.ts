@@ -315,6 +315,7 @@ export class KatasController implements IKatasController {
                 code: StatusCodes.OK,
                 readable: readStream
             };
+            LogSuccess(`[/api/katas/files] Get Kata File by filename: ${filename}`);
 
         } else {
             const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'No kata file can be obtained, filename cannot be found');
@@ -340,7 +341,7 @@ export class KatasController implements IKatasController {
 
         await uploadKataFilesS3(files);
 
-        const unlinkFile = util.promisify(fs.unlink);
+        const unlinkFile = await util.promisify(fs.unlink);
         files.forEach(async (file: any) => {
             await unlinkFile(file.path);
         });
@@ -386,7 +387,7 @@ export class KatasController implements IKatasController {
                 message: `Kata files was uploaded successfuly by ID: ${id}`,
                 files: filesInfo
             };
-            LogSuccess(`[/api/katas] Update Kata Files by ID: ${id}`);
+            LogSuccess(`[/api/katas/files] Update Kata Files by ID: ${id}`);
 
         }).catch((error: BaseError) => {
             response = error.getResponse();
