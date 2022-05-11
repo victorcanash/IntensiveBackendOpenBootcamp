@@ -15,6 +15,7 @@ import rootRouter from '../routes';
 const server: Express = express();
 
 // * Server settings
+server.set('env', envConfig.NODE_ENV);
 server.set('port', envConfig.PORT);
 server.set('pkg', pkg);
 server.set('json spaces', 4);
