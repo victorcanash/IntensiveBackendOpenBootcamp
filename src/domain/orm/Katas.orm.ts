@@ -77,6 +77,10 @@ export const deleteKatasByID = async (ids: string[]): Promise<number> => {
     
     let deletedCount: number = 0;
 
+    if (ids.length < 1) {
+        return deletedCount;
+    }
+
     await kataModel.deleteMany({ id: { $in: ids } }).then((deleteResult) => {
         deletedCount = deleteResult?.deletedCount;
         if (!deleteResult?.acknowledged) {
