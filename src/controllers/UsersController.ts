@@ -218,13 +218,13 @@ export class UsersController implements IUsersController {
 
         const katas = foundUser.katas;
         foundUser.katas = [];
-        await updateUserById(foundUser, foundUser.email).then((updatedUser: IUser) => {
+        await updateUserById(foundUser, findId).then((updatedUser: IUser) => {
             response = {
                 code: StatusCodes.OK,
-                message: `Katas from user deleted successfully with email: ${updatedUser.email} and with ${katas.length} katas id: [${katas}]`,
+                message: `Katas from user deleted successfully with email: ${updatedUser.email} and with ${katas.length} katas ids: [${katas}]`,
                 deletedCount: deletedCount
             };
-            LogSuccess(`[/api/users/katas] Delete katas from user with email: ${updatedUser.email} and with ${katas.length} katas id: [${katas}]`);
+            LogSuccess(`[/api/users/katas] Delete katas from user with email: ${updatedUser.email} and with ${katas.length} katas ids: [${katas}]`);
         
         }).catch((error: BaseError) => {
             response = error.getResponse();
