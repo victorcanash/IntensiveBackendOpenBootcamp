@@ -58,10 +58,11 @@ export const loginUser = async (auth: IAuthLogin): Promise<AuthResponse> => {
 
     await userModel.findOne({ email: auth.email }).then((userResult: IUser | any) => {
         response.user = userResult;
-        userId = userResult!.id;
         if (!response.user) {
             throw new ModelNotFoundError(ErrorProviders.AUTH, 'Invalid email to login');
-        } else if (userId === '') {
+        }
+        userId = userResult!._id;
+        if (userId === '') {
             throw new SomethingWrongError(ErrorProviders.AUTH);
         }
     }).catch((error: BaseError) => {
