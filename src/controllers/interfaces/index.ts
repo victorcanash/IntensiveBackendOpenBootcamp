@@ -15,43 +15,29 @@ export interface IGoodbyeController {
 }
 
 export interface IUsersController {
-    // Get all users from database with pagination || Get user by id
-    getUsers(page?: number, limit?: number, order?: any, id?: string): Promise<UserResponse | UsersResponse | ErrorResponse>
-    // Delete logged user
+    getUser(id: string): Promise<UserResponse | ErrorResponse>
+    getUsers(page?: number, limit?: number, order?: any): Promise<UsersResponse | ErrorResponse>
     deleteUser(id?: string): Promise<BasicResponse | ErrorResponse>
-    // Update logged user
     updateUser(user: IUserUpdate, id?: string): Promise<UserResponse | ErrorResponse>
-    // Get Katas of user with pagination
     getKatas(page?: number, limit?: number, order?: any, id?: string, level?: KataLevels): Promise<KatasFromUserResponse | ErrorResponse>
 }
 
 export interface IAuthController {
-    // Register users
     registerUser(auth: IAuthRegister): Promise<BasicResponse | ErrorResponse>
-    // Login user
     loginUser(auth: IAuthLogin): Promise<AuthResponse | ErrorResponse>
-    // Get logged user
     getLoggedUser(): Promise<UserResponse | ErrorResponse>
-    // Logout user
     logoutUser(request: Request): Promise<BasicResponse | ErrorResponse>
 }
 
 export interface IKatasController {
-    // Get all katas from database with pagination || Get kata By ID
-    getKatas(page?: number, limit?: number, order?: any, id?: string, level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse>
-    // Create New Kata
+    getKata(id: string): Promise<KataResponse | ErrorResponse>
+    getKatas(page?: number, limit?: number, order?: any, level?: KataLevels): Promise<KatasResponse | ErrorResponse>
     createKata(kata: IKataUpdate): Promise<KataResponse | ErrorResponse>
-    // Delete Kata By ID
     deleteKata(id: string): Promise<BasicResponse | ErrorResponse>
-    // Update Kata
     updateKata(kata: IKataUpdate, id: string): Promise<KataResponse | ErrorResponse>
-    // Update Kata Stars
     updateKataStars(kataStars: IKataStars, id: string): Promise<KataResponse | ErrorResponse>
-    // Get Kata File
     getKataFile(filename: string): Promise<ReadableResponse | ErrorResponse> 
-    // Update Kata Files
     // eslint-disable-next-line no-undef
     updateKataFiles(file: Express.Multer.File[], id: string): Promise<KataFilesResponse | ErrorResponse>
-    // Check Kata Solution
     sendKataSolution(solution: string, id: string): Promise<KataResponse | ErrorResponse>
 }

@@ -16,14 +16,18 @@ const controller: UsersController = new UsersController();
 
 usersRouter.route('/')
     .get(verifyToken, async (req: Request, res: Response) => {
-        const page: any = req?.query?.page;
-        const limit: any = req?.query?.limit;
         const id: any = req?.query?.id;
-        const order: any = req?.query?.order;
 
-        const controllerRes = await controller.getUsers(page, limit, order, id);
+        if (id) {
+            const controllerRes = await controller.getUser(id);
 
-        return res.status(controllerRes.code).send(controllerRes);
+            return res.status(controllerRes.code).send(controllerRes);
+
+        } else {
+            const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'No user can be found');
+            badQueryError.logError();
+            return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+        }
     })
 
     .delete(verifyToken, async (req: Request, res: Response) => {
@@ -58,6 +62,18 @@ usersRouter.route('/')
             return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
         }
     });
+
+usersRouter.route('/all')
+    .get(verifyToken, async (req: Request, res: Response) => {
+        const page: any = req?.query?.page;
+        const limit: any = req?.query?.limit;
+        const order: any = req?.query?.order;
+
+        const controllerRes = await controller.getUsers(page, limit, order);
+
+        return res.status(controllerRes.code).send(controllerRes);
+    });
+
 
 usersRouter.route('/katas')
     .get(verifyToken, async (req: Request, res: Response) => {

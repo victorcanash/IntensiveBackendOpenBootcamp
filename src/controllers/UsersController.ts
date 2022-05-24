@@ -24,41 +24,52 @@ export class UsersController implements IUsersController {
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async getUsers(@Query()page?: number, @Query()limit?: number, @Query()order?: any, @Query()id?: string): Promise<UserResponse | UsersResponse | ErrorResponse> {
-        let response: UserResponse | UsersResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async getUser(@Query()id: string): Promise<UserResponse | ErrorResponse> {
+        let response: UserResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
-        if (id) {
-            await getUserByID(id).then((foundUser: IUser) => {
-                response = {
-                    code: StatusCodes.OK,
-                    message: 'User found successfully',
-                    user: foundUser
-                };
-                LogSuccess(`[/api/users] Get user by ID: ${id}`);
+        await getUserByID(id).then((foundUser: IUser) => {
+            response = {
+                code: StatusCodes.OK,
+                message: 'User found successfully',
+                user: foundUser
+            };
+            LogSuccess(`[/api/users] Get user by ID: ${id}`);
 
-            }).catch((error: BaseError) => {
-                response = error.getResponse();
-            });
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
+        
+        return response;
+    }
 
-        } else {
-            const fixedOrder = order ? JSON.parse(order) : {};
+    @Get('/all')
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async getUsers(@Query()page?: number, @Query()limit?: number, @Query()order?: any): Promise<UsersResponse | ErrorResponse> {
+        let response: UsersResponse | ErrorResponse = this.somethingWrongError.getResponse();
+        
+        const fixedOrder = order ? JSON.parse(order) : {};
 
-            await getAllUsers(page || 1, limit || 10, fixedOrder).then((usersResponse: UsersORMResponse) => {
-                response = {
-                    code: StatusCodes.OK,
-                    message: 'Users found successfully',
-                    users: usersResponse.users,
-                    totalPages: usersResponse.totalPages,
-                    currentPage: usersResponse.currentPage
-                };
-                LogSuccess('[/api/users] Get all users');
+        await getAllUsers(page || 1, limit || 10, fixedOrder).then((usersResponse: UsersORMResponse) => {
+            response = {
+                code: StatusCodes.OK,
+                message: 'Users found successfully',
+                users: usersResponse.users,
+                totalPages: usersResponse.totalPages,
+                currentPage: usersResponse.currentPage
+            };
+            LogSuccess('[/api/users] Get all users');
 
-            }).catch((error: BaseError) => {
-                response = error.getResponse();
-            }); 
-        }
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        }); 
         
         return response;
     }

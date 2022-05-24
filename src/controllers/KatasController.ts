@@ -27,41 +27,52 @@ export class KatasController implements IKatasController {
     @SuccessResponse(StatusCodes.OK)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
     @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async getKatas(@Query()page?: number, @Query()limit?: number, @Query()order?: any, @Query()id?: string, @Query()level?: KataLevels): Promise<KataResponse | KatasResponse | ErrorResponse> { 
-        let response: KataResponse | KatasResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async getKata(@Query()id: string): Promise<KataResponse | ErrorResponse> { 
+        let response: KataResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
-        if (id) {
-            await getKataByID(id).then((foundKata: IKata) => {
-                response = {
-                    code: StatusCodes.OK,
-                    message: 'Kata found successfully',
-                    kata: foundKata
-                };
-                LogSuccess(`[/api/katas] Get kata by ID: ${id}`);
+        await getKataByID(id).then((foundKata: IKata) => {
+            response = {
+                code: StatusCodes.OK,
+                message: 'Kata found successfully',
+                kata: foundKata
+            };
+            LogSuccess(`[/api/katas] Get kata by ID: ${id}`);
 
-            }).catch((error: BaseError) => {
-                response = error.getResponse();
-            });
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        });
+        
+        return response;
+    }
 
-        } else {
-            const fixedOrder = order ? JSON.parse(order) : {};
+    @Get('/all')
+    @Security('jwt')
+    @SuccessResponse(StatusCodes.OK)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.MISSING_DATA)
+    @Response<ErrorResponse>(StatusCodes.UNAUTHORIZED, ErrorTypes.BAD_DATA)
+    @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
+    @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
+    public async getKatas(@Query()page?: number, @Query()limit?: number, @Query()order?: any, @Query()level?: KataLevels): Promise<KatasResponse | ErrorResponse> { 
+        let response: KatasResponse | ErrorResponse = this.somethingWrongError.getResponse();
+        
+        const fixedOrder = order ? JSON.parse(order) : {};
 
-            await getAllKatas(page || 1, limit || 10, fixedOrder, level).then((katasResponse: KatasORMResponse) => {
-                response = {
-                    code: StatusCodes.OK,
-                    message: 'Katas found successfully',
-                    katas: katasResponse.katas,
-                    totalPages: katasResponse.totalPages,
-                    currentPage: katasResponse.currentPage
-                };
-                LogSuccess('[/api/katas] Get all katas');
+        await getAllKatas(page || 1, limit || 10, fixedOrder, level).then((katasResponse: KatasORMResponse) => {
+            response = {
+                code: StatusCodes.OK,
+                message: 'Katas found successfully',
+                katas: katasResponse.katas,
+                totalPages: katasResponse.totalPages,
+                currentPage: katasResponse.currentPage
+            };
+            LogSuccess('[/api/katas] Get all katas');
 
-            }).catch((error: BaseError) => {
-                response = error.getResponse();
-            }); 
-        }
+        }).catch((error: BaseError) => {
+            response = error.getResponse();
+        }); 
         
         return response;
     }

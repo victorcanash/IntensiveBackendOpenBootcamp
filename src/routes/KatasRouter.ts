@@ -18,17 +18,18 @@ const controller: KatasController = new KatasController();
 
 katasRouter.route('/')
     .get(verifyToken, async (req: Request, res: Response) => {
-        const page: any = req?.query?.page;
-        const limit: any = req?.query?.limit;
         const id: any = req?.query?.id;
-        const level: any = req?.query?.level;
-        const order: any = req?.query?.order;
 
-        const fixedLevel: any = level ? fixKataLevelValue(level) : level;
+        if (id) {
+            const controllerRes: any = await controller.getKata(id);
 
-        const controllerRes: any = await controller.getKatas(page, limit, order, id, fixedLevel);
+            return res.status(controllerRes.code).send(controllerRes);
 
-        return res.status(controllerRes.code).send(controllerRes);
+        } else {
+            const badQueryError = new BadQueryError(ErrorProviders.KATAS, 'No kata can be found');
+            badQueryError.logError();
+            return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
+        }
     })
 
     .delete(verifyToken, async (req: Request, res: Response) => {
@@ -105,6 +106,21 @@ katasRouter.route('/')
             return res.status(badQueryError.statusCode).send(badQueryError.getResponse());
         }
     });
+
+katasRouter.route('/all')
+    .get(verifyToken, async (req: Request, res: Response) => {
+        const page: any = req?.query?.page;
+        const limit: any = req?.query?.limit;
+        const level: any = req?.query?.level;
+        const order: any = req?.query?.order;
+
+        const fixedLevel: any = level ? fixKataLevelValue(level) : level;
+
+        const controllerRes: any = await controller.getKatas(page, limit, order, fixedLevel);
+
+        return res.status(controllerRes.code).send(controllerRes);
+    });
+
 
 katasRouter.route('/stars')
     .put(jsonParser, verifyToken, async (req: Request, res: Response) => {
