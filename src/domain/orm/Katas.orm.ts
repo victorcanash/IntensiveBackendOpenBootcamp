@@ -5,7 +5,7 @@ import { ModelNotFoundError, ErrorProviders } from '../../errors';
 import { deleteKataFilesS3 } from '../../utils/s3';
 
 
-const modelSelect: string = 'description level intents stars creator participants created_at updated_at';
+const modelSelect: string = 'name description level intents stars creator participants files created_at updated_at';
 
 export const getAllKatas = async (page: number, limit: number, order: {}, level?: KataLevels): Promise<KatasResponse> => {
     const kataModel = kataEntity();
