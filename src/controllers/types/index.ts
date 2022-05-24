@@ -93,25 +93,17 @@ export type BasicResponse = {
 }
 
 /**
- * Kata Solution JSON response for Controllers
+ * Uploaded kata files JSON response for Controllers
  */
- export type KataSolutionResponse = {
-    code: number,
-    message: string,
-    filenames: string[]
-}
-
-/**
- * Uploaded files JSON response for Controllers
- */
-export type FilesResponse = {
+export type KataFilesResponse = {
     code: number,
     message: string,
     files: {
             name: string,
             mimetype: string,
             size: string
-    }[]
+    }[],
+    kata: IKata
 }
 
 /**

@@ -108,8 +108,8 @@ export class UsersController implements IUsersController {
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async updateUser(@Body()user: IUserUpdate, @Query()id?: string): Promise<BasicResponse | ErrorResponse> { 
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async updateUser(@Body()user: IUserUpdate, @Query()id?: string): Promise<UserResponse | ErrorResponse> { 
+        let response: UserResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
         const payload: any = server.locals.payload;
 
@@ -125,7 +125,8 @@ export class UsersController implements IUsersController {
         await updateUserById(user, findId).then((updatedUser: IUser) => {
             response = {
                 code: StatusCodes.CREATED,
-                message: `User with email: ${updatedUser.email} updated successfully`
+                message: `User with email: ${updatedUser.email} updated successfully`,
+                user: updatedUser
             };
             LogSuccess(`[/api/users] Update user by email: ${updatedUser.email}`);
 

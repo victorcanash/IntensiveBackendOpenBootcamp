@@ -4,7 +4,7 @@ import fs from 'fs';
 import * as util from 'util';
 
 import { IKatasController } from './interfaces';
-import { ErrorResponse, BasicResponse, FilesResponse, KataResponse, KatasResponse, KataSolutionResponse, ReadableResponse } from './types';
+import { ErrorResponse, BasicResponse, KataFilesResponse, KataResponse, KatasResponse, ReadableResponse } from './types';
 import server from '../server';
 import { SomethingWrongError, MissingPermissionsError, BaseError, ErrorProviders, ErrorTypes, BadQueryError } from '../errors';
 import { LogSuccess } from '../utils/logger';
@@ -74,8 +74,8 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async createKata(@Body()kata: IKataUpdate): Promise<BasicResponse | ErrorResponse> {
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async createKata(@Body()kata: IKataUpdate): Promise<KataResponse | ErrorResponse> {
+        let response: KataResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
         const email: any = server.locals.payload?.email;
 
@@ -110,7 +110,8 @@ export class KatasController implements IKatasController {
             id = createdKata!._id;
             response = {
                 code: StatusCodes.CREATED,
-                message: `Kata created successfully with ID: ${id}`
+                message: `Kata created successfully with ID: ${id}`,
+                kata: createdKata
             };
 
         }).catch((error: BaseError) => {
@@ -201,8 +202,8 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async updateKata(@Body()kata: IKataUpdate, @Query()id: string): Promise<BasicResponse | ErrorResponse> { 
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async updateKata(@Body()kata: IKataUpdate, @Query()id: string): Promise<KataResponse | ErrorResponse> { 
+        let response: KataResponse | ErrorResponse = this.somethingWrongError.getResponse();
         
         const email: any = server.locals.payload?.email;
         const role: any = server.locals.payload?.role;
@@ -229,7 +230,8 @@ export class KatasController implements IKatasController {
         await updateKataByID(kata, id).then((updatedKata: IKata) => {
             response = {
                 code: StatusCodes.CREATED,
-                message: `Kata updated successfully by ID: ${id}`
+                message: `Kata updated successfully by ID: ${id}`,
+                kata: updatedKata
             };
             LogSuccess(`[/api/katas] Update Kata by ID: ${id}`);
 
@@ -249,8 +251,8 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async updateKataStars(@Body()kataStars: IKataStars, @Query()id: string): Promise<BasicResponse | ErrorResponse> {
-        let response: BasicResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async updateKataStars(@Body()kataStars: IKataStars, @Query()id: string): Promise<KataResponse | ErrorResponse> {
+        let response: KataResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
         const email: any = server.locals.payload?.email;
 
@@ -283,10 +285,11 @@ export class KatasController implements IKatasController {
             return response;
         }
 
-        await updateKataStarsByID(kataStars, id).then((r) => {
+        await updateKataStarsByID(kataStars, id).then((updatedKata: IKata) => {
             response = {
                 code: StatusCodes.CREATED,
                 message: `Kata Stars updated successfully by ID: ${id}`,
+                kata: updatedKata
             };
             LogSuccess(`[/api/katas/stars] Update Kata Stars by ID: ${id}`);
 
@@ -336,8 +339,8 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
     // eslint-disable-next-line no-undef
-    public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[], @Query()id: string): Promise<FilesResponse | ErrorResponse> {
-        let response: FilesResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async updateKataFiles(@UploadedFiles() files: Express.Multer.File[], @Query()id: string): Promise<KataFilesResponse | ErrorResponse> {
+        let response: KataFilesResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
         await uploadKataFilesS3(files);
 
@@ -385,7 +388,8 @@ export class KatasController implements IKatasController {
             response = {
                 code: StatusCodes.CREATED,
                 message: `Kata files was uploaded successfuly by ID: ${id}`,
-                files: filesInfo
+                files: filesInfo,
+                kata: updatedKata
             };
             LogSuccess(`[/api/katas/files] Update Kata Files by ID: ${id}`);
 
@@ -404,8 +408,8 @@ export class KatasController implements IKatasController {
     @Response<ErrorResponse>(StatusCodes.BAD_REQUEST, ErrorTypes.BAD_DATA)
     @Response<ErrorResponse>(StatusCodes.NOT_FOUND, ErrorTypes.MODEL_NOT_FOUND)
     @Response<ErrorResponse>(StatusCodes.INTERNAL_SERVER_ERROR, ErrorTypes.SOMETHING_WRONG)
-    public async sendKataSolution(@Body()solution: string, @Query()id: string): Promise<KataSolutionResponse | ErrorResponse> { 
-        let response: KataSolutionResponse | ErrorResponse = this.somethingWrongError.getResponse();
+    public async sendKataSolution(@Body()solution: string, @Query()id: string): Promise<KataResponse | ErrorResponse> { 
+        let response: KataResponse | ErrorResponse = this.somethingWrongError.getResponse();
 
         const email: any = server.locals.payload?.email;
 
@@ -422,11 +426,11 @@ export class KatasController implements IKatasController {
             return response;
         }
 
-        await updateKataParticipantsByID(id, participant).then((kataResult: IKata) => {
+        await updateKataParticipantsByID(id, participant).then((updatedKata: IKata) => {
             response = {
                 code: StatusCodes.CREATED,
                 message: `Kata solution was sent successfuly by ID: ${id}`,
-                filenames: kataResult.files
+                kata: updatedKata
             };
             LogSuccess(`[/api/katas/solution] Send Kata Solution By ID: ${id}`);
 
