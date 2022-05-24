@@ -108,6 +108,27 @@
 				"type": "object",
 				"description": "User JSON response for Controllers"
 			},
+			"ErrorResponse": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"error": {
+						"type": "string"
+					},
+					"code": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"message",
+					"error",
+					"code"
+				],
+				"type": "object",
+				"description": "Error JSON response for Controllers"
+			},
 			"UsersResponse": {
 				"properties": {
 					"currentPage": {
@@ -141,27 +162,6 @@
 				],
 				"type": "object",
 				"description": "Users JSON response for Controllers"
-			},
-			"ErrorResponse": {
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"error": {
-						"type": "string"
-					},
-					"code": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"message",
-					"error",
-					"code"
-				],
-				"type": "object",
-				"description": "Error JSON response for Controllers"
 			},
 			"IUserUpdate": {
 				"properties": {
@@ -488,8 +488,11 @@
 				"type": "object",
 				"description": "Get file JSON response for Controllers"
 			},
-			"FilesResponse": {
+			"KataFilesResponse": {
 				"properties": {
+					"kata": {
+						"$ref": "#/components/schemas/IKata"
+					},
 					"files": {
 						"items": {
 							"properties": {
@@ -521,36 +524,13 @@
 					}
 				},
 				"required": [
+					"kata",
 					"files",
 					"message",
 					"code"
 				],
 				"type": "object",
-				"description": "Uploaded files JSON response for Controllers"
-			},
-			"KataSolutionResponse": {
-				"properties": {
-					"filenames": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"message": {
-						"type": "string"
-					},
-					"code": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"filenames",
-					"message",
-					"code"
-				],
-				"type": "object",
-				"description": "Kata Solution JSON response for Controllers"
+				"description": "Uploaded kata files JSON response for Controllers"
 			}
 		},
 		"securitySchemes": {
@@ -638,7 +618,7 @@
 		},
 		"/api/users": {
 			"get": {
-				"operationId": "GetUsers",
+				"operationId": "GetUser",
 				"responses": {
 					"200": {
 						"description": "",
@@ -650,12 +630,19 @@
 											"$ref": "#/components/schemas/UserResponse"
 										},
 										{
-											"$ref": "#/components/schemas/UsersResponse"
-										},
-										{
 											"$ref": "#/components/schemas/ErrorResponse"
 										}
 									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
 								}
 							}
 						}
@@ -702,34 +689,8 @@
 				"parameters": [
 					{
 						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "limit",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "order",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
 						"name": "id",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
 						}
@@ -826,7 +787,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/BasicResponse"
+											"$ref": "#/components/schemas/UserResponse"
 										},
 										{
 											"$ref": "#/components/schemas/ErrorResponse"
@@ -915,6 +876,96 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/users/all": {
+			"get": {
+				"operationId": "GetUsers",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/UsersResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"UsersController"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "order",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/api/users/katas": {
@@ -1359,7 +1410,7 @@
 		},
 		"/api/katas": {
 			"get": {
-				"operationId": "GetKatas",
+				"operationId": "GetKata",
 				"responses": {
 					"200": {
 						"description": "",
@@ -1371,12 +1422,19 @@
 											"$ref": "#/components/schemas/KataResponse"
 										},
 										{
-											"$ref": "#/components/schemas/KatasResponse"
-										},
-										{
 											"$ref": "#/components/schemas/ErrorResponse"
 										}
 									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
 								}
 							}
 						}
@@ -1423,44 +1481,10 @@
 				"parameters": [
 					{
 						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "limit",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "order",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
 						"name": "id",
-						"required": false,
+						"required": true,
 						"schema": {
 							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "level",
-						"required": false,
-						"schema": {
-							"$ref": "#/components/schemas/KataLevels"
 						}
 					}
 				]
@@ -1475,7 +1499,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/BasicResponse"
+											"$ref": "#/components/schemas/KataResponse"
 										},
 										{
 											"$ref": "#/components/schemas/ErrorResponse"
@@ -1646,7 +1670,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/BasicResponse"
+											"$ref": "#/components/schemas/KataResponse"
 										},
 										{
 											"$ref": "#/components/schemas/ErrorResponse"
@@ -1737,6 +1761,104 @@
 				}
 			}
 		},
+		"/api/katas/all": {
+			"get": {
+				"operationId": "GetKatas",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/KatasResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Bad Data",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Model Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something Wrong",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"KatasController"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "order",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "level",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/KataLevels"
+						}
+					}
+				]
+			}
+		},
 		"/api/katas/stars": {
 			"put": {
 				"operationId": "UpdateKataStars",
@@ -1748,7 +1870,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/BasicResponse"
+											"$ref": "#/components/schemas/KataResponse"
 										},
 										{
 											"$ref": "#/components/schemas/ErrorResponse"
@@ -1920,7 +2042,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/FilesResponse"
+											"$ref": "#/components/schemas/KataFilesResponse"
 										},
 										{
 											"$ref": "#/components/schemas/ErrorResponse"
@@ -2034,7 +2156,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/KataSolutionResponse"
+											"$ref": "#/components/schemas/KataResponse"
 										},
 										{
 											"$ref": "#/components/schemas/ErrorResponse"
