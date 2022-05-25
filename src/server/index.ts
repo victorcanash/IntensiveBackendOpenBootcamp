@@ -23,6 +23,7 @@ server.set('json spaces', 4);
 // * Security Config
 server.use(helmet());
 server.use(cors(corsOptions));
+server.options('*', cors<Request>(corsOptions));
 
 // * Content Type Config
 server.use(express.urlencoded({
