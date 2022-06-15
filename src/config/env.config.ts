@@ -5,6 +5,8 @@ dotenv.config();
 export const envConfig = {
     NODE_ENV: process.env.NODE_ENV || 'development',
     PORT: process.env.PORT || 8000,
+    DEV_CORS_ORIGIN: process.env.DEV_CORS_ORIGIN || '',
+    PROD_CORS_ORIGIN: process.env.PROD_CORS_ORIGIN || '',
     DB_URI: process.env.DB_URI || 'mongodb://localhost:27017/intensive-ob-db',
     REDIS_HOST: process.env.REDIS_HOST || 'localhost',
     REDIS_PORT: process.env.REDIS_PORT || '6379',
